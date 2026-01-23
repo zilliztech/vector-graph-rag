@@ -1,0 +1,319 @@
+[
+    {
+        "_id": "test_sample_001",
+        "type": "compositional",
+        "question": "When did Albert Einstein publish his theory of relativity?",
+        "context": [
+            [
+                "Albert Einstein",
+                [
+                    "Albert Einstein (1879-1955) was a German-born theoretical physicist.",
+                    "He published the special theory of relativity in 1905.",
+                    "The general theory of relativity was published in 1915."
+                ]
+            ],
+            [
+                "Theory of Relativity",
+                [
+                    "The theory of relativity revolutionized physics.",
+                    "It consists of special relativity and general relativity."
+                ]
+            ]
+        ],
+        "answer": "1905",
+        "supporting_facts": [
+            [
+                "Albert Einstein",
+                1
+            ]
+        ]
+    },
+    {
+        "_id": "test_sample_002",
+        "type": "compositional",
+        "question": "What is the capital city of the country where the Eiffel Tower is located?",
+        "context": [
+            [
+                "Eiffel Tower",
+                [
+                    "The Eiffel Tower is located in Paris, France.",
+                    "It was completed in 1889."
+                ]
+            ],
+            [
+                "Paris",
+                [
+                    "Paris is the capital city of France.",
+                    "It is known as the City of Light."
+                ]
+            ]
+        ],
+        "answer": "Paris",
+        "supporting_facts": [
+            [
+                "Eiffel Tower",
+                0
+            ],
+            [
+                "Paris",
+                0
+            ]
+        ]
+    },
+    {
+        "_id": "test_sample_003",
+        "type": "compositional",
+        "question": "Who wrote the novel that features the character Sherlock Holmes?",
+        "context": [
+            [
+                "Sherlock Holmes",
+                [
+                    "Sherlock Holmes is a fictional detective created by Arthur Conan Doyle.",
+                    "The character first appeared in 1887."
+                ]
+            ],
+            [
+                "Arthur Conan Doyle",
+                [
+                    "Arthur Conan Doyle was a British writer.",
+                    "He created the character Sherlock Holmes."
+                ]
+            ]
+        ],
+        "answer": "Arthur Conan Doyle",
+        "supporting_facts": [
+            [
+                "Sherlock Holmes",
+                0
+            ],
+            [
+                "Arthur Conan Doyle",
+                1
+            ]
+        ]
+    },
+    {
+        "_id": "test_sample_004",
+        "type": "compositional",
+        "question": "In which year did the company founded by Steve Jobs release its first iPhone?",
+        "context": [
+            [
+                "Steve Jobs",
+                [
+                    "Steve Jobs co-founded Apple Inc. in 1976.",
+                    "He was the CEO of Apple until 2011."
+                ]
+            ],
+            [
+                "Apple Inc.",
+                [
+                    "Apple Inc. is a technology company.",
+                    "The first iPhone was released in 2007."
+                ]
+            ]
+        ],
+        "answer": "2007",
+        "supporting_facts": [
+            [
+                "Steve Jobs",
+                0
+            ],
+            [
+                "Apple Inc.",
+                1
+            ]
+        ]
+    },
+    {
+        "_id": "test_sample_005",
+        "type": "compositional",
+        "question": "What is the chemical symbol of the element discovered by Marie Curie?",
+        "context": [
+            [
+                "Marie Curie",
+                [
+                    "Marie Curie was a Polish-French physicist.",
+                    "She discovered the elements polonium and radium."
+                ]
+            ],
+            [
+                "Polonium",
+                [
+                    "Polonium is a chemical element with symbol Po.",
+                    "It was discovered by Marie Curie in 1898."
+                ]
+            ]
+        ],
+        "answer": "Po",
+        "supporting_facts": [
+            [
+                "Marie Curie",
+                1
+            ],
+            [
+                "Polonium",
+                0
+            ]
+        ]
+    },
+    {
+        "_id": "test_sample_006",
+        "type": "compositional",
+        "question": "Which planet is closest to the Sun in our solar system?",
+        "context": [
+            [
+                "Solar System",
+                [
+                    "The solar system consists of the Sun and planets.",
+                    "Mercury is the closest planet to the Sun."
+                ]
+            ],
+            [
+                "Mercury",
+                [
+                    "Mercury is the smallest planet in the solar system.",
+                    "It orbits closest to the Sun."
+                ]
+            ]
+        ],
+        "answer": "Mercury",
+        "supporting_facts": [
+            [
+                "Solar System",
+                1
+            ],
+            [
+                "Mercury",
+                1
+            ]
+        ]
+    },
+    {
+        "_id": "test_sample_007",
+        "type": "compositional",
+        "question": "What is the name of the longest river in the continent where the Amazon rainforest is located?",
+        "context": [
+            [
+                "Amazon Rainforest",
+                [
+                    "The Amazon rainforest is located in South America.",
+                    "It is the largest tropical rainforest in the world."
+                ]
+            ],
+            [
+                "Amazon River",
+                [
+                    "The Amazon River is the longest river in South America.",
+                    "It flows through the Amazon rainforest."
+                ]
+            ]
+        ],
+        "answer": "Amazon River",
+        "supporting_facts": [
+            [
+                "Amazon Rainforest",
+                0
+            ],
+            [
+                "Amazon River",
+                0
+            ]
+        ]
+    },
+    {
+        "_id": "test_sample_008",
+        "type": "compositional",
+        "question": "Who painted the artwork that features the Mona Lisa?",
+        "context": [
+            [
+                "Mona Lisa",
+                [
+                    "The Mona Lisa is a famous painting by Leonardo da Vinci.",
+                    "It is displayed in the Louvre Museum in Paris."
+                ]
+            ],
+            [
+                "Leonardo da Vinci",
+                [
+                    "Leonardo da Vinci was an Italian Renaissance artist.",
+                    "He painted the Mona Lisa between 1503 and 1519."
+                ]
+            ]
+        ],
+        "answer": "Leonardo da Vinci",
+        "supporting_facts": [
+            [
+                "Mona Lisa",
+                0
+            ],
+            [
+                "Leonardo da Vinci",
+                1
+            ]
+        ]
+    },
+    {
+        "_id": "test_sample_009",
+        "type": "compositional",
+        "question": "What is the capital of the country where Mount Everest is located?",
+        "context": [
+            [
+                "Mount Everest",
+                [
+                    "Mount Everest is located on the border between Nepal and China.",
+                    "It is the highest mountain in the world."
+                ]
+            ],
+            [
+                "Nepal",
+                [
+                    "Nepal is a country in South Asia.",
+                    "Kathmandu is the capital city of Nepal."
+                ]
+            ]
+        ],
+        "answer": "Kathmandu",
+        "supporting_facts": [
+            [
+                "Mount Everest",
+                0
+            ],
+            [
+                "Nepal",
+                1
+            ]
+        ]
+    },
+    {
+        "_id": "test_sample_010",
+        "type": "compositional",
+        "question": "Which scientist formulated the laws of motion that describe planetary orbits?",
+        "context": [
+            [
+                "Laws of Motion",
+                [
+                    "The laws of motion were formulated by Isaac Newton.",
+                    "They describe the motion of objects and planets."
+                ]
+            ],
+            [
+                "Isaac Newton",
+                [
+                    "Isaac Newton was an English physicist and mathematician.",
+                    "He formulated the laws of motion and universal gravitation."
+                ]
+            ]
+        ],
+        "answer": "Isaac Newton",
+        "supporting_facts": [
+            [
+                "Laws of Motion",
+                0
+            ],
+            [
+                "Isaac Newton",
+                0
+            ]
+        ]
+    }
+]

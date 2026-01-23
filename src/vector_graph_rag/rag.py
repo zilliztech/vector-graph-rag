@@ -1,0 +1,710 @@
+"""
+Main Vector Graph RAG class with user-friendly API.
+"""
+
+from typing import List, Optional, Union
+from tqdm import tqdm
+
+from vector_graph_rag.config import Settings, get_settings
+from vector_graph_rag.models import Document, QueryResult, ExtractionResult, RetrievalDetail, RerankResult
+from vector_graph_rag.llm.extractor import TripletExtractor
+from vector_graph_rag.llm.reranker import LLMReranker, AnswerGenerator
+from vector_graph_rag.storage.embeddings import EmbeddingModel
+from vector_graph_rag.storage.milvus import MilvusStore
+from vector_graph_rag.graph.builder import GraphBuilder
+from vector_graph_rag.graph.retriever import GraphRetriever, RetrievalResult
+from vector_graph_rag.graph.knowledge_graph import SubGraph
+
+
+class VectorGraphRAG:
+    """
+    Vector Graph RAG - Graph RAG using pure vector search with Milvus.
+
+    This class provides a simple, user-friendly API for building and querying
+    a Graph RAG system. It uses knowledge graph triplets extracted from documents
+    and performs multi-way retrieval with subgraph expansion.
+
+    Example:
+        >>> # Initialize
+        >>> rag = VectorGraphRAG()
+        >>>
+        >>> # Add documents
+        >>> documents = [
+        ...     "Einstein was a physicist who developed relativity.",
+        ...     "Relativity revolutionized our understanding of space and time.",
+        ... ]
+        >>> rag.add_documents(documents)
+        >>>
+        >>> # Query
+        >>> result = rag.query("What did Einstein develop?")
+        >>> print(result.answer)
+        >>>
+        >>> # Access the subgraph for debugging
+        >>> subgraph = result.subgraph
+        >>> print(subgraph.expansion_history)
+
+    Quick Start:
+        >>> from vector_graph_rag import VectorGraphRAG
+        >>> rag = VectorGraphRAG()
+        >>> rag.add_documents(["Your text here..."])
+        >>> answer = rag.query("Your question?").answer
+    """
+
+    def __init__(
+        self,
+        settings: Optional[Settings] = None,
+        milvus_uri: Optional[str] = None,
+        openai_api_key: Optional[str] = None,
+        llm_model: Optional[str] = None,
+        embedding_model: Optional[str] = None,
+    ):
+        """
+        Initialize Vector Graph RAG.
+
+        Args:
+            settings: Full settings object (overrides other parameters).
+            milvus_uri: Milvus connection URI. Defaults to local file.
+            openai_api_key: OpenAI API key. Uses environment variable if not provided.
+            llm_model: LLM model name. Defaults to "gpt-4o-mini".
+            embedding_model: Embedding model name. Defaults to "text-embedding-3-small".
+
+        Example:
+            >>> # Use defaults (reads OPENAI_API_KEY from environment)
+            >>> rag = VectorGraphRAG()
+            >>>
+            >>> # Custom configuration
+            >>> rag = VectorGraphRAG(
+            ...     milvus_uri="./my_data.db",
+            ...     llm_model="gpt-4o",
+            ... )
+        """
+        # Build settings
+        if settings:
+            self.settings = settings
+        else:
+            settings_kwargs = {}
+            if milvus_uri:
+                settings_kwargs["milvus_uri"] = milvus_uri
+            if openai_api_key:
+                settings_kwargs["openai_api_key"] = openai_api_key
+            if llm_model:
+                settings_kwargs["llm_model"] = llm_model
+            if embedding_model:
+                settings_kwargs["embedding_model"] = embedding_model
+
+            self.settings = Settings(**settings_kwargs)
+
+        # Validate settings
+        self.settings.validate_settings()
+
+        # Initialize components
+        self._embedding_model = EmbeddingModel(settings=self.settings)
+        self._store = MilvusStore(
+            settings=self.settings,
+            embedding_model=self._embedding_model,
+        )
+        self._graph_builder = GraphBuilder(settings=self.settings)
+        self._triplet_extractor = TripletExtractor(settings=self.settings)
+        self._reranker = LLMReranker(settings=self.settings)
+        self._answer_generator = AnswerGenerator(settings=self.settings)
+
+        # Retriever is initialized after documents are added
+        self._retriever: Optional[GraphRetriever] = None
+
+        # Track extraction result
+        self._extraction_result: Optional[ExtractionResult] = None
+
+        # Create collections
+        self._store.create_collections(drop_existing=False)
+
+    def _ensure_retriever(self) -> GraphRetriever:
+        """Ensure retriever is initialized."""
+        if self._retriever is None:
+            self._retriever = GraphRetriever(
+                store=self._store,
+                graph_builder=self._graph_builder,
+                settings=self.settings,
+                embedding_model=self._embedding_model,
+            )
+        return self._retriever
+
+    def _get_passages_from_subgraph(self, subgraph: SubGraph) -> List[str]:
+        """
+        Get passages from a subgraph.
+
+        The subgraph lazily loads passage data from Milvus.
+
+        Args:
+            subgraph: The subgraph containing passage IDs.
+
+        Returns:
+            List of passage texts.
+        """
+        return subgraph.passage_texts
+
+    def _get_passages_from_relations(
+        self, relation_ids: List[int]
+    ) -> tuple[List[int], List[str]]:
+        """
+        Get passages associated with given relations.
+
+        Args:
+            relation_ids: List of relation IDs.
+
+        Returns:
+            Tuple of (passage_ids, passage_texts).
+        """
+        if not relation_ids:
+            return [], []
+
+        # Query Milvus for relation data
+        relation_data = self._store.get_relations_by_ids(relation_ids)
+
+        passage_ids = []
+        seen_ids = set()
+        for rel in relation_data:
+            for pid in rel.get("passage_ids", []):
+                if pid not in seen_ids:
+                    seen_ids.add(pid)
+                    passage_ids.append(pid)
+
+        if not passage_ids:
+            return [], []
+
+        passage_data = self._store.get_passages_by_ids(passage_ids)
+        id_to_text = {p["id"]: p["text"] for p in passage_data}
+
+        passages = [id_to_text[pid] for pid in passage_ids if pid in id_to_text]
+        return passage_ids, passages
+
+    def add_documents(
+        self,
+        documents: Union[List[str], List[Document]],
+        extract_triplets: bool = True,
+        show_progress: bool = True,
+    ) -> ExtractionResult:
+        """
+        Add documents to the knowledge base.
+
+        This method:
+        1. Extracts triplets from documents (if enabled)
+        2. Builds the knowledge graph structure
+        3. Indexes entities, relations, and passages in Milvus
+
+        Args:
+            documents: List of text strings or Document objects.
+            extract_triplets: Whether to extract triplets using LLM.
+            show_progress: Whether to show progress bars.
+
+        Returns:
+            ExtractionResult with graph statistics.
+
+        Example:
+            >>> rag.add_documents([
+            ...     "Albert Einstein developed the theory of relativity.",
+            ...     "The theory of relativity changed physics forever.",
+            ... ])
+        """
+        # Convert to Document objects if needed
+        if documents and isinstance(documents[0], str):
+            docs = [Document(id=i, text=text) for i, text in enumerate(documents)]
+        else:
+            docs = list(documents)
+
+        # Extract triplets
+        if extract_triplets:
+            docs = self._triplet_extractor.extract_from_documents(
+                docs, show_progress=show_progress
+            )
+
+        # Build ExtractionResult
+        self._extraction_result = self._graph_builder.build_from_documents(docs)
+
+        # Generate embeddings
+        if show_progress:
+            print("Generating embeddings...")
+
+        entity_texts = [e.name for e in self._extraction_result.entities]
+        relation_texts = [r.text for r in self._extraction_result.relations]
+        passage_texts = [d.text for d in docs]
+
+        entity_embeddings = (
+            self._embedding_model.embed_batch(entity_texts, show_progress=show_progress)
+            if entity_texts
+            else []
+        )
+
+        relation_embeddings = (
+            self._embedding_model.embed_batch(
+                relation_texts, show_progress=show_progress
+            )
+            if relation_texts
+            else []
+        )
+
+        passage_embeddings = (
+            self._embedding_model.embed_batch(
+                passage_texts, show_progress=show_progress
+            )
+            if passage_texts
+            else []
+        )
+
+        # Build metadata for adjacency information
+        # Entity metadata: relation_ids (directly connected relations), passage_ids
+        entity_metadatas = [
+            {
+                "relation_ids": self._extraction_result.entity_to_relation_ids.get(
+                    i, []
+                ),
+                "passage_ids": self._graph_builder.entity_to_passage_ids.get(i, []),
+            }
+            for i in range(len(entity_texts))
+        ]
+
+        # Relation metadata: entity_ids (head and tail), passage_ids
+        relation_metadatas = []
+        for rel in self._extraction_result.relations:
+            entity_ids = []
+            subject_id = self._graph_builder.entity_to_id.get(rel.triplet.subject)
+            object_id = self._graph_builder.entity_to_id.get(rel.triplet.object)
+            if subject_id is not None:
+                entity_ids.append(subject_id)
+            if object_id is not None:
+                entity_ids.append(object_id)
+
+            relation_metadatas.append(
+                {
+                    "entity_ids": entity_ids,
+                    "passage_ids": rel.source_passage_ids,
+                }
+            )
+
+        # Passage metadata (optional, for reference)
+        passage_metadatas = None
+
+        # Drop and recreate collections for fresh data
+        self._store.drop_collections()
+        self._store.create_collections(drop_existing=True)
+
+        # Insert into Milvus
+        if show_progress:
+            print("Inserting into Milvus...")
+
+        self._store.insert_entities(
+            entity_texts,
+            entity_embeddings,
+            metadatas=entity_metadatas,
+            show_progress=show_progress,
+        )
+        self._store.insert_relations(
+            relation_texts,
+            relation_embeddings,
+            metadatas=relation_metadatas,
+            show_progress=show_progress,
+        )
+        self._store.insert_passages(
+            passage_texts,
+            passage_embeddings,
+            metadatas=passage_metadatas,
+            show_progress=show_progress,
+        )
+
+        # Reset retriever to pick up new knowledge graph
+        self._retriever = None
+
+        return self._extraction_result
+
+    def add_documents_with_triplets(
+        self,
+        documents: List[dict],
+        show_progress: bool = True,
+    ) -> ExtractionResult:
+        """
+        Add documents with pre-extracted triplets.
+
+        Use this method if you already have triplets extracted,
+        to avoid the LLM triplet extraction step.
+
+        Args:
+            documents: List of dicts with "passage" and "triplets" keys.
+                       Each triplet is [subject, predicate, object].
+            show_progress: Whether to show progress bars.
+
+        Returns:
+            ExtractionResult with graph statistics.
+
+        Example:
+            >>> rag.add_documents_with_triplets([
+            ...     {
+            ...         "passage": "Einstein developed relativity.",
+            ...         "triplets": [
+            ...             ["Einstein", "developed", "relativity"],
+            ...         ],
+            ...     },
+            ... ])
+        """
+        from vector_graph_rag.models import Triplet
+
+        docs = []
+        for i, doc_data in enumerate(documents):
+            passage = doc_data["passage"]
+            triplets = [
+                Triplet(subject=t[0], predicate=t[1], object=t[2])
+                for t in doc_data.get("triplets", [])
+            ]
+            docs.append(Document(id=i, text=passage, triplets=triplets))
+
+        return self.add_documents(
+            docs, extract_triplets=False, show_progress=show_progress
+        )
+
+    def query(
+        self,
+        question: str,
+        use_reranking: bool = True,
+        compare_naive: bool = False,
+        entity_top_k: Optional[int] = None,
+        relation_top_k: Optional[int] = None,
+        entity_similarity_threshold: Optional[float] = None,
+        relation_similarity_threshold: Optional[float] = None,
+        expansion_degree: Optional[int] = None,
+    ) -> QueryResult:
+        """
+        Query the knowledge base.
+
+        This method performs Graph RAG retrieval:
+        1. Extracts entities from the question
+        2. Retrieves similar entities and relations (with similarity threshold filtering)
+        3. Expands the subgraph
+        4. Reranks candidate relations (optional)
+        5. Retrieves final passages
+        6. Generates an answer
+
+        Args:
+            question: The question to answer.
+            use_reranking: Whether to use LLM reranking.
+            compare_naive: If True, also runs naive RAG for comparison.
+            entity_top_k: Override entity retrieval top_k.
+            relation_top_k: Override relation retrieval top_k.
+            entity_similarity_threshold: Override entity similarity threshold.
+            relation_similarity_threshold: Override relation similarity threshold.
+            expansion_degree: Override expansion degree.
+
+        Returns:
+            QueryResult with answer, retrieval details, and subgraph for visualization.
+
+        Example:
+            >>> result = rag.query("What did Einstein develop?")
+            >>> print(result.answer)
+            >>> print(result.subgraph.expansion_history)  # Visualize expansion
+        """
+        retriever = self._ensure_retriever()
+
+        # Retrieve with custom parameters
+        retrieval_result = retriever.retrieve(
+            question,
+            entity_top_k=entity_top_k,
+            relation_top_k=relation_top_k,
+            entity_similarity_threshold=entity_similarity_threshold,
+            relation_similarity_threshold=relation_similarity_threshold,
+            expansion_degree=expansion_degree,
+        )
+
+        # Build retrieval detail for visualization
+        retrieval_detail = RetrievalDetail(
+            entity_ids=retrieval_result.entity_ids,
+            entity_texts=retrieval_result.entity_texts,
+            entity_scores=retrieval_result.entity_scores,
+            relation_ids=retrieval_result.relation_ids,
+            relation_texts=retrieval_result.relation_texts,
+            relation_scores=retrieval_result.relation_scores,
+        )
+
+        # Get candidate relations from subgraph
+        candidate_ids = retrieval_result.expanded_relation_ids
+        candidate_texts = retrieval_result.expanded_relation_texts
+
+        # Rerank if enabled
+        rerank_result = None
+        if use_reranking and candidate_ids:
+            reranked_ids, reranked_texts = self._reranker.rerank(
+                question, candidate_ids, candidate_texts
+            )
+            rerank_result = RerankResult(
+                selected_relation_ids=reranked_ids,
+                selected_relation_texts=reranked_texts,
+            )
+        else:
+            reranked_ids = candidate_ids[: self.settings.final_top_k]
+            reranked_texts = candidate_texts[: self.settings.final_top_k]
+
+        # Get passages from reranked relations
+        passage_ids, passages = self._get_passages_from_relations(reranked_ids)
+        final_passages = passages[: self.settings.final_top_k]
+
+        # Generate answer
+        answer = self._answer_generator.generate(question, final_passages)
+
+        return QueryResult(
+            query=question,
+            answer=answer,
+            query_entities=retrieval_result.query_entities,
+            retrieved_passages=final_passages,
+            retrieved_relations=retrieval_result.relation_texts,
+            expanded_relations=candidate_texts,
+            reranked_relations=reranked_texts,
+            subgraph=retrieval_result.subgraph,
+            passages=final_passages,
+            retrieval_detail=retrieval_detail,
+            rerank_result=rerank_result,
+        )
+
+    def query_with_debug(
+        self,
+        question: str,
+        use_reranking: bool = True,
+    ) -> tuple[QueryResult, RetrievalResult]:
+        """
+        Query with full debug information including subgraph expansion history.
+
+        Args:
+            question: The question to answer.
+            use_reranking: Whether to use LLM reranking.
+
+        Returns:
+            Tuple of (QueryResult, RetrievalResult).
+            RetrievalResult contains the SubGraph with expansion_history.
+
+        Example:
+            >>> result, debug_info = rag.query_with_debug("What did Einstein develop?")
+            >>> print(debug_info.subgraph.expansion_history)
+        """
+        retriever = self._ensure_retriever()
+        retrieval_result = retriever.retrieve(question)
+
+        candidate_ids = retrieval_result.expanded_relation_ids
+        candidate_texts = retrieval_result.expanded_relation_texts
+
+        if use_reranking and candidate_ids:
+            reranked_ids, reranked_texts = self._reranker.rerank(
+                question, candidate_ids, candidate_texts
+            )
+        else:
+            reranked_ids = candidate_ids[: self.settings.final_top_k]
+            reranked_texts = candidate_texts[: self.settings.final_top_k]
+
+        passage_ids, passages = self._get_passages_from_relations(reranked_ids)
+        final_passages = passages[: self.settings.final_top_k]
+
+        answer = self._answer_generator.generate(question, final_passages)
+
+        query_result = QueryResult(
+            query=question,
+            answer=answer,
+            retrieved_passages=final_passages,
+            retrieved_relations=retrieval_result.relation_texts,
+            expanded_relations=candidate_texts,
+            reranked_relations=reranked_texts,
+        )
+
+        return query_result, retrieval_result
+
+    def query_simple(self, question: str) -> str:
+        """
+        Simple query that returns just the answer.
+
+        Args:
+            question: The question to answer.
+
+        Returns:
+            The answer string.
+
+        Example:
+            >>> answer = rag.query_simple("What did Einstein develop?")
+            >>> print(answer)
+        """
+        return self.query(question).answer
+
+    def query_naive(self, question: str) -> QueryResult:
+        """
+        Query using naive RAG (direct passage retrieval).
+
+        Useful for comparing Graph RAG performance against baseline.
+
+        Args:
+            question: The question to answer.
+
+        Returns:
+            QueryResult with answer and retrieved passages.
+        """
+        retriever = self._ensure_retriever()
+        passages = retriever.retrieve_passages_naive(question)
+        answer = self._answer_generator.generate(question, passages)
+
+        return QueryResult(
+            query=question,
+            answer=answer,
+            retrieved_passages=passages,
+            retrieved_relations=[],
+            expanded_relations=[],
+            reranked_relations=[],
+        )
+
+    def retrieve(
+        self,
+        question: str,
+        use_reranking: bool = True,
+        top_k: Optional[int] = None,
+    ) -> QueryResult:
+        """
+        Retrieve passages using Graph RAG without generating an answer.
+
+        This method performs all retrieval steps but skips LLM answer generation,
+        useful for evaluation or when only retrieved documents are needed.
+
+        Args:
+            question: The question to answer.
+            use_reranking: Whether to use LLM reranking.
+            top_k: Number of passages to retrieve. Uses settings.final_top_k if not provided.
+
+        Returns:
+            QueryResult with retrieved passages (answer will be empty).
+        """
+        retriever = self._ensure_retriever()
+        top_k = top_k or self.settings.final_top_k
+
+        # Retrieve
+        retrieval_result = retriever.retrieve(question)
+
+        # Get candidate relations
+        candidate_ids = retrieval_result.expanded_relation_ids
+        candidate_texts = retrieval_result.expanded_relation_texts
+
+        # Rerank if enabled
+        if use_reranking and candidate_ids:
+            reranked_ids, reranked_texts = self._reranker.rerank(
+                question, candidate_ids, candidate_texts
+            )
+        else:
+            reranked_ids = candidate_ids[:top_k]
+            reranked_texts = candidate_texts[:top_k]
+
+        # Get passages from reranked relations
+        passage_ids, passages = self._get_passages_from_relations(reranked_ids)
+
+        if len(passages) < top_k:
+            additional_passages = retriever.retrieve_passages_naive(
+                question, top_k=top_k
+            )
+            for passage in additional_passages:
+                if passage not in passages:
+                    passages.append(passage)
+                    if len(passages) >= top_k:
+                        break
+        final_passages = passages[:top_k]
+
+        return QueryResult(
+            query=question,
+            answer="",  # No answer generation
+            retrieved_passages=final_passages,
+            retrieved_relations=retrieval_result.relation_texts,
+            expanded_relations=candidate_texts,
+            reranked_relations=reranked_texts,
+        )
+
+    def retrieve_naive(
+        self,
+        question: str,
+        top_k: Optional[int] = None,
+    ) -> QueryResult:
+        """
+        Retrieve passages using naive RAG without generating an answer.
+
+        This method performs direct passage retrieval but skips LLM answer generation,
+        useful for evaluation or when only retrieved documents are needed.
+
+        Args:
+            question: The question to answer.
+            top_k: Number of passages to retrieve. Uses settings.final_top_k if not provided.
+
+        Returns:
+            QueryResult with retrieved passages (answer will be empty).
+        """
+        retriever = self._ensure_retriever()
+        top_k = top_k or self.settings.final_top_k
+        passages = retriever.retrieve_passages_naive(question, top_k=top_k)
+
+        return QueryResult(
+            query=question,
+            answer="",  # No answer generation
+            retrieved_passages=passages,
+            retrieved_relations=[],
+            expanded_relations=[],
+            reranked_relations=[],
+        )
+
+    def get_stats(self) -> dict:
+        """
+        Get statistics about the knowledge base.
+
+        Returns:
+            Dictionary with counts of entities, relations, passages.
+        """
+        if self._extraction_result is None:
+            return {
+                "entities": 0,
+                "relations": 0,
+                "passages": 0,
+            }
+
+        return {
+            "entities": len(self._extraction_result.entities),
+            "relations": len(self._extraction_result.relations),
+            "passages": len(self._extraction_result.documents),
+        }
+
+    def reset(self) -> None:
+        """
+        Reset the knowledge base, removing all data.
+        """
+        self._store.drop_collections()
+        self._store.create_collections(drop_existing=True)
+        self._extraction_result = None
+        self._retriever = None
+
+        # Reset graph builder state
+        self._graph_builder = GraphBuilder(settings=self.settings)
+
+
+def create_rag(
+    milvus_uri: Optional[str] = None,
+    openai_api_key: Optional[str] = None,
+    llm_model: str = "gpt-4o-mini",
+    embedding_model: str = "text-embedding-3-small",
+) -> VectorGraphRAG:
+    """
+    Factory function to create a VectorGraphRAG instance.
+
+    A convenient way to create a RAG instance with common configurations.
+
+    Args:
+        milvus_uri: Milvus connection URI. Defaults to local file.
+        openai_api_key: OpenAI API key. Uses environment variable if not provided.
+        llm_model: LLM model name.
+        embedding_model: Embedding model name.
+
+    Returns:
+        Configured VectorGraphRAG instance.
+
+    Example:
+        >>> from vector_graph_rag import create_rag
+        >>> rag = create_rag()
+        >>> rag.add_documents(["Your documents here..."])
+    """
+    return VectorGraphRAG(
+        milvus_uri=milvus_uri,
+        openai_api_key=openai_api_key,
+        llm_model=llm_model,
+        embedding_model=embedding_model,
+    )
