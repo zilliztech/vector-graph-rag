@@ -224,6 +224,57 @@ class GraphRetriever:
 
         return subgraph
 
+    def _apply_eviction(
+        self,
+        query: str,
+        expanded_relation_ids: List[int],
+        relation_number_threshold: int,
+    ) -> Tuple[List[int], List[str]]:
+        """
+        Apply eviction strategy if expanded relations exceed threshold.
+
+        Uses vector similarity search to filter the most relevant relations.
+
+        Args:
+            query: The query text.
+            expanded_relation_ids: All expanded relation IDs.
+            relation_number_threshold: Maximum number of relations to keep.
+
+        Returns:
+            Tuple of (filtered_relation_ids, filtered_relation_texts).
+        """
+        if len(expanded_relation_ids) <= relation_number_threshold:
+            # No eviction needed, fetch all relation texts
+            filter_expr = f"id in {list(expanded_relation_ids)}"
+            results = self.store.client.query(
+                collection_name=self.store.relation_collection,
+                filter=filter_expr,
+                output_fields=["id", "text"],
+            )
+            id_to_text = {r["id"]: r["text"] for r in results}
+            # Sort by ID to match HippoRAG's behavior (Milvus client.get returns sorted by ID)
+            sorted_ids = sorted(expanded_relation_ids)
+            return sorted_ids, [id_to_text.get(rid, "") for rid in sorted_ids]
+
+        # Eviction needed: use vector search to filter most relevant relations
+        print(f"Use Eviction Strategy. ({len(expanded_relation_ids)} -> {relation_number_threshold})")
+
+        query_embedding = self.embedding_model.embed(query)
+        filter_expr = f"id in {list(expanded_relation_ids)}"
+
+        search_results = self.store.client.search(
+            collection_name=self.store.relation_collection,
+            data=[query_embedding],
+            limit=relation_number_threshold,
+            filter=filter_expr,
+            output_fields=["id", "text"],
+        )[0]
+
+        filtered_ids = [r["entity"]["id"] for r in search_results[:relation_number_threshold]]
+        filtered_texts = [r["entity"]["text"] for r in search_results[:relation_number_threshold]]
+
+        return filtered_ids, filtered_texts
+
     def retrieve(
         self,
         query: str,
@@ -232,6 +283,7 @@ class GraphRetriever:
         entity_similarity_threshold: Optional[float] = None,
         relation_similarity_threshold: Optional[float] = None,
         expansion_degree: Optional[int] = None,
+        relation_number_threshold: Optional[int] = None,
     ) -> RetrievalResult:
         """
         Perform graph-based retrieval for a query.
@@ -241,6 +293,7 @@ class GraphRetriever:
         2. Retrieves similar entities via vector search (with threshold filtering)
         3. Retrieves similar relations via vector search (with threshold filtering)
         4. Expands the subgraph (lazy loading from Milvus)
+        5. Applies eviction strategy if expanded relations exceed threshold
 
         Args:
             query: The query text.
@@ -249,6 +302,7 @@ class GraphRetriever:
             entity_similarity_threshold: Override entity similarity threshold.
             relation_similarity_threshold: Override relation similarity threshold.
             expansion_degree: Override expansion degree.
+            relation_number_threshold: Override relation number threshold for eviction.
 
         Returns:
             RetrievalResult with all retrieval information, including
@@ -276,6 +330,14 @@ class GraphRetriever:
             entity_ids, relation_ids, degree=expansion_degree
         )
 
+        # Apply eviction strategy if needed
+        threshold = relation_number_threshold or self.settings.relation_number_threshold
+        expanded_ids, expanded_texts = self._apply_eviction(
+            query,
+            list(subgraph.relation_ids),
+            threshold,
+        )
+
         return RetrievalResult(
             entity_ids=entity_ids,
             entity_texts=entity_texts,
@@ -284,8 +346,8 @@ class GraphRetriever:
             relation_texts=relation_texts,
             relation_scores=relation_scores,
             subgraph=subgraph,
-            expanded_relation_ids=list(subgraph.relation_ids),
-            expanded_relation_texts=subgraph.relation_texts,
+            expanded_relation_ids=expanded_ids,
+            expanded_relation_texts=expanded_texts,
             query=query,
             query_entities=query_entities,
         )

@@ -13,6 +13,7 @@ from vector_graph_rag.models import (
     ExtractionResult,
 )
 from vector_graph_rag.config import Settings, get_settings
+from vector_graph_rag.llm.extractor import processing_phrases
 
 
 class GraphBuilder:
@@ -74,7 +75,7 @@ class GraphBuilder:
 
     def _add_entity(self, entity_name: str, passage_id: int) -> int:
         """Add an entity and return its ID."""
-        normalized = entity_name.strip()
+        normalized = processing_phrases(entity_name)
         if normalized not in self.entity_to_id:
             entity_id = len(self.entities)
             self.entities.append(normalized)
@@ -94,7 +95,11 @@ class GraphBuilder:
 
     def _add_relation(self, triplet: Triplet, passage_id: int) -> int:
         """Add a relation and return its ID."""
-        relation_text = triplet.to_relation_text()
+        # Normalize each part of the triplet and build relation text
+        subject = processing_phrases(triplet.subject)
+        predicate = processing_phrases(triplet.predicate)
+        obj = processing_phrases(triplet.object)
+        relation_text = f"{subject} {predicate} {obj}"
 
         if relation_text not in self.relation_to_id:
             relation_id = len(self.relations)
@@ -176,7 +181,7 @@ class GraphBuilder:
 
     def get_entity_id(self, entity_name: str) -> Optional[int]:
         """Get entity ID by name."""
-        return self.entity_to_id.get(entity_name.strip())
+        return self.entity_to_id.get(processing_phrases(entity_name))
 
     def get_relation_id(self, relation_text: str) -> Optional[int]:
         """Get relation ID by text."""

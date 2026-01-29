@@ -4,50 +4,49 @@ LLM-based reranking for candidate relations.
 
 import json
 from typing import List, Optional, Tuple
-from openai import OpenAI
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.prompts import ChatPromptTemplate
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from vector_graph_rag.config import Settings, get_settings
 from vector_graph_rag.llm.cache import get_llm_cache, LLMCache
 
 
-# One-shot example for reranking (similar to HippoRAG's prompt)
+# One-shot example for reranking (same as HippoRAG's prompt)
 RERANK_EXAMPLE_INPUT = """I will provide you with a set of relationship descriptions in the knowledge graph, and you should select 5 relationships that may be useful to answer this question.
 You just return me with a json, which contains a thought process description, and a list of the useful relation lines. The more useful the relationship is for answering the question, the higher rank it will be in the list.
 
 Question:
-When was the mother of the leader of the Third Crusade born?
+When did Lothair Ii's mother die?
 
 Relationship descriptions:
-[1] Eleanor was born in 1122.
-[2] Eleanor married King Louis VII of France.
-[3] Eleanor was the Duchess of Aquitaine.
-[4] Eleanor participated in the Second Crusade.
-[5] Eleanor had eight children.
-[6] Eleanor was married to Henry II of England.
-[7] Eleanor was the mother of Richard the Lionheart.
-[8] Richard the Lionheart was the King of England.
-[9] Henry II was the father of Richard the Lionheart.
-[10] Henry II was the King of England.
-[11] Richard the Lionheart led the Third Crusade.
+[53] bertha married to theobald of arles
+[54] bertha married to adalbert ii of tuscany
+[55] bertha regent of lucca
+[56] bertha regent of tuscany
+[66] hermann i pfalzgraf of lotharingia
+[67] waldrada was mistress of lothair ii
+[40] lothair ii was the king of lotharingia
+[42] lothair ii son of ermengarde of tours
+[43] lothair ii married to teutberga
+[44] teutberga daughter of boso the elder
+[10] lambert son of bertha
+[52] bertha daughter of lothair ii
+[57] bertha mother of guy of tuscany
+[41] lothair ii son of emperor lothair i
+[58] lothair ii father of bertha
+[59] lothair ii king of lotharingia
+[60] lothair ii husband of waldrada
+[5] lothair ii king of lotharingia
+[68] waldrada was wife of lothair ii
+[69] lothair ii of lotharingia
 
 """
 
-RERANK_EXAMPLE_OUTPUT = """{
-    "thought_process": "To answer the question about the birth of the mother of the leader of the Third Crusade, I first need to identify who led the Third Crusade and then determine who his mother was. After identifying his mother, I can look for the relationship that mentions her birth.",
-    "useful_relationships": [
-        "[11] Richard the Lionheart led the Third Crusade",
-        "[7] Eleanor was the mother of Richard the Lionheart",
-        "[1] Eleanor was born in 1122",
-        "[6] Eleanor was married to Henry II of England",
-        "[9] Henry II was the father of Richard the Lionheart"
-    ]
-}"""
+RERANK_EXAMPLE_OUTPUT = """{"thought_process": "To answer the question about the death of Lothair II's mother, we need to identify relationships that provide information about his mother. Relationships involving Lothair II's parents or family members would be most useful.", "useful_relations": ["[41] lothair ii son of emperor lothair i", "[42] lothair ii son of ermengarde of tours", "[43] lothair ii married to teutberga", "[60] lothair ii husband of waldrada", "[67] waldrada was mistress of lothair ii"]}"""
 
-RERANK_PROMPT_TEMPLATE = """I will provide you with a set of relationship descriptions in the knowledge graph, and you should select {num_select} relationships that may be useful to answer this question.
-You just return me with a json, which contains a thought process description, and a list of the useful relation lines. The more useful the relationship is for answering the question, the higher rank it will be in the list.
-
-Question:
+RERANK_PROMPT_TEMPLATE = """Question:
 {question}
 
 Relationship descriptions:
@@ -90,7 +89,7 @@ class LLMReranker:
         self,
         settings: Optional[Settings] = None,
         model: Optional[str] = None,
-        use_cache: bool = True,
+        use_cache: Optional[bool] = None,
         cache: Optional[LLMCache] = None,
     ):
         """
@@ -99,7 +98,7 @@ class LLMReranker:
         Args:
             settings: Configuration settings.
             model: Override LLM model from settings.
-            use_cache: Whether to use LLM response caching.
+            use_cache: Whether to use LLM response caching (default: from settings).
             cache: Custom cache instance.
         """
         self.settings = settings or get_settings()
@@ -107,13 +106,17 @@ class LLMReranker:
 
         self.model = model or self.settings.llm_model
 
-        self.client = OpenAI(
+        self.client = ChatOpenAI(
+            model=self.model,
+            temperature=0,
             api_key=self.settings.openai_api_key,
             base_url=self.settings.openai_base_url,
+            max_tokens=None,
         )
 
-        self.use_cache = use_cache
-        self.cache = cache or get_llm_cache() if use_cache else None
+        # Use settings.use_llm_cache if use_cache not explicitly provided
+        self.use_cache = use_cache if use_cache is not None else self.settings.use_llm_cache
+        self.cache = cache or get_llm_cache() if self.use_cache else None
 
     def _format_relations(
         self,
@@ -127,23 +130,22 @@ class LLMReranker:
         return "\n".join(lines)
 
     def _build_prompt(
-        self, query: str, relation_descriptions: str, num_select: int
+        self, query: str, relation_descriptions: str
     ) -> str:
         """Build the full prompt for caching."""
-        return f"{RERANK_EXAMPLE_INPUT}\n{RERANK_EXAMPLE_OUTPUT}\n\n{RERANK_PROMPT_TEMPLATE.format(num_select=num_select, question=query, relation_descriptions=relation_descriptions)}"
+        return f"{RERANK_EXAMPLE_INPUT}\n{RERANK_EXAMPLE_OUTPUT}\n\n{RERANK_PROMPT_TEMPLATE.format(question=query, relation_descriptions=relation_descriptions)}"
 
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=2, max=10),
     )
-    def _call_llm(self, query: str, relation_descriptions: str, num_select: int) -> str:
+    def _call_llm(self, query: str, relation_descriptions: str) -> str:
         """Call LLM API with retry logic and caching."""
         prompt = RERANK_PROMPT_TEMPLATE.format(
-            num_select=num_select,
             question=query,
             relation_descriptions=relation_descriptions,
         )
-        cache_key = self._build_prompt(query, relation_descriptions, num_select)
+        cache_key = self._build_prompt(query, relation_descriptions)
 
         # Check cache
         if self.cache:
@@ -151,17 +153,19 @@ class LLMReranker:
             if cached is not None:
                 return cached
 
-        response = self.client.chat.completions.create(
-            model=self.model,
-            temperature=0,
-            response_format={"type": "json_object"},
-            messages=[
-                {"role": "user", "content": RERANK_EXAMPLE_INPUT},
-                {"role": "assistant", "content": RERANK_EXAMPLE_OUTPUT},
-                {"role": "user", "content": prompt},
-            ],
-        )
-        result = response.choices[0].message.content or "{}"
+        messages = [
+            HumanMessage(content=RERANK_EXAMPLE_INPUT),
+            AIMessage(content=RERANK_EXAMPLE_OUTPUT),
+            HumanMessage(content=prompt),
+        ]
+
+        # gpt-5 series doesn't support 'stop' parameter
+        invoke_kwargs = {"response_format": {"type": "json_object"}}
+        if not self.model.startswith("gpt-5"):
+            invoke_kwargs["stop"] = ['\n\n']
+
+        response = self.client.invoke(messages, **invoke_kwargs)
+        result = response.content or "{}"
 
         # Store in cache
         if self.cache:
@@ -179,7 +183,7 @@ class LLMReranker:
         """Parse LLM response to extract selected relation IDs."""
         try:
             data = json.loads(response)
-            useful_relationships = data.get("useful_relationships", [])
+            useful_relationships = data.get("useful_relations", [])
 
             selected_ids = []
             id_to_line = {}
@@ -240,7 +244,7 @@ class LLMReranker:
         relation_descriptions = self._format_relations(relation_ids, relation_texts)
 
         # Call LLM
-        response = self._call_llm(query, relation_descriptions, num_select)
+        response = self._call_llm(query, relation_descriptions)
 
         # Parse response
         valid_ids = set(relation_ids)
@@ -248,19 +252,13 @@ class LLMReranker:
             response, valid_ids, relation_ids, relation_texts
         )
 
-        # If parsing failed or not enough selected, fallback to first N
-        if len(selected_ids) < num_select:
-            for rid in relation_ids:
-                if rid not in selected_ids:
-                    selected_ids.append(rid)
-                if len(selected_ids) >= num_select:
-                    break
+        # No fallback - return whatever LLM selected (same as current project)
 
         # Get corresponding texts
         id_to_text = dict(zip(relation_ids, relation_texts))
         selected_texts = [id_to_text[rid] for rid in selected_ids if rid in id_to_text]
 
-        return selected_ids[:num_select], selected_texts[:num_select]
+        return selected_ids, selected_texts
 
 
 class AnswerGenerator:
@@ -280,7 +278,7 @@ Answer:"""
         self,
         settings: Optional[Settings] = None,
         model: Optional[str] = None,
-        use_cache: bool = True,
+        use_cache: Optional[bool] = None,
         cache: Optional[LLMCache] = None,
     ):
         """
@@ -289,7 +287,7 @@ Answer:"""
         Args:
             settings: Configuration settings.
             model: Override LLM model from settings.
-            use_cache: Whether to use LLM response caching.
+            use_cache: Whether to use LLM response caching (default: from settings).
             cache: Custom cache instance.
         """
         self.settings = settings or get_settings()
@@ -297,13 +295,17 @@ Answer:"""
 
         self.model = model or self.settings.llm_model
 
-        self.client = OpenAI(
+        self.client = ChatOpenAI(
+            model=self.model,
+            temperature=0,
             api_key=self.settings.openai_api_key,
             base_url=self.settings.openai_base_url,
+            max_tokens=None,
         )
 
-        self.use_cache = use_cache
-        self.cache = cache or get_llm_cache() if use_cache else None
+        # Use settings.use_llm_cache if use_cache not explicitly provided
+        self.use_cache = use_cache if use_cache is not None else self.settings.use_llm_cache
+        self.cache = cache or get_llm_cache() if self.use_cache else None
 
     @retry(
         stop=stop_after_attempt(3),
@@ -329,13 +331,10 @@ Answer:"""
             if cached is not None:
                 return cached
 
-        response = self.client.chat.completions.create(
-            model=self.model,
-            temperature=0,
-            messages=[{"role": "user", "content": prompt}],
-        )
+        messages = [HumanMessage(content=prompt)]
+        response = self.client.invoke(messages)
 
-        result = response.choices[0].message.content or "I don't know."
+        result = response.content or "I don't know."
 
         # Store in cache
         if self.cache:

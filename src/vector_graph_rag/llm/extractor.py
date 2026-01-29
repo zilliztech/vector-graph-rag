@@ -17,15 +17,15 @@ from vector_graph_rag.llm.cache import get_llm_cache, LLMCache
 def processing_phrases(phrase: str) -> str:
     """
     Preprocess phrases for normalization.
-    Similar to HippoRAG's processing_phrases function.
+    Same as HippoRAG's processing_phrases function.
+
+    Replaces all non-alphanumeric characters (including apostrophes,
+    commas, hyphens, accented characters) with spaces.
     """
     if not phrase:
         return ""
-    # Convert to lowercase and strip whitespace
-    phrase = phrase.lower().strip()
-    # Remove extra whitespace
-    phrase = re.sub(r"\s+", " ", phrase)
-    return phrase
+    # Replace all non-alphanumeric characters with space, convert to lowercase, strip
+    return re.sub(r'[^A-Za-z0-9 ]', ' ', phrase.lower()).strip()
 
 
 # System prompt for triplet extraction
@@ -262,6 +262,7 @@ class EntityExtractor:
         model: Optional[str] = None,
         use_cache: bool = True,
         cache: Optional[LLMCache] = None,
+        ner_cache_file: Optional[str] = None,
     ):
         """
         Initialize the entity extractor.
@@ -271,7 +272,12 @@ class EntityExtractor:
             model: Override LLM model from settings.
             use_cache: Whether to use LLM response caching.
             cache: Custom cache instance.
+            ner_cache_file: Path to TSV file with pre-computed NER results (HippoRAG format).
+                If not provided, will try to auto-detect from settings.ner_cache_dir and
+                settings.collection_prefix.
         """
+        import os
+
         self.settings = settings or get_settings()
         self.settings.validate_settings()
 
@@ -284,6 +290,43 @@ class EntityExtractor:
 
         self.use_cache = use_cache
         self.cache = cache or get_llm_cache() if use_cache else None
+
+        # Load TSV cache file if provided (HippoRAG format)
+        self.ner_tsv_cache: dict = {}
+        if ner_cache_file:
+            self._load_tsv_cache(ner_cache_file)
+        elif self.settings.ner_cache_dir and self.settings.collection_prefix:
+            # Auto-detect cache file from settings
+            # collection_prefix format: "ds_hotpotqa" -> dataset "hotpotqa"
+            dataset = self.settings.collection_prefix
+            if dataset.startswith("ds_"):
+                dataset = dataset[3:]  # Remove "ds_" prefix
+            cache_file = os.path.join(
+                self.settings.ner_cache_dir,
+                f"{dataset}_queries.named_entity_output.tsv"
+            )
+            if os.path.exists(cache_file):
+                self._load_tsv_cache(cache_file)
+
+    def _load_tsv_cache(self, cache_file: str) -> None:
+        """Load NER results from TSV cache file (HippoRAG format)."""
+        import pandas as pd
+        try:
+            df = pd.read_csv(cache_file, sep='\t')
+            # The TSV has columns: query, triples (which contains JSON with named_entities)
+            query_col = 'query' if 'query' in df.columns else 'question'
+            for _, row in df.iterrows():
+                query = row.get(query_col, '')
+                triples_str = row.get('triples', '{}')
+                try:
+                    triples_data = eval(triples_str) if isinstance(triples_str, str) else triples_str
+                    if isinstance(triples_data, dict) and 'named_entities' in triples_data:
+                        self.ner_tsv_cache[query] = triples_data['named_entities']
+                except:
+                    pass
+            print(f"Loaded {len(self.ner_tsv_cache)} NER entries from {cache_file}")
+        except Exception as e:
+            print(f"Warning: Could not load NER cache file {cache_file}: {e}")
 
     def _build_prompt(self, question: str) -> str:
         """Build prompt for caching."""
@@ -303,9 +346,14 @@ class EntityExtractor:
         Returns:
             List of entity strings.
         """
+        # Check TSV cache first (HippoRAG format)
+        if question in self.ner_tsv_cache:
+            entities = self.ner_tsv_cache[question]
+            return [processing_phrases(str(e)) for e in entities if e]
+
         prompt = self._build_prompt(question)
 
-        # Check cache
+        # Check LLM cache
         if self.cache:
             cached = self.cache.get(self.model, prompt, temperature=0)
             if cached is not None:

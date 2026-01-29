@@ -94,7 +94,7 @@ class MilvusStore:
         add_index_kwargs = {
             "field_name": "vector",
             "index_type": index_type,
-            "metric_type": "COSINE",
+            "metric_type": "IP",
         }
         if index_params_config:
             add_index_kwargs["params"] = index_params_config

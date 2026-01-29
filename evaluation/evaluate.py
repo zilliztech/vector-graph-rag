@@ -19,7 +19,6 @@ from pathlib import Path
 
 from tqdm import tqdm
 
-
 def setup_logging(log_dir: str = "logs", dataset_name: str = "eval") -> str:
     """
     Setup logging to both console and file.
@@ -249,6 +248,9 @@ class VectorGraphRAGEvaluator:
         relation_top_k: Optional[int] = None,
         entity_similarity_threshold: Optional[float] = None,
         relation_similarity_threshold: Optional[float] = None,
+        relation_number_threshold: Optional[int] = None,
+        llm_model: Optional[str] = None,
+        use_llm_cache: bool = True,
     ):
         """
         Initialize the evaluator.
@@ -266,6 +268,9 @@ class VectorGraphRAGEvaluator:
             relation_top_k: Number of top relations to retrieve (default: 10)
             entity_similarity_threshold: Similarity threshold for entity retrieval (default: 0.9)
             relation_similarity_threshold: Similarity threshold for relation retrieval (default: -1)
+            relation_number_threshold: Max expanded relations, eviction if exceeded (default: 1000)
+            llm_model: LLM model for reranking (default: gpt-4o-mini)
+            use_llm_cache: Whether to use LLM response caching (default: True)
         """
         self.dataset_name = dataset_name
         self.data_dir = data_dir
@@ -301,6 +306,11 @@ class VectorGraphRAGEvaluator:
             settings.entity_similarity_threshold = entity_similarity_threshold
         if relation_similarity_threshold is not None:
             settings.relation_similarity_threshold = relation_similarity_threshold
+        if relation_number_threshold is not None:
+            settings.relation_number_threshold = relation_number_threshold
+        if llm_model is not None:
+            settings.llm_model = llm_model
+        settings.use_llm_cache = use_llm_cache
         self.rag = VectorGraphRAG(settings=settings)
 
     def has_existing_index(self) -> bool:
@@ -411,6 +421,8 @@ class VectorGraphRAGEvaluator:
                     )
                 except Exception as e:
                     print(f"Error in Graph RAG for sample {sample_id}: {e}")
+                    import traceback
+                    traceback.print_exc()
                     graph_titles = []
                 recall_graph = calculate_recall(gold_items, graph_titles, k_list)
 
@@ -578,6 +590,12 @@ def main():
         help="Similarity threshold for relation retrieval, keep if score > threshold (default: -1, keeps all)",
     )
     parser.add_argument(
+        "--relation-number-threshold",
+        type=int,
+        default=1000,
+        help="Maximum number of expanded relations. If exceeded, use eviction strategy (default: 1000)",
+    )
+    parser.add_argument(
         "--method",
         type=str,
         choices=["both", "graph", "naive"],
@@ -589,6 +607,17 @@ def main():
         type=str,
         default="logs",
         help="Directory to save log files (default: logs)",
+    )
+    parser.add_argument(
+        "--llm-model",
+        type=str,
+        default="gpt-4o-mini",
+        help="LLM model for reranking (default: gpt-4o-mini)",
+    )
+    parser.add_argument(
+        "--no-llm-cache",
+        action="store_true",
+        help="Disable LLM response caching",
     )
 
     args = parser.parse_args()
@@ -612,6 +641,9 @@ def main():
         relation_top_k=args.relation_top_k,
         entity_similarity_threshold=args.entity_similarity_threshold,
         relation_similarity_threshold=args.relation_similarity_threshold,
+        relation_number_threshold=args.relation_number_threshold,
+        llm_model=args.llm_model,
+        use_llm_cache=not args.no_llm_cache,
     )
 
     # Build index

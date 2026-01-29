@@ -97,6 +97,10 @@ class Settings(BaseSettings):
     expansion_degree: int = Field(
         default=1, description="Degree of subgraph expansion (1 or 2 recommended)"
     )
+    relation_number_threshold: int = Field(
+        default=1000,
+        description="Maximum number of expanded relations. If exceeded, use eviction strategy to filter by similarity.",
+    )
     final_top_k: int = Field(
         default=3, description="Number of final passages to return"
     )
@@ -108,10 +112,23 @@ class Settings(BaseSettings):
     llm_max_retries: int = Field(
         default=3, description="Maximum retries for LLM API calls"
     )
+    use_llm_cache: bool = Field(
+        default=True, description="Whether to use LLM response caching"
+    )
 
     # Processing Settings
     batch_size: int = Field(
         default=100, description="Batch size for embedding and insertion"
+    )
+
+    # NER Cache Settings
+    ner_cache_dir: Optional[str] = Field(
+        default_factory=lambda: os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),  # -> vector-graph-rag-reference/
+            "data", "ner_cache"
+        ),
+        description="Directory containing NER cache TSV files (HippoRAG format). "
+        "Files should be named {dataset}_queries.named_entity_output.tsv",
     )
 
     model_config = {
