@@ -19,16 +19,16 @@ class GraphEntity:
     An entity node in the subgraph.
 
     Attributes:
-        id: Unique identifier for the entity.
+        id: Unique identifier for the entity (string).
         name: The name/text of the entity.
         relation_ids: IDs of relations connected to this entity.
         passage_ids: IDs of passages where this entity appears.
     """
 
-    id: int
+    id: str
     name: str
-    relation_ids: List[int] = field(default_factory=list)
-    passage_ids: List[int] = field(default_factory=list)
+    relation_ids: List[str] = field(default_factory=list)
+    passage_ids: List[str] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for serialization."""
@@ -56,7 +56,7 @@ class GraphRelation:
     A relation edge in the subgraph.
 
     Attributes:
-        id: Unique identifier for the relation.
+        id: Unique identifier for the relation (string).
         text: The full relation text (subject + predicate + object).
         subject: Subject entity name.
         predicate: Predicate/relationship.
@@ -65,21 +65,21 @@ class GraphRelation:
         passage_ids: IDs of source passages.
     """
 
-    id: int
+    id: str
     text: str
     subject: str
     predicate: str
     object: str
-    entity_ids: List[int] = field(default_factory=list)
-    passage_ids: List[int] = field(default_factory=list)
+    entity_ids: List[str] = field(default_factory=list)
+    passage_ids: List[str] = field(default_factory=list)
 
     @property
-    def head_entity_id(self) -> Optional[int]:
+    def head_entity_id(self) -> Optional[str]:
         """Get the subject entity ID."""
         return self.entity_ids[0] if self.entity_ids else None
 
     @property
-    def tail_entity_id(self) -> Optional[int]:
+    def tail_entity_id(self) -> Optional[str]:
         """Get the object entity ID."""
         return self.entity_ids[1] if len(self.entity_ids) > 1 else None
 
@@ -115,16 +115,16 @@ class GraphPassage:
     A passage node in the subgraph.
 
     Attributes:
-        id: Unique identifier for the passage.
+        id: Unique identifier for the passage (string).
         text: The passage text content.
         entity_ids: IDs of entities mentioned in this passage.
         relation_ids: IDs of relations extracted from this passage.
     """
 
-    id: int
+    id: str
     text: str
-    entity_ids: List[int] = field(default_factory=list)
-    relation_ids: List[int] = field(default_factory=list)
+    entity_ids: List[str] = field(default_factory=list)
+    relation_ids: List[str] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for serialization."""
@@ -178,22 +178,22 @@ class SubGraph:
         """
         self._store = store
 
-        # Node IDs in this subgraph
-        self._entity_ids: Set[int] = set()
-        self._relation_ids: Set[int] = set()
-        self._passage_ids: Set[int] = set()
+        # Node IDs in this subgraph (all string IDs)
+        self._entity_ids: Set[str] = set()
+        self._relation_ids: Set[str] = set()
+        self._passage_ids: Set[str] = set()
 
         # Cached node data
-        self._entities: Dict[int, GraphEntity] = {}
-        self._relations: Dict[int, GraphRelation] = {}
-        self._passages: Dict[int, GraphPassage] = {}
+        self._entities: Dict[str, GraphEntity] = {}
+        self._relations: Dict[str, GraphRelation] = {}
+        self._passages: Dict[str, GraphPassage] = {}
 
         # Expansion history for debugging/visualization
         self._expansion_history: List[Dict[str, Any]] = []
 
     # ==================== Add Initial Nodes ====================
 
-    def add_entities(self, entity_ids: List[int]) -> "SubGraph":
+    def add_entities(self, entity_ids: List[str]) -> "SubGraph":
         """
         Add initial entity IDs to the subgraph.
 
@@ -223,7 +223,7 @@ class SubGraph:
 
         return self
 
-    def add_relations(self, relation_ids: List[int]) -> "SubGraph":
+    def add_relations(self, relation_ids: List[str]) -> "SubGraph":
         """
         Add initial relation IDs to the subgraph.
 
@@ -277,7 +277,7 @@ class SubGraph:
         """
         # Step 0: From initial entities -> relations, merge with initial relations
         # This creates the starting state
-        init_new_relations: Set[int] = set()
+        init_new_relations: Set[str] = set()
         for eid in list(self._entity_ids):
             entity = self._entities.get(eid)
             if entity:
@@ -303,8 +303,8 @@ class SubGraph:
 
         # For each degree: relations -> entities -> relations
         for step in range(degree):
-            step_new_entities: Set[int] = set()
-            step_new_relations: Set[int] = set()
+            step_new_entities: Set[str] = set()
+            step_new_relations: Set[str] = set()
 
             # From current relations -> entities
             for rid in list(self._relation_ids):
@@ -359,7 +359,7 @@ class SubGraph:
 
     # ==================== Fetch from Milvus ====================
 
-    def _fetch_entities(self, entity_ids: List[int]) -> None:
+    def _fetch_entities(self, entity_ids: List[str]) -> None:
         """Fetch entities from Milvus and cache them."""
         if not entity_ids:
             return
@@ -368,7 +368,9 @@ class SubGraph:
         if not ids_to_fetch:
             return
 
-        filter_expr = f"id in {ids_to_fetch}"
+        # Format IDs as quoted strings for Milvus filter
+        ids_str = ", ".join(f'"{eid}"' for eid in ids_to_fetch)
+        filter_expr = f"id in [{ids_str}]"
         results = self._store.client.query(
             collection_name=self._store.entity_collection,
             filter=filter_expr,
@@ -384,7 +386,7 @@ class SubGraph:
             )
             self._entities[entity.id] = entity
 
-    def _fetch_relations(self, relation_ids: List[int]) -> None:
+    def _fetch_relations(self, relation_ids: List[str]) -> None:
         """Fetch relations from Milvus and cache them."""
         if not relation_ids:
             return
@@ -393,19 +395,28 @@ class SubGraph:
         if not ids_to_fetch:
             return
 
-        filter_expr = f"id in {ids_to_fetch}"
+        # Format IDs as quoted strings for Milvus filter
+        ids_str = ", ".join(f'"{rid}"' for rid in ids_to_fetch)
+        filter_expr = f"id in [{ids_str}]"
         results = self._store.client.query(
             collection_name=self._store.relation_collection,
             filter=filter_expr,
-            output_fields=["id", "text", "entity_ids", "passage_ids"],
+            output_fields=["id", "text", "entity_ids", "passage_ids", "subject", "predicate", "object"],
         )
 
         for r in results:
             text = r["text"]
-            parts = text.split(" ", 2)
-            subject = parts[0] if len(parts) > 0 else ""
-            predicate = parts[1] if len(parts) > 1 else ""
-            obj = parts[2] if len(parts) > 2 else ""
+            # Use stored triplet fields if available, otherwise parse from text
+            subject = r.get("subject") or ""
+            predicate = r.get("predicate") or ""
+            obj = r.get("object") or ""
+
+            # Fallback to parsing if fields are empty
+            if not subject and not predicate and not obj:
+                parts = text.split(" ", 2)
+                subject = parts[0] if len(parts) > 0 else ""
+                predicate = parts[1] if len(parts) > 1 else ""
+                obj = parts[2] if len(parts) > 2 else ""
 
             relation = GraphRelation(
                 id=r["id"],
@@ -418,7 +429,7 @@ class SubGraph:
             )
             self._relations[relation.id] = relation
 
-    def _fetch_passages(self, passage_ids: List[int]) -> None:
+    def _fetch_passages(self, passage_ids: List[str]) -> None:
         """Fetch passages from Milvus and cache them."""
         if not passage_ids:
             return
@@ -427,34 +438,38 @@ class SubGraph:
         if not ids_to_fetch:
             return
 
-        filter_expr = f"id in {ids_to_fetch}"
+        # Format IDs as quoted strings for Milvus filter
+        ids_str = ", ".join(f'"{pid}"' for pid in ids_to_fetch)
+        filter_expr = f"id in [{ids_str}]"
         results = self._store.client.query(
             collection_name=self._store.passage_collection,
             filter=filter_expr,
-            output_fields=["id", "text"],
+            output_fields=["id", "text", "entity_ids", "relation_ids"],
         )
 
         for r in results:
             passage = GraphPassage(
                 id=r["id"],
                 text=r["text"],
+                entity_ids=r.get("entity_ids", []),
+                relation_ids=r.get("relation_ids", []),
             )
             self._passages[passage.id] = passage
 
     # ==================== Accessors ====================
 
     @property
-    def entity_ids(self) -> Set[int]:
+    def entity_ids(self) -> Set[str]:
         """Get entity IDs in this subgraph."""
         return self._entity_ids
 
     @property
-    def relation_ids(self) -> Set[int]:
+    def relation_ids(self) -> Set[str]:
         """Get relation IDs in this subgraph."""
         return self._relation_ids
 
     @property
-    def passage_ids(self) -> Set[int]:
+    def passage_ids(self) -> Set[str]:
         """Get passage IDs in this subgraph."""
         return self._passage_ids
 
@@ -499,15 +514,15 @@ class SubGraph:
         """Get expansion history for debugging/visualization."""
         return self._expansion_history
 
-    def get_entity(self, entity_id: int) -> Optional[GraphEntity]:
+    def get_entity(self, entity_id: str) -> Optional[GraphEntity]:
         """Get entity by ID."""
         return self._entities.get(entity_id)
 
-    def get_relation(self, relation_id: int) -> Optional[GraphRelation]:
+    def get_relation(self, relation_id: str) -> Optional[GraphRelation]:
         """Get relation by ID."""
         return self._relations.get(relation_id)
 
-    def get_passage(self, passage_id: int) -> Optional[GraphPassage]:
+    def get_passage(self, passage_id: str) -> Optional[GraphPassage]:
         """Get passage by ID."""
         return self._passages.get(passage_id)
 

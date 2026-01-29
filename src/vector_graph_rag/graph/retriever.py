@@ -17,13 +17,13 @@ from vector_graph_rag.llm.extractor import EntityExtractor
 class RetrievalResult:
     """Result of graph-based retrieval."""
 
-    # Entity retrieval
-    entity_ids: List[int]
+    # Entity retrieval - all IDs are strings
+    entity_ids: List[str]
     entity_texts: List[str]
     entity_scores: List[float]
 
     # Relation retrieval
-    relation_ids: List[int]
+    relation_ids: List[str]
     relation_texts: List[str]
     relation_scores: List[float]
 
@@ -31,7 +31,7 @@ class RetrievalResult:
     subgraph: Optional[SubGraph] = None
 
     # Expanded relations (for backward compatibility)
-    expanded_relation_ids: List[int] = field(default_factory=list)
+    expanded_relation_ids: List[str] = field(default_factory=list)
     expanded_relation_texts: List[str] = field(default_factory=list)
 
     # Query info
@@ -98,7 +98,7 @@ class GraphRetriever:
         query_entities: List[str],
         top_k: Optional[int] = None,
         similarity_threshold: Optional[float] = None,
-    ) -> Tuple[List[int], List[str], List[float]]:
+    ) -> Tuple[List[str], List[str], List[float]]:
         """
         Retrieve similar entities based on query entities.
 
@@ -123,14 +123,14 @@ class GraphRetriever:
         # Embed query entities
         query_embeddings = self.embedding_model.embed_batch(query_entities)
 
-        # Search for similar entities
-        search_results = self.store.search_entities(query_embeddings, top_k=top_k)
+        # Search for similar entities (using private method)
+        search_results = self.store._search_entities(query_embeddings, top_k=top_k)
 
         # Aggregate results with threshold filtering
-        entity_ids = []
-        entity_texts = []
-        scores = []
-        seen_ids = set()
+        entity_ids: List[str] = []
+        entity_texts: List[str] = []
+        scores: List[float] = []
+        seen_ids: set = set()
 
         for result_list in search_results:
             for result in result_list:
@@ -153,7 +153,7 @@ class GraphRetriever:
         query: str,
         top_k: Optional[int] = None,
         similarity_threshold: Optional[float] = None,
-    ) -> Tuple[List[int], List[str], List[float]]:
+    ) -> Tuple[List[str], List[str], List[float]]:
         """
         Retrieve similar relations based on query.
 
@@ -175,13 +175,13 @@ class GraphRetriever:
         # Embed query
         query_embedding = self.embedding_model.embed(query)
 
-        # Search for similar relations
-        results = self.store.search_relations(query_embedding, top_k=top_k)
+        # Search for similar relations (using private method)
+        results = self.store._search_relations(query_embedding, top_k=top_k)
 
         # Filter by similarity threshold
-        relation_ids = []
-        relation_texts = []
-        scores = []
+        relation_ids: List[str] = []
+        relation_texts: List[str] = []
+        scores: List[float] = []
 
         for r in results:
             score = r["distance"]
@@ -194,8 +194,8 @@ class GraphRetriever:
 
     def _expand_subgraph(
         self,
-        entity_ids: List[int],
-        relation_ids: List[int],
+        entity_ids: List[str],
+        relation_ids: List[str],
         degree: Optional[int] = None,
     ) -> SubGraph:
         """
@@ -227,9 +227,9 @@ class GraphRetriever:
     def _apply_eviction(
         self,
         query: str,
-        expanded_relation_ids: List[int],
+        expanded_relation_ids: List[str],
         relation_number_threshold: int,
-    ) -> Tuple[List[int], List[str]]:
+    ) -> Tuple[List[str], List[str]]:
         """
         Apply eviction strategy if expanded relations exceed threshold.
 
@@ -245,7 +245,8 @@ class GraphRetriever:
         """
         if len(expanded_relation_ids) <= relation_number_threshold:
             # No eviction needed, fetch all relation texts
-            filter_expr = f"id in {list(expanded_relation_ids)}"
+            ids_str = ", ".join(f'"{rid}"' for rid in expanded_relation_ids)
+            filter_expr = f"id in [{ids_str}]"
             results = self.store.client.query(
                 collection_name=self.store.relation_collection,
                 filter=filter_expr,
@@ -260,7 +261,8 @@ class GraphRetriever:
         print(f"Use Eviction Strategy. ({len(expanded_relation_ids)} -> {relation_number_threshold})")
 
         query_embedding = self.embedding_model.embed(query)
-        filter_expr = f"id in {list(expanded_relation_ids)}"
+        ids_str = ", ".join(f'"{rid}"' for rid in expanded_relation_ids)
+        filter_expr = f"id in [{ids_str}]"
 
         search_results = self.store.client.search(
             collection_name=self.store.relation_collection,

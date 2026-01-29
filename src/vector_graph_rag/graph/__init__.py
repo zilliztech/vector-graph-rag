@@ -10,8 +10,10 @@ from vector_graph_rag.graph.knowledge_graph import (
     GraphRelation,
     GraphPassage,
 )
+from vector_graph_rag.graph.graph import Graph
 
 __all__ = [
+    "Graph",
     "GraphBuilder",
     "GraphRetriever",
     "RetrievalResult",

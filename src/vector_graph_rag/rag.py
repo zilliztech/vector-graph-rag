@@ -143,13 +143,13 @@ class VectorGraphRAG:
         return subgraph.passage_texts
 
     def _get_passages_from_relations(
-        self, relation_ids: List[int]
-    ) -> tuple[List[int], List[str]]:
+        self, relation_ids: List[str]
+    ) -> tuple[List[str], List[str]]:
         """
         Get passages associated with given relations.
 
         Args:
-            relation_ids: List of relation IDs.
+            relation_ids: List of relation IDs (strings).
 
         Returns:
             Tuple of (passage_ids, passage_texts).
@@ -157,11 +157,11 @@ class VectorGraphRAG:
         if not relation_ids:
             return [], []
 
-        # Query Milvus for relation data
-        relation_data = self._store.get_relations_by_ids(relation_ids)
+        # Query Milvus for relation data (using private method)
+        relation_data = self._store._get_relations_by_ids(relation_ids)
 
-        passage_ids = []
-        seen_ids = set()
+        passage_ids: List[str] = []
+        seen_ids: set = set()
         for rel in relation_data:
             for pid in rel.get("passage_ids", []):
                 if pid not in seen_ids:
@@ -180,6 +180,7 @@ class VectorGraphRAG:
     def add_documents(
         self,
         documents: Union[List[str], List[Document]],
+        ids: Optional[List[str]] = None,
         extract_triplets: bool = True,
         show_progress: bool = True,
     ) -> ExtractionResult:
@@ -193,6 +194,7 @@ class VectorGraphRAG:
 
         Args:
             documents: List of text strings or Document objects.
+            ids: Optional list of IDs for the documents. If not provided, UUIDs are generated.
             extract_triplets: Whether to extract triplets using LLM.
             show_progress: Whether to show progress bars.
 
@@ -204,12 +206,26 @@ class VectorGraphRAG:
             ...     "Albert Einstein developed the theory of relativity.",
             ...     "The theory of relativity changed physics forever.",
             ... ])
+            >>>
+            >>> # With custom IDs
+            >>> rag.add_documents(
+            ...     ["Document 1", "Document 2"],
+            ...     ids=["doc_001", "doc_002"]
+            ... )
         """
         # Convert to Document objects if needed
         if documents and isinstance(documents[0], str):
-            docs = [Document(id=i, text=text) for i, text in enumerate(documents)]
+            docs = []
+            for i, text in enumerate(documents):
+                doc_id = ids[i] if ids and i < len(ids) else None
+                docs.append(Document(id=doc_id, text=text))
         else:
             docs = list(documents)
+            # Apply IDs if provided
+            if ids:
+                for i, doc in enumerate(docs):
+                    if i < len(ids) and not doc.id:
+                        doc.id = ids[i]
 
         # Extract triplets
         if extract_triplets:
@@ -224,9 +240,9 @@ class VectorGraphRAG:
         if show_progress:
             print("Generating embeddings...")
 
-        entity_texts = [e.name for e in self._extraction_result.entities]
-        relation_texts = [r.text for r in self._extraction_result.relations]
-        passage_texts = [d.text for d in docs]
+        entity_texts = self._graph_builder.get_entity_texts()
+        relation_texts = self._graph_builder.get_relation_texts()
+        passage_texts = self._graph_builder.get_passage_texts()
 
         entity_embeddings = (
             self._embedding_model.embed_batch(entity_texts, show_progress=show_progress)
@@ -252,36 +268,39 @@ class VectorGraphRAG:
 
         # Build metadata for adjacency information
         # Entity metadata: relation_ids (directly connected relations), passage_ids
-        entity_metadatas = [
-            {
-                "relation_ids": self._extraction_result.entity_to_relation_ids.get(
-                    i, []
-                ),
-                "passage_ids": self._graph_builder.entity_to_passage_ids.get(i, []),
-            }
-            for i in range(len(entity_texts))
-        ]
+        entity_metadatas = []
+        for eid in self._graph_builder.entity_ids:
+            entity_metadatas.append({
+                "relation_ids": self._graph_builder.entity_to_relation_ids.get(eid, []),
+                "passage_ids": self._graph_builder.entity_to_passage_ids.get(eid, []),
+            })
 
-        # Relation metadata: entity_ids (head and tail), passage_ids
+        # Relation metadata: entity_ids (head and tail), passage_ids, triplet fields
         relation_metadatas = []
-        for rel in self._extraction_result.relations:
-            entity_ids = []
-            subject_id = self._graph_builder.entity_to_id.get(rel.triplet.subject)
-            object_id = self._graph_builder.entity_to_id.get(rel.triplet.object)
-            if subject_id is not None:
-                entity_ids.append(subject_id)
-            if object_id is not None:
-                entity_ids.append(object_id)
+        for rid in self._graph_builder.relation_ids:
+            triplet = self._graph_builder.relation_id_to_triplet.get(rid)
+            entity_ids = self._graph_builder.relation_to_entity_ids.get(rid, [])
+            passage_ids = self._graph_builder.relation_to_passage_ids.get(rid, [])
 
-            relation_metadatas.append(
-                {
-                    "entity_ids": entity_ids,
-                    "passage_ids": rel.source_passage_ids,
-                }
-            )
+            metadata = {
+                "entity_ids": entity_ids,
+                "passage_ids": passage_ids,
+            }
+            # Add structured triplet fields
+            if triplet:
+                metadata["subject"] = triplet.subject
+                metadata["predicate"] = triplet.predicate
+                metadata["object"] = triplet.object
 
-        # Passage metadata (optional, for reference)
-        passage_metadatas = None
+            relation_metadatas.append(metadata)
+
+        # Passage metadata
+        passage_metadatas = []
+        for pid in self._graph_builder.passage_ids:
+            passage_metadatas.append({
+                "entity_ids": self._graph_builder.passage_to_entity_ids.get(pid, []),
+                "relation_ids": self._graph_builder.passage_to_relation_ids.get(pid, []),
+            })
 
         # Drop and recreate collections for fresh data
         self._store.drop_collections()
@@ -291,21 +310,25 @@ class VectorGraphRAG:
         if show_progress:
             print("Inserting into Milvus...")
 
-        self._store.insert_entities(
+        # Use private methods for entities and relations
+        self._store._insert_entities(
             entity_texts,
-            entity_embeddings,
+            ids=self._graph_builder.entity_ids,
+            embeddings=entity_embeddings,
             metadatas=entity_metadatas,
             show_progress=show_progress,
         )
-        self._store.insert_relations(
+        self._store._insert_relations(
             relation_texts,
-            relation_embeddings,
+            ids=self._graph_builder.relation_ids,
+            embeddings=relation_embeddings,
             metadatas=relation_metadatas,
             show_progress=show_progress,
         )
         self._store.insert_passages(
             passage_texts,
-            passage_embeddings,
+            ids=self._graph_builder.passage_ids,
+            embeddings=passage_embeddings,
             metadatas=passage_metadatas,
             show_progress=show_progress,
         )
@@ -328,6 +351,7 @@ class VectorGraphRAG:
 
         Args:
             documents: List of dicts with "passage" and "triplets" keys.
+                       Optionally include "id" for custom document ID.
                        Each triplet is [subject, predicate, object].
             show_progress: Whether to show progress bars.
 
@@ -337,6 +361,7 @@ class VectorGraphRAG:
         Example:
             >>> rag.add_documents_with_triplets([
             ...     {
+            ...         "id": "doc_001",  # optional
             ...         "passage": "Einstein developed relativity.",
             ...         "triplets": [
             ...             ["Einstein", "developed", "relativity"],
@@ -347,13 +372,14 @@ class VectorGraphRAG:
         from vector_graph_rag.models import Triplet
 
         docs = []
-        for i, doc_data in enumerate(documents):
+        for doc_data in documents:
             passage = doc_data["passage"]
+            doc_id = doc_data.get("id")  # May be None
             triplets = [
                 Triplet(subject=t[0], predicate=t[1], object=t[2])
                 for t in doc_data.get("triplets", [])
             ]
-            docs.append(Document(id=i, text=passage, triplets=triplets))
+            docs.append(Document(id=doc_id, text=passage, triplets=triplets))
 
         return self.add_documents(
             docs, extract_triplets=False, show_progress=show_progress

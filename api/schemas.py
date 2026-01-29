@@ -9,28 +9,28 @@ from pydantic import BaseModel
 class EntitySchema(BaseModel):
     """Entity in the knowledge graph."""
 
-    id: int
+    id: str
     name: str
-    relation_ids: List[int] = []
-    passage_ids: List[int] = []
+    relation_ids: List[str] = []
+    passage_ids: List[str] = []
 
 
 class RelationSchema(BaseModel):
     """Relation in the knowledge graph."""
 
-    id: int
+    id: str
     text: str
     subject: str
     predicate: str
     object: str
-    entity_ids: List[int] = []
-    passage_ids: List[int] = []
+    entity_ids: List[str] = []
+    passage_ids: List[str] = []
 
 
 class PassageSchema(BaseModel):
     """Passage in the knowledge graph."""
 
-    id: int
+    id: str
     text: str
 
 
@@ -40,8 +40,8 @@ class ExpansionStepSchema(BaseModel):
     step: int
     operation: str
     description: Optional[str] = None
-    new_entity_ids: List[int] = []
-    new_relation_ids: List[int] = []
+    new_entity_ids: List[str] = []
+    new_relation_ids: List[str] = []
     total_entities: int = 0
     total_relations: int = 0
 
@@ -49,9 +49,9 @@ class ExpansionStepSchema(BaseModel):
 class SubGraphSchema(BaseModel):
     """Subgraph data for visualization."""
 
-    entity_ids: List[int]
-    relation_ids: List[int]
-    passage_ids: List[int]
+    entity_ids: List[str]
+    relation_ids: List[str]
+    passage_ids: List[str]
     entities: List[EntitySchema]
     relations: List[RelationSchema]
     passages: List[PassageSchema]
@@ -61,10 +61,10 @@ class SubGraphSchema(BaseModel):
 class RetrievalDetailSchema(BaseModel):
     """Details of initial retrieval step (before expansion)."""
 
-    entity_ids: List[int] = []
+    entity_ids: List[str] = []
     entity_texts: List[str] = []
     entity_scores: List[float] = []
-    relation_ids: List[int] = []
+    relation_ids: List[str] = []
     relation_texts: List[str] = []
     relation_scores: List[float] = []
 
@@ -72,7 +72,7 @@ class RetrievalDetailSchema(BaseModel):
 class RerankResultSchema(BaseModel):
     """Result of LLM reranking."""
 
-    selected_relation_ids: List[int] = []
+    selected_relation_ids: List[str] = []
     selected_relation_texts: List[str] = []
 
 

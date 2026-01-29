@@ -42,12 +42,12 @@ class Entity(BaseModel):
     An entity extracted from text.
 
     Attributes:
-        id: Unique identifier for the entity.
+        id: Unique identifier for the entity (string, UUID or user-provided).
         name: The name/text of the entity.
         embedding: Optional embedding vector.
     """
 
-    id: Optional[int] = Field(default=None, description="Entity ID")
+    id: Optional[str] = Field(default=None, description="Entity ID")
     name: str = Field(..., description="Entity name")
     embedding: Optional[List[float]] = Field(
         default=None, description="Entity embedding"
@@ -67,17 +67,17 @@ class Relation(BaseModel):
     A relation (edge) in the knowledge graph.
 
     Attributes:
-        id: Unique identifier for the relation.
+        id: Unique identifier for the relation (string, UUID or user-provided).
         text: The full relation text (subject + predicate + object).
         triplet: The original triplet.
         source_passage_ids: IDs of passages where this relation was extracted from.
         embedding: Optional embedding vector.
     """
 
-    id: Optional[int] = Field(default=None, description="Relation ID")
+    id: Optional[str] = Field(default=None, description="Relation ID")
     text: str = Field(..., description="Full relation text")
     triplet: Triplet = Field(..., description="Original triplet")
-    source_passage_ids: List[int] = Field(
+    source_passage_ids: List[str] = Field(
         default_factory=list, description="Source passage IDs"
     )
     embedding: Optional[List[float]] = Field(
@@ -90,14 +90,14 @@ class Document(BaseModel):
     A document/passage to be processed.
 
     Attributes:
-        id: Unique identifier for the document.
+        id: Unique identifier for the document (string, UUID or user-provided).
         text: The document text content.
         metadata: Optional metadata dictionary.
         triplets: Extracted triplets from this document.
         embedding: Optional embedding vector.
     """
 
-    id: Optional[int] = Field(default=None, description="Document ID")
+    id: Optional[str] = Field(default=None, description="Document ID")
     text: str = Field(..., description="Document text content")
     metadata: dict = Field(default_factory=dict, description="Optional metadata")
     triplets: List[Triplet] = Field(
@@ -105,6 +105,27 @@ class Document(BaseModel):
     )
     embedding: Optional[List[float]] = Field(
         default=None, description="Document embedding"
+    )
+
+
+class Passage(BaseModel):
+    """
+    A passage in the knowledge graph.
+
+    Attributes:
+        id: Unique identifier for the passage (string, UUID or user-provided).
+        text: The passage text content.
+        entity_ids: IDs of entities in this passage.
+        relation_ids: IDs of relations from this passage.
+        embedding: Optional embedding vector.
+    """
+
+    id: Optional[str] = Field(default=None, description="Passage ID")
+    text: str = Field(..., description="Passage text content")
+    entity_ids: List[str] = Field(default_factory=list, description="Entity IDs")
+    relation_ids: List[str] = Field(default_factory=list, description="Relation IDs")
+    embedding: Optional[List[float]] = Field(
+        default=None, description="Passage embedding"
     )
 
 
@@ -121,10 +142,10 @@ class RetrievalDetail(BaseModel):
         relation_scores: Similarity scores of retrieved relations.
     """
 
-    entity_ids: List[int] = Field(default_factory=list)
+    entity_ids: List[str] = Field(default_factory=list)
     entity_texts: List[str] = Field(default_factory=list)
     entity_scores: List[float] = Field(default_factory=list)
-    relation_ids: List[int] = Field(default_factory=list)
+    relation_ids: List[str] = Field(default_factory=list)
     relation_texts: List[str] = Field(default_factory=list)
     relation_scores: List[float] = Field(default_factory=list)
 
@@ -138,7 +159,7 @@ class RerankResult(BaseModel):
         selected_relation_texts: Texts of selected relations.
     """
 
-    selected_relation_ids: List[int] = Field(default_factory=list)
+    selected_relation_ids: List[str] = Field(default_factory=list)
     selected_relation_texts: List[str] = Field(default_factory=list)
 
 
@@ -204,5 +225,5 @@ class ExtractionResult(BaseModel):
     documents: List[Document] = Field(default_factory=list)
     entities: List[Entity] = Field(default_factory=list)
     relations: List[Relation] = Field(default_factory=list)
-    entity_to_relation_ids: dict[int, List[int]] = Field(default_factory=dict)
-    relation_to_passage_ids: dict[int, List[int]] = Field(default_factory=dict)
+    entity_to_relation_ids: dict[str, List[str]] = Field(default_factory=dict)
+    relation_to_passage_ids: dict[str, List[str]] = Field(default_factory=dict)

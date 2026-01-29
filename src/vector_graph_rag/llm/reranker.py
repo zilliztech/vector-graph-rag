@@ -56,8 +56,8 @@ Relationship descriptions:
 
 
 def _correct_line(
-    predict_line: str, relation_des_texts: List[str], relation_des_ids: List[int]
-) -> Optional[int]:
+    predict_line: str, relation_des_texts: List[str], relation_des_ids: List[str]
+) -> Optional[str]:
     """
     Correct a predicted line by matching text content.
     Similar to HippoRAG's _correct_line function.
@@ -120,7 +120,7 @@ class LLMReranker:
 
     def _format_relations(
         self,
-        relation_ids: List[int],
+        relation_ids: List[str],
         relation_texts: List[str],
     ) -> str:
         """Format relations for the prompt."""
@@ -177,9 +177,9 @@ class LLMReranker:
         self,
         response: str,
         valid_ids: set,
-        relation_ids: List[int],
+        relation_ids: List[str],
         relation_texts: List[str],
-    ) -> List[int]:
+    ) -> List[str]:
         """Parse LLM response to extract selected relation IDs."""
         try:
             data = json.loads(response)
@@ -193,24 +193,21 @@ class LLMReranker:
                 if "[" in line and "]" in line:
                     start = line.find("[") + 1
                     end = line.find("]")
-                    try:
-                        rel_id = int(line[start:end])
-                        id_to_line[rel_id] = line.strip()
+                    rel_id = line[start:end].strip()
+                    id_to_line[rel_id] = line.strip()
 
-                        if rel_id in valid_ids and rel_id not in selected_ids:
-                            selected_ids.append(rel_id)
-                        elif rel_id not in valid_ids:
-                            # Try to correct the ID by matching text
-                            corrected_id = _correct_line(
-                                line, relation_texts, relation_ids
-                            )
-                            if (
-                                corrected_id is not None
-                                and corrected_id not in selected_ids
-                            ):
-                                selected_ids.append(corrected_id)
-                    except ValueError:
-                        continue
+                    if rel_id in valid_ids and rel_id not in selected_ids:
+                        selected_ids.append(rel_id)
+                    elif rel_id not in valid_ids:
+                        # Try to correct the ID by matching text
+                        corrected_id = _correct_line(
+                            line, relation_texts, relation_ids
+                        )
+                        if (
+                            corrected_id is not None
+                            and corrected_id not in selected_ids
+                        ):
+                            selected_ids.append(corrected_id)
 
             return selected_ids
         except (json.JSONDecodeError, KeyError):
@@ -219,16 +216,16 @@ class LLMReranker:
     def rerank(
         self,
         query: str,
-        relation_ids: List[int],
+        relation_ids: List[str],
         relation_texts: List[str],
         num_select: Optional[int] = None,
-    ) -> Tuple[List[int], List[str]]:
+    ) -> Tuple[List[str], List[str]]:
         """
         Rerank candidate relations using LLM.
 
         Args:
             query: The query text.
-            relation_ids: Candidate relation IDs.
+            relation_ids: Candidate relation IDs (string UUIDs).
             relation_texts: Candidate relation texts.
             num_select: Number of relations to select (default: final_top_k).
 

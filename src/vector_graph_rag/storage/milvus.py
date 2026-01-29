@@ -5,14 +5,23 @@ Stores adjacency information in metadata:
 - Entity metadata: relation_ids (directly connected relation IDs)
 - Relation metadata: entity_ids (head and tail entity IDs), passage_ids (source passage IDs)
 - Passage metadata: entity_ids, relation_ids (for reference)
+
+Note: Entity and Relation methods are private (prefixed with _) as they are internal.
+Users should interact with passages through the Graph abstraction layer.
 """
 
+import uuid
 from typing import List, Optional, Dict, Any
 from pymilvus import MilvusClient, DataType
 from tqdm import tqdm
 
 from vector_graph_rag.config import Settings, get_settings
 from vector_graph_rag.storage.embeddings import EmbeddingModel
+
+
+def generate_id() -> str:
+    """Generate a unique ID using UUID4."""
+    return str(uuid.uuid4())
 
 
 class MilvusStore:
@@ -84,8 +93,9 @@ class MilvusStore:
         index_params_config = self.settings.milvus_index_params
 
         # Build schema using MilvusClient API (required for index_type to take effect)
+        # Use VARCHAR for ID to support user-provided IDs or UUIDs
         schema = self.client.create_schema(auto_id=False, enable_dynamic_field=True)
-        schema.add_field(field_name="id", datatype=DataType.INT64, is_primary=True)
+        schema.add_field(field_name="id", datatype=DataType.VARCHAR, max_length=64, is_primary=True)
         schema.add_field(field_name="vector", datatype=DataType.FLOAT_VECTOR, dim=dim)
         schema.add_field(field_name="text", datatype=DataType.VARCHAR, max_length=65535)
 
@@ -144,14 +154,24 @@ class MilvusStore:
     def _insert_data(
         self,
         collection_name: str,
-        ids: List[int],
+        ids: List[str],
         texts: List[str],
         embeddings: List[List[float]],
         metadatas: Optional[List[Dict[str, Any]]] = None,
         batch_size: Optional[int] = None,
         show_progress: bool = False,
     ) -> None:
-        """Insert data into a collection with optional metadata."""
+        """Insert data into a collection with optional metadata.
+
+        Args:
+            collection_name: Name of the collection.
+            ids: List of string IDs (user-provided or UUIDs).
+            texts: List of text content.
+            embeddings: List of embedding vectors.
+            metadatas: Optional list of metadata dicts.
+            batch_size: Batch size for insertion.
+            show_progress: Whether to show progress bar.
+        """
         batch_size = batch_size or self.settings.batch_size
 
         total_batches = (len(ids) + batch_size - 1) // batch_size
@@ -181,33 +201,43 @@ class MilvusStore:
 
             self.client.insert(collection_name=collection_name, data=batch_data)
 
-    def insert_entities(
+    def _insert_entities(
         self,
         entity_texts: List[str],
+        ids: Optional[List[str]] = None,
         embeddings: Optional[List[List[float]]] = None,
         metadatas: Optional[List[Dict[str, Any]]] = None,
         show_progress: bool = False,
-    ) -> None:
+    ) -> List[str]:
         """
         Insert entities into the entity collection.
 
+        This is a private method. Users should use the Graph abstraction layer.
+
         Args:
             entity_texts: List of entity names/texts.
+            ids: Optional list of string IDs. If not provided, UUIDs are generated.
             embeddings: Pre-computed embeddings. Generated if not provided.
             metadatas: List of metadata dicts, each containing:
                 - relation_ids: List of directly connected relation IDs
                 - passage_ids: List of source passage IDs (optional)
             show_progress: Whether to show progress bar.
+
+        Returns:
+            List of IDs (provided or generated).
         """
         if not entity_texts:
-            return
+            return []
 
         if embeddings is None:
             embeddings = self.embedding_model.embed_batch(
                 entity_texts, show_progress=show_progress
             )
 
-        ids = list(range(len(entity_texts)))
+        # Generate UUIDs if IDs not provided
+        if ids is None:
+            ids = [generate_id() for _ in entity_texts]
+
         self._insert_data(
             self.entity_collection,
             ids,
@@ -216,34 +246,48 @@ class MilvusStore:
             metadatas=metadatas,
             show_progress=show_progress,
         )
+        return ids
 
-    def insert_relations(
+    def _insert_relations(
         self,
         relation_texts: List[str],
+        ids: Optional[List[str]] = None,
         embeddings: Optional[List[List[float]]] = None,
         metadatas: Optional[List[Dict[str, Any]]] = None,
         show_progress: bool = False,
-    ) -> None:
+    ) -> List[str]:
         """
         Insert relations into the relation collection.
 
+        This is a private method. Users should use the Graph abstraction layer.
+
         Args:
             relation_texts: List of relation texts.
+            ids: Optional list of string IDs. If not provided, UUIDs are generated.
             embeddings: Pre-computed embeddings. Generated if not provided.
             metadatas: List of metadata dicts, each containing:
                 - entity_ids: List of connected entity IDs (head and tail)
                 - passage_ids: List of source passage IDs
+                - subject: Subject entity text (optional, for structured triplet)
+                - predicate: Predicate text (optional, for structured triplet)
+                - object: Object entity text (optional, for structured triplet)
             show_progress: Whether to show progress bar.
+
+        Returns:
+            List of IDs (provided or generated).
         """
         if not relation_texts:
-            return
+            return []
 
         if embeddings is None:
             embeddings = self.embedding_model.embed_batch(
                 relation_texts, show_progress=show_progress
             )
 
-        ids = list(range(len(relation_texts)))
+        # Generate UUIDs if IDs not provided
+        if ids is None:
+            ids = [generate_id() for _ in relation_texts]
+
         self._insert_data(
             self.relation_collection,
             ids,
@@ -252,34 +296,43 @@ class MilvusStore:
             metadatas=metadatas,
             show_progress=show_progress,
         )
+        return ids
 
     def insert_passages(
         self,
         passage_texts: List[str],
+        ids: Optional[List[str]] = None,
         embeddings: Optional[List[List[float]]] = None,
         metadatas: Optional[List[Dict[str, Any]]] = None,
         show_progress: bool = False,
-    ) -> None:
+    ) -> List[str]:
         """
         Insert passages into the passage collection.
 
         Args:
             passage_texts: List of passage texts.
+            ids: Optional list of string IDs. If not provided, UUIDs are generated.
             embeddings: Pre-computed embeddings. Generated if not provided.
             metadatas: List of metadata dicts, each containing:
                 - entity_ids: List of entity IDs in this passage
                 - relation_ids: List of relation IDs in this passage
             show_progress: Whether to show progress bar.
+
+        Returns:
+            List of IDs (provided or generated).
         """
         if not passage_texts:
-            return
+            return []
 
         if embeddings is None:
             embeddings = self.embedding_model.embed_batch(
                 passage_texts, show_progress=show_progress
             )
 
-        ids = list(range(len(passage_texts)))
+        # Generate UUIDs if IDs not provided
+        if ids is None:
+            ids = [generate_id() for _ in passage_texts]
+
         self._insert_data(
             self.passage_collection,
             ids,
@@ -288,8 +341,9 @@ class MilvusStore:
             metadatas=metadatas,
             show_progress=show_progress,
         )
+        return ids
 
-    def search_entities(
+    def _search_entities(
         self,
         query_embeddings: List[List[float]],
         top_k: Optional[int] = None,
@@ -297,13 +351,15 @@ class MilvusStore:
         """
         Search for similar entities.
 
+        This is a private method. Users should use the Graph abstraction layer.
+
         Args:
             query_embeddings: Query embedding vectors.
             top_k: Number of results to return per query.
 
         Returns:
             List of search results per query, each result includes:
-            - id, text, distance
+            - id (str), text, distance
             - relation_ids, passage_ids (if stored)
         """
         top_k = top_k or self.settings.entity_top_k
@@ -316,7 +372,7 @@ class MilvusStore:
         )
         return results
 
-    def search_relations(
+    def _search_relations(
         self,
         query_embedding: List[float],
         top_k: Optional[int] = None,
@@ -324,13 +380,15 @@ class MilvusStore:
         """
         Search for similar relations.
 
+        This is a private method. Users should use the Graph abstraction layer.
+
         Args:
             query_embedding: Query embedding vector.
             top_k: Number of results to return.
 
         Returns:
             List of search results, each includes:
-            - id, text, distance
+            - id (str), text, distance
             - entity_ids, passage_ids (if stored)
         """
         top_k = top_k or self.settings.relation_top_k
@@ -339,7 +397,7 @@ class MilvusStore:
             collection_name=self.relation_collection,
             data=[query_embedding],
             limit=top_k,
-            output_fields=["id", "text", "entity_ids", "passage_ids"],
+            output_fields=["id", "text", "entity_ids", "passage_ids", "subject", "predicate", "object"],
         )
         return results[0] if results else []
 
@@ -356,7 +414,7 @@ class MilvusStore:
             top_k: Number of results to return.
 
         Returns:
-            List of search results.
+            List of search results with id (str) and text.
         """
         top_k = top_k or self.settings.final_top_k
 
@@ -364,19 +422,21 @@ class MilvusStore:
             collection_name=self.passage_collection,
             data=[query_embedding],
             limit=top_k,
-            output_fields=["id", "text"],
+            output_fields=["id", "text", "entity_ids", "relation_ids"],
         )
         return results[0] if results else []
 
-    def get_entities_by_ids(
+    def _get_entities_by_ids(
         self,
-        entity_ids: List[int],
+        entity_ids: List[str],
     ) -> List[Dict[str, Any]]:
         """
         Get entities by their IDs.
 
+        This is a private method. Users should use the Graph abstraction layer.
+
         Args:
-            entity_ids: List of entity IDs.
+            entity_ids: List of entity IDs (strings).
 
         Returns:
             List of entity data with id, text, relation_ids, and passage_ids.
@@ -384,82 +444,405 @@ class MilvusStore:
         if not entity_ids:
             return []
 
+        # Format IDs as quoted strings for Milvus filter
+        ids_str = ", ".join(f'"{eid}"' for eid in entity_ids)
         results = self.client.query(
             collection_name=self.entity_collection,
-            filter=f"id in {entity_ids}",
+            filter=f"id in [{ids_str}]",
             output_fields=["id", "text", "relation_ids", "passage_ids"],
         )
         return results
 
-    def get_relations_by_ids(
+    def _get_relations_by_ids(
         self,
-        relation_ids: List[int],
+        relation_ids: List[str],
     ) -> List[Dict[str, Any]]:
         """
         Get relations by their IDs.
 
+        This is a private method. Users should use the Graph abstraction layer.
+
         Args:
-            relation_ids: List of relation IDs.
+            relation_ids: List of relation IDs (strings).
 
         Returns:
-            List of relation data with id, text, entity_ids, passage_ids.
+            List of relation data with id, text, entity_ids, passage_ids,
+            and structured triplet fields (subject, predicate, object).
         """
         if not relation_ids:
             return []
 
+        # Format IDs as quoted strings for Milvus filter
+        ids_str = ", ".join(f'"{rid}"' for rid in relation_ids)
         results = self.client.query(
             collection_name=self.relation_collection,
-            filter=f"id in {relation_ids}",
-            output_fields=["id", "text", "entity_ids", "passage_ids"],
+            filter=f"id in [{ids_str}]",
+            output_fields=["id", "text", "entity_ids", "passage_ids", "subject", "predicate", "object"],
         )
         return results
 
     def get_passages_by_ids(
         self,
-        passage_ids: List[int],
+        passage_ids: List[str],
     ) -> List[Dict[str, Any]]:
         """
         Get passages by their IDs.
 
         Args:
-            passage_ids: List of passage IDs.
+            passage_ids: List of passage IDs (strings).
 
         Returns:
-            List of passage data.
+            List of passage data with id, text, entity_ids, and relation_ids.
         """
         if not passage_ids:
             return []
 
+        # Format IDs as quoted strings for Milvus filter
+        ids_str = ", ".join(f'"{pid}"' for pid in passage_ids)
         results = self.client.query(
             collection_name=self.passage_collection,
-            filter=f"id in {passage_ids}",
-            output_fields=["id", "text"],
+            filter=f"id in [{ids_str}]",
+            output_fields=["id", "text", "entity_ids", "relation_ids"],
         )
         return results
 
-    def get_collection_stats(self) -> Dict[str, int]:
-        """Get statistics for all collections."""
-        stats = {}
-        for name in [
-            self.entity_collection,
-            self.relation_collection,
-            self.passage_collection,
-        ]:
-            if self.client.has_collection(name):
-                # Use describe_collection to get entity count
-                info = self.client.describe_collection(name)
-                stats[name] = (
-                    self.client.query(
-                        collection_name=name,
-                        filter="",
-                        output_fields=["count(*)"],
-                    )[0].get("count(*)", 0)
-                    if self.client.has_collection(name)
-                    else 0
-                )
-            else:
-                stats[name] = 0
-        return stats
+    # ==================== Update Operations ====================
+
+    def _update_entity(
+        self,
+        entity_id: str,
+        text: Optional[str] = None,
+        embedding: Optional[List[float]] = None,
+        relation_ids: Optional[List[str]] = None,
+        passage_ids: Optional[List[str]] = None,
+    ) -> bool:
+        """
+        Update an entity by ID using upsert.
+
+        This is a private method. Users should use the Graph abstraction layer.
+
+        Args:
+            entity_id: The entity ID to update.
+            text: New text (optional).
+            embedding: New embedding (optional, auto-generated if text changes).
+            relation_ids: New relation IDs (optional).
+            passage_ids: New passage IDs (optional).
+
+        Returns:
+            True if update succeeded, False if entity not found.
+        """
+        # First get the existing entity
+        existing = self._get_entities_by_ids([entity_id])
+        if not existing:
+            return False
+
+        entity_data = existing[0]
+
+        # Build update data
+        update_data = {"id": entity_id}
+
+        if text is not None:
+            update_data["text"] = text
+            # Re-compute embedding if text changed
+            if embedding is None:
+                embedding = self.embedding_model.embed(text)
+        else:
+            update_data["text"] = entity_data["text"]
+
+        if embedding is not None:
+            update_data["vector"] = embedding
+        else:
+            # Need to fetch the vector - query doesn't return it by default
+            # For now, re-compute from text
+            update_data["vector"] = self.embedding_model.embed(update_data["text"])
+
+        if relation_ids is not None:
+            update_data["relation_ids"] = relation_ids
+        elif "relation_ids" in entity_data:
+            update_data["relation_ids"] = entity_data["relation_ids"]
+
+        if passage_ids is not None:
+            update_data["passage_ids"] = passage_ids
+        elif "passage_ids" in entity_data:
+            update_data["passage_ids"] = entity_data["passage_ids"]
+
+        # Upsert the entity
+        self.client.upsert(
+            collection_name=self.entity_collection,
+            data=[update_data],
+        )
+        return True
+
+    def _update_relation(
+        self,
+        relation_id: str,
+        text: Optional[str] = None,
+        embedding: Optional[List[float]] = None,
+        entity_ids: Optional[List[str]] = None,
+        passage_ids: Optional[List[str]] = None,
+        subject: Optional[str] = None,
+        predicate: Optional[str] = None,
+        object_: Optional[str] = None,
+    ) -> bool:
+        """
+        Update a relation by ID using upsert.
+
+        This is a private method. Users should use the Graph abstraction layer.
+
+        Args:
+            relation_id: The relation ID to update.
+            text: New text (optional).
+            embedding: New embedding (optional, auto-generated if text changes).
+            entity_ids: New entity IDs (optional).
+            passage_ids: New passage IDs (optional).
+            subject: New subject (optional).
+            predicate: New predicate (optional).
+            object_: New object (optional).
+
+        Returns:
+            True if update succeeded, False if relation not found.
+        """
+        existing = self._get_relations_by_ids([relation_id])
+        if not existing:
+            return False
+
+        relation_data = existing[0]
+
+        # Build update data
+        update_data = {"id": relation_id}
+
+        if text is not None:
+            update_data["text"] = text
+            if embedding is None:
+                embedding = self.embedding_model.embed(text)
+        else:
+            update_data["text"] = relation_data["text"]
+
+        if embedding is not None:
+            update_data["vector"] = embedding
+        else:
+            update_data["vector"] = self.embedding_model.embed(update_data["text"])
+
+        if entity_ids is not None:
+            update_data["entity_ids"] = entity_ids
+        elif "entity_ids" in relation_data:
+            update_data["entity_ids"] = relation_data["entity_ids"]
+
+        if passage_ids is not None:
+            update_data["passage_ids"] = passage_ids
+        elif "passage_ids" in relation_data:
+            update_data["passage_ids"] = relation_data["passage_ids"]
+
+        if subject is not None:
+            update_data["subject"] = subject
+        elif "subject" in relation_data:
+            update_data["subject"] = relation_data["subject"]
+
+        if predicate is not None:
+            update_data["predicate"] = predicate
+        elif "predicate" in relation_data:
+            update_data["predicate"] = relation_data["predicate"]
+
+        if object_ is not None:
+            update_data["object"] = object_
+        elif "object" in relation_data:
+            update_data["object"] = relation_data["object"]
+
+        self.client.upsert(
+            collection_name=self.relation_collection,
+            data=[update_data],
+        )
+        return True
+
+    def update_passage(
+        self,
+        passage_id: str,
+        text: Optional[str] = None,
+        embedding: Optional[List[float]] = None,
+        entity_ids: Optional[List[str]] = None,
+        relation_ids: Optional[List[str]] = None,
+    ) -> bool:
+        """
+        Update a passage by ID using upsert.
+
+        Args:
+            passage_id: The passage ID to update.
+            text: New text (optional).
+            embedding: New embedding (optional, auto-generated if text changes).
+            entity_ids: New entity IDs (optional).
+            relation_ids: New relation IDs (optional).
+
+        Returns:
+            True if update succeeded, False if passage not found.
+        """
+        existing = self.get_passages_by_ids([passage_id])
+        if not existing:
+            return False
+
+        passage_data = existing[0]
+
+        # Build update data
+        update_data = {"id": passage_id}
+
+        if text is not None:
+            update_data["text"] = text
+            if embedding is None:
+                embedding = self.embedding_model.embed(text)
+        else:
+            update_data["text"] = passage_data["text"]
+
+        if embedding is not None:
+            update_data["vector"] = embedding
+        else:
+            update_data["vector"] = self.embedding_model.embed(update_data["text"])
+
+        if entity_ids is not None:
+            update_data["entity_ids"] = entity_ids
+        elif "entity_ids" in passage_data:
+            update_data["entity_ids"] = passage_data["entity_ids"]
+
+        if relation_ids is not None:
+            update_data["relation_ids"] = relation_ids
+        elif "relation_ids" in passage_data:
+            update_data["relation_ids"] = passage_data["relation_ids"]
+
+        self.client.upsert(
+            collection_name=self.passage_collection,
+            data=[update_data],
+        )
+        return True
+
+    # ==================== Delete Operations ====================
+
+    def _delete_entity(self, entity_id: str) -> bool:
+        """
+        Delete an entity by ID.
+
+        This is a private method. Users should use the Graph abstraction layer.
+
+        Args:
+            entity_id: The entity ID to delete.
+
+        Returns:
+            True if deletion succeeded, False if entity not found.
+        """
+        existing = self._get_entities_by_ids([entity_id])
+        if not existing:
+            return False
+
+        self.client.delete(
+            collection_name=self.entity_collection,
+            filter=f'id == "{entity_id}"',
+        )
+        return True
+
+    def _delete_relation(self, relation_id: str) -> bool:
+        """
+        Delete a relation by ID.
+
+        This is a private method. Users should use the Graph abstraction layer.
+
+        Args:
+            relation_id: The relation ID to delete.
+
+        Returns:
+            True if deletion succeeded, False if relation not found.
+        """
+        existing = self._get_relations_by_ids([relation_id])
+        if not existing:
+            return False
+
+        self.client.delete(
+            collection_name=self.relation_collection,
+            filter=f'id == "{relation_id}"',
+        )
+        return True
+
+    def delete_passage(self, passage_id: str) -> bool:
+        """
+        Delete a passage by ID.
+
+        Args:
+            passage_id: The passage ID to delete.
+
+        Returns:
+            True if deletion succeeded, False if passage not found.
+        """
+        existing = self.get_passages_by_ids([passage_id])
+        if not existing:
+            return False
+
+        self.client.delete(
+            collection_name=self.passage_collection,
+            filter=f'id == "{passage_id}"',
+        )
+        return True
+
+    def _delete_entities(self, entity_ids: List[str]) -> int:
+        """
+        Delete multiple entities by IDs.
+
+        This is a private method. Users should use the Graph abstraction layer.
+
+        Args:
+            entity_ids: List of entity IDs to delete.
+
+        Returns:
+            Number of entities deleted.
+        """
+        if not entity_ids:
+            return 0
+
+        ids_str = ", ".join(f'"{eid}"' for eid in entity_ids)
+        self.client.delete(
+            collection_name=self.entity_collection,
+            filter=f"id in [{ids_str}]",
+        )
+        return len(entity_ids)
+
+    def _delete_relations(self, relation_ids: List[str]) -> int:
+        """
+        Delete multiple relations by IDs.
+
+        This is a private method. Users should use the Graph abstraction layer.
+
+        Args:
+            relation_ids: List of relation IDs to delete.
+
+        Returns:
+            Number of relations deleted.
+        """
+        if not relation_ids:
+            return 0
+
+        ids_str = ", ".join(f'"{rid}"' for rid in relation_ids)
+        self.client.delete(
+            collection_name=self.relation_collection,
+            filter=f"id in [{ids_str}]",
+        )
+        return len(relation_ids)
+
+    def delete_passages(self, passage_ids: List[str]) -> int:
+        """
+        Delete multiple passages by IDs.
+
+        Args:
+            passage_ids: List of passage IDs to delete.
+
+        Returns:
+            Number of passages deleted.
+        """
+        if not passage_ids:
+            return 0
+
+        ids_str = ", ".join(f'"{pid}"' for pid in passage_ids)
+        self.client.delete(
+            collection_name=self.passage_collection,
+            filter=f"id in [{ids_str}]",
+        )
+        return len(passage_ids)
+
+    # ==================== Utility Methods ====================
 
     @classmethod
     def list_graphs(

@@ -318,10 +318,28 @@ class VectorGraphRAGEvaluator:
         Check if collections already exist and have data in Milvus.
         """
         try:
-            stats = self.rag._store.get_collection_stats()
-            entity_count = stats.get(self.rag._store.entity_collection, 0)
-            passage_count = stats.get(self.rag._store.passage_collection, 0)
-            return entity_count > 0 and passage_count > 0
+            # Check if collections exist by trying to query them
+            client = self.rag._store.client
+            entity_col = self.rag._store.entity_collection
+            passage_col = self.rag._store.passage_collection
+
+            if not client.has_collection(entity_col) or not client.has_collection(passage_col):
+                return False
+
+            # Try to get at least one record from each collection
+            entity_results = client.query(
+                collection_name=entity_col,
+                filter="",
+                limit=1,
+                output_fields=["id"],
+            )
+            passage_results = client.query(
+                collection_name=passage_col,
+                filter="",
+                limit=1,
+                output_fields=["id"],
+            )
+            return len(entity_results) > 0 and len(passage_results) > 0
         except Exception:
             return False
 
@@ -334,8 +352,7 @@ class VectorGraphRAGEvaluator:
         """
         # Check if index already exists in Milvus
         if not force_reindex and self.has_existing_index():
-            stats = self.rag._store.get_collection_stats()
-            print(f"Using existing index in Milvus: {stats}")
+            print(f"Using existing index in Milvus (collections exist with data)")
             print("(Use --force-reindex to rebuild)")
             return
 
@@ -359,8 +376,9 @@ class VectorGraphRAGEvaluator:
             print(f"Auto triplet extraction for {len(passages)} passages...")
             self.rag.add_documents(passages, show_progress=True)
 
-        stats = self.rag._store.get_collection_stats()
-        print(f"Index built: {stats}")
+        # Get stats from extraction result
+        stats = self.rag.get_stats()
+        print(f"Index built: entities={stats['entities']}, relations={stats['relations']}, passages={stats['passages']}")
 
     def evaluate(
         self,
