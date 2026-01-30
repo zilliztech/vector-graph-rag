@@ -204,7 +204,7 @@ class MilvusStore:
 
         if embeddings is None:
             embeddings = self.embedding_model.embed_batch(
-                entity_texts, show_progress=show_progress
+                entity_texts, show_progress=show_progress, text_type="document"
             )
 
         ids = list(range(len(entity_texts)))
@@ -240,7 +240,7 @@ class MilvusStore:
 
         if embeddings is None:
             embeddings = self.embedding_model.embed_batch(
-                relation_texts, show_progress=show_progress
+                relation_texts, show_progress=show_progress, text_type="document"
             )
 
         ids = list(range(len(relation_texts)))
@@ -276,7 +276,7 @@ class MilvusStore:
 
         if embeddings is None:
             embeddings = self.embedding_model.embed_batch(
-                passage_texts, show_progress=show_progress
+                passage_texts, show_progress=show_progress, text_type="document"
             )
 
         ids = list(range(len(passage_texts)))
