@@ -922,3 +922,39 @@ class MilvusStore:
         graphs.sort(key=lambda g: g["name"])
 
         return graphs
+
+    def get_collection_stats(self) -> Dict[str, int]:
+        """
+        Get statistics for all collections.
+
+        Returns:
+            Dict with entity_count, relation_count, passage_count.
+        """
+        stats = {
+            "entity_count": 0,
+            "relation_count": 0,
+            "passage_count": 0,
+        }
+
+        try:
+            if self.client.has_collection(self.entity_collection):
+                entity_stats = self.client.get_collection_stats(self.entity_collection)
+                stats["entity_count"] = entity_stats.get("row_count", 0)
+        except Exception:
+            pass
+
+        try:
+            if self.client.has_collection(self.relation_collection):
+                relation_stats = self.client.get_collection_stats(self.relation_collection)
+                stats["relation_count"] = relation_stats.get("row_count", 0)
+        except Exception:
+            pass
+
+        try:
+            if self.client.has_collection(self.passage_collection):
+                passage_stats = self.client.get_collection_stats(self.passage_collection)
+                stats["passage_count"] = passage_stats.get("row_count", 0)
+        except Exception:
+            pass
+
+        return stats

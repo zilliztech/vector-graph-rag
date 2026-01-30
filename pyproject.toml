@@ -52,6 +52,33 @@ all = [
     "vector-graph-rag[dev,api]",
 ]
 
+# ==================== PyTorch Index Configuration ====================
+# Define PyTorch indexes for different backends
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+# Default: use CPU for macOS, CUDA 12.4 for Linux
+# Can be overridden by environment or Docker build args
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cpu", marker = "sys_platform == 'darwin'" },
+    { index = "pytorch-cpu", marker = "sys_platform == 'linux' and platform_machine == 'aarch64'" },
+    { index = "pytorch-cu124", marker = "sys_platform == 'linux' and platform_machine == 'x86_64'" },
+]
+
 [project.scripts]
 vector-graph-rag = "vector_graph_rag.cli:main"
 

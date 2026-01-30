@@ -6,10 +6,16 @@ Provides RESTful API endpoints for:
 - Listing available graphs
 - Adding and querying documents
 - Document CRUD operations
+- Graph exploration (stats, neighbors)
 """
 
-from typing import List, Optional
+import os
+from pathlib import Path
+from typing import List, Optional, Dict, Any
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from vector_graph_rag import VectorGraphRAG
@@ -76,15 +82,79 @@ class QueryRequest(BaseModel):
     expansion_degree: Optional[int] = Field(default=None, description="Subgraph expansion degree")
 
 
+class EntitySchema(BaseModel):
+    """Schema for an entity in the subgraph."""
+    id: str = Field(..., description="Entity ID")
+    name: str = Field(..., description="Entity name")
+    relation_ids: List[str] = Field(default_factory=list, description="Connected relation IDs")
+    passage_ids: List[str] = Field(default_factory=list, description="Source passage IDs")
+
+
+class RelationSchema(BaseModel):
+    """Schema for a relation in the subgraph."""
+    id: str = Field(..., description="Relation ID")
+    text: str = Field(..., description="Full relation text")
+    subject: str = Field(..., description="Subject entity name")
+    predicate: str = Field(..., description="Predicate/relationship")
+    object: str = Field(..., description="Object entity name")
+    entity_ids: List[str] = Field(default_factory=list, description="Connected entity IDs [subject_id, object_id]")
+    passage_ids: List[str] = Field(default_factory=list, description="Source passage IDs")
+
+
+class PassageSchema(BaseModel):
+    """Schema for a passage in the subgraph."""
+    id: str = Field(..., description="Passage ID")
+    text: str = Field(..., description="Passage text")
+
+
+class ExpansionStepSchema(BaseModel):
+    """Schema for an expansion step in the history."""
+    step: int = Field(..., description="Step number")
+    operation: str = Field(..., description="Operation type")
+    description: Optional[str] = Field(default=None, description="Operation description")
+    added_entity_ids: List[str] = Field(default_factory=list, description="Entity IDs added in this step")
+    added_relation_ids: List[str] = Field(default_factory=list, description="Relation IDs added in this step")
+    total_entities: int = Field(default=0, description="Total entities after this step")
+    total_relations: int = Field(default=0, description="Total relations after this step")
+
+
+class SubGraphSchema(BaseModel):
+    """Schema for the expanded subgraph."""
+    entity_ids: List[str] = Field(default_factory=list, description="All entity IDs in subgraph")
+    relation_ids: List[str] = Field(default_factory=list, description="All relation IDs in subgraph")
+    passage_ids: List[str] = Field(default_factory=list, description="All passage IDs in subgraph")
+    entities: List[EntitySchema] = Field(default_factory=list, description="Entity details")
+    relations: List[RelationSchema] = Field(default_factory=list, description="Relation details")
+    passages: List[PassageSchema] = Field(default_factory=list, description="Passage details")
+    expansion_history: List[ExpansionStepSchema] = Field(default_factory=list, description="Expansion history")
+
+
+class RetrievalDetailSchema(BaseModel):
+    """Schema for retrieval details."""
+    entity_ids: List[str] = Field(default_factory=list, description="Retrieved entity IDs")
+    entity_texts: List[str] = Field(default_factory=list, description="Retrieved entity names")
+    entity_scores: List[float] = Field(default_factory=list, description="Entity similarity scores")
+    relation_ids: List[str] = Field(default_factory=list, description="Retrieved relation IDs")
+    relation_texts: List[str] = Field(default_factory=list, description="Retrieved relation texts")
+    relation_scores: List[float] = Field(default_factory=list, description="Relation similarity scores")
+
+
+class RerankResultSchema(BaseModel):
+    """Schema for rerank results."""
+    selected_relation_ids: List[str] = Field(default_factory=list, description="Selected relation IDs")
+    selected_relation_texts: List[str] = Field(default_factory=list, description="Selected relation texts")
+
+
 class QueryResponse(BaseModel):
     """Response for a query."""
-    query: str = Field(..., description="Original query")
+    question: str = Field(..., description="Original question")
     answer: str = Field(..., description="Generated answer")
     query_entities: List[str] = Field(default_factory=list, description="Entities extracted from query")
+    subgraph: Optional[SubGraphSchema] = Field(default=None, description="Expanded subgraph for visualization")
     retrieved_passages: List[str] = Field(default_factory=list, description="Retrieved passages")
-    retrieved_relations: List[str] = Field(default_factory=list, description="Retrieved relations")
-    expanded_relations: List[str] = Field(default_factory=list, description="Expanded relations")
-    reranked_relations: List[str] = Field(default_factory=list, description="Reranked relations")
+    stats: Dict[str, Any] = Field(default_factory=dict, description="Query statistics")
+    retrieval_detail: Optional[RetrievalDetailSchema] = Field(default=None, description="Initial retrieval details")
+    rerank_result: Optional[RerankResultSchema] = Field(default=None, description="LLM rerank results")
 
 
 class DocumentResponse(BaseModel):
@@ -112,6 +182,21 @@ class DeleteResponse(BaseModel):
     message: str = Field(default="", description="Additional message")
 
 
+class GraphStatsResponse(BaseModel):
+    """Response for graph statistics."""
+    graph_name: str = Field(..., description="Graph name")
+    entity_count: int = Field(default=0, description="Number of entities")
+    relation_count: int = Field(default=0, description="Number of relations")
+    passage_count: int = Field(default=0, description="Number of passages")
+
+
+class NeighborResponse(BaseModel):
+    """Response for entity neighbors."""
+    entity_id: str = Field(..., description="Central entity ID")
+    neighbors: List[EntitySchema] = Field(default_factory=list, description="Neighbor entities")
+    relations: List[RelationSchema] = Field(default_factory=list, description="Connecting relations")
+
+
 # ==================== Application Factory ====================
 
 def create_app(settings: Optional[Settings] = None) -> FastAPI:
@@ -128,6 +213,15 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
         title="Vector Graph RAG API",
         description="Graph RAG using pure vector search with Milvus",
         version="0.1.0",
+    )
+
+    # Add CORS middleware for frontend
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],  # In production, specify your frontend URL
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
 
     # Store settings and RAG instances
@@ -232,6 +326,8 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
 
         Performs entity extraction, multi-way retrieval, subgraph expansion,
         optional reranking, and answer generation.
+
+        Returns detailed information including the expanded subgraph for visualization.
         """
         rag = get_rag(graph_name)
 
@@ -243,15 +339,184 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
             expansion_degree=request.expansion_degree,
         )
 
+        # Convert subgraph to schema if available
+        subgraph_schema = None
+        if result.subgraph:
+            sg = result.subgraph
+            subgraph_schema = SubGraphSchema(
+                entity_ids=list(sg.entity_ids) if hasattr(sg, 'entity_ids') else [],
+                relation_ids=list(sg.relation_ids) if hasattr(sg, 'relation_ids') else [],
+                passage_ids=list(sg.passage_ids) if hasattr(sg, 'passage_ids') else [],
+                entities=[
+                    EntitySchema(
+                        id=e.id,
+                        name=e.name,
+                        relation_ids=e.relation_ids,
+                        passage_ids=e.passage_ids,
+                    )
+                    for e in (sg.entities if hasattr(sg, 'entities') else [])
+                ],
+                relations=[
+                    RelationSchema(
+                        id=r.id,
+                        text=r.text,
+                        subject=r.subject,
+                        predicate=r.predicate,
+                        object=r.object,
+                        entity_ids=r.entity_ids,
+                        passage_ids=r.passage_ids,
+                    )
+                    for r in (sg.relations if hasattr(sg, 'relations') else [])
+                ],
+                passages=[
+                    PassageSchema(id=p.id, text=p.text)
+                    for p in (sg.passages if hasattr(sg, 'passages') else [])
+                ],
+                expansion_history=[
+                    ExpansionStepSchema(
+                        step=h.get('step', i),
+                        operation=h.get('operation', 'unknown'),
+                        description=h.get('description'),
+                        added_entity_ids=h.get('added_entity_ids', h.get('new_entity_ids', [])),
+                        added_relation_ids=h.get('added_relation_ids', h.get('new_relation_ids', [])),
+                        total_entities=h.get('total_entities', 0),
+                        total_relations=h.get('total_relations', 0),
+                    )
+                    for i, h in enumerate(sg.expansion_history if hasattr(sg, 'expansion_history') else [])
+                ],
+            )
+
+        # Convert retrieval_detail to schema
+        retrieval_detail_schema = None
+        if result.retrieval_detail:
+            rd = result.retrieval_detail
+            retrieval_detail_schema = RetrievalDetailSchema(
+                entity_ids=rd.entity_ids,
+                entity_texts=rd.entity_texts,
+                entity_scores=rd.entity_scores,
+                relation_ids=rd.relation_ids,
+                relation_texts=rd.relation_texts,
+                relation_scores=rd.relation_scores,
+            )
+
+        # Convert rerank_result to schema
+        rerank_result_schema = None
+        if result.rerank_result:
+            rr = result.rerank_result
+            rerank_result_schema = RerankResultSchema(
+                selected_relation_ids=rr.selected_relation_ids,
+                selected_relation_texts=rr.selected_relation_texts,
+            )
+
         return QueryResponse(
-            query=result.query,
+            question=result.query,
             answer=result.answer,
             query_entities=result.query_entities,
+            subgraph=subgraph_schema,
             retrieved_passages=result.retrieved_passages,
-            retrieved_relations=result.retrieved_relations,
-            expanded_relations=result.expanded_relations,
-            reranked_relations=result.reranked_relations,
+            stats={
+                "retrieved_relations": len(result.retrieved_relations),
+                "expanded_relations": len(result.expanded_relations),
+                "reranked_relations": len(result.reranked_relations),
+                "passages_used": len(result.passages),
+            },
+            retrieval_detail=retrieval_detail_schema,
+            rerank_result=rerank_result_schema,
         )
+
+    # ==================== Graph Exploration ====================
+
+    @app.get("/graph/{graph_name}/stats", response_model=GraphStatsResponse, tags=["Graph"])
+    async def get_graph_stats(graph_name: str):
+        """
+        Get statistics for a graph.
+
+        Returns counts of entities, relations, and passages.
+        """
+        graph = get_graph(graph_name)
+
+        try:
+            stats = graph.get_stats()
+            return GraphStatsResponse(
+                graph_name=graph_name,
+                entity_count=stats.get('entity_count', 0),
+                relation_count=stats.get('relation_count', 0),
+                passage_count=stats.get('passage_count', 0),
+            )
+        except Exception as e:
+            # If stats not available, return zeros
+            return GraphStatsResponse(
+                graph_name=graph_name,
+                entity_count=0,
+                relation_count=0,
+                passage_count=0,
+            )
+
+    @app.get("/graph/{graph_name}/neighbors/{entity_id}", response_model=NeighborResponse, tags=["Graph"])
+    async def get_entity_neighbors(
+        graph_name: str,
+        entity_id: str,
+        limit: int = Query(default=20, description="Maximum number of neighbors to return"),
+    ):
+        """
+        Get neighbors of an entity.
+
+        Returns entities connected to the given entity and the relations between them.
+        Used for lazy-loading graph expansion in the frontend.
+        """
+        graph = get_graph(graph_name)
+
+        try:
+            # Get the entity
+            entity = graph.get_entity(entity_id)
+            if not entity:
+                raise HTTPException(status_code=404, detail=f"Entity not found: {entity_id}")
+
+            # Get connected relations
+            relations = graph.get_relations_for_entity(entity_id, limit=limit)
+
+            # Collect neighbor entity IDs
+            neighbor_ids = set()
+            for rel in relations:
+                for eid in rel.entity_ids:
+                    if eid != entity_id:
+                        neighbor_ids.add(eid)
+
+            # Get neighbor entities
+            neighbors = []
+            for nid in list(neighbor_ids)[:limit]:
+                neighbor = graph.get_entity(nid)
+                if neighbor:
+                    neighbors.append(EntitySchema(
+                        id=neighbor.id,
+                        name=neighbor.name,
+                        relation_ids=neighbor.relation_ids,
+                        passage_ids=neighbor.passage_ids,
+                    ))
+
+            # Convert relations to schema
+            relation_schemas = [
+                RelationSchema(
+                    id=r.id,
+                    text=r.text,
+                    subject=r.subject,
+                    predicate=r.predicate,
+                    object=r.object,
+                    entity_ids=r.entity_ids,
+                    passage_ids=r.passage_ids,
+                )
+                for r in relations
+            ]
+
+            return NeighborResponse(
+                entity_id=entity_id,
+                neighbors=neighbors,
+                relations=relation_schemas,
+            )
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
 
     # ==================== Document CRUD ====================
 
@@ -365,6 +630,37 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
             success=True,
             message=f"Document {document_id} deleted successfully",
         )
+
+    # ==================== Static Files (Frontend) ====================
+
+    # Serve static files if the static directory exists (for Docker deployment)
+    static_dir = Path(__file__).parent.parent.parent.parent / "static"
+    if not static_dir.exists():
+        # Also check relative to current working directory
+        static_dir = Path("static")
+
+    if static_dir.exists():
+        # Mount static assets (js, css, etc.)
+        app.mount("/assets", StaticFiles(directory=static_dir / "assets"), name="assets")
+
+        # Serve index.html for SPA routing
+        @app.get("/{full_path:path}")
+        async def serve_spa(full_path: str):
+            """Serve the SPA for any unmatched routes."""
+            # Don't intercept API routes
+            if full_path.startswith("api/"):
+                raise HTTPException(status_code=404, detail="Not found")
+
+            file_path = static_dir / full_path
+            if file_path.exists() and file_path.is_file():
+                return FileResponse(file_path)
+
+            # Return index.html for SPA routing
+            index_path = static_dir / "index.html"
+            if index_path.exists():
+                return FileResponse(index_path)
+
+            raise HTTPException(status_code=404, detail="Not found")
 
     return app
 

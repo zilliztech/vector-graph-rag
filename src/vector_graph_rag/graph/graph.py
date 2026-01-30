@@ -671,6 +671,77 @@ class Graph:
         # Delete the passage
         return self._store.delete_passage(passage_id)
 
+    # ==================== Public: Entity and Relation Read ====================
+
+    def get_entity(self, entity_id: str) -> Optional[Any]:
+        """
+        Get an entity by ID (public method for API).
+
+        Args:
+            entity_id: Entity ID.
+
+        Returns:
+            Entity-like object with id, name, relation_ids, passage_ids.
+        """
+        results = self._store._get_entities_by_ids([entity_id])
+        if not results:
+            return None
+
+        data = results[0]
+
+        class EntityData:
+            def __init__(self, d):
+                self.id = d["id"]
+                self.name = d["text"]
+                self.relation_ids = d.get("relation_ids", [])
+                self.passage_ids = d.get("passage_ids", [])
+
+        return EntityData(data)
+
+    def get_relations_for_entity(self, entity_id: str, limit: int = 20) -> List[Any]:
+        """
+        Get relations connected to an entity.
+
+        Args:
+            entity_id: Entity ID.
+            limit: Maximum number of relations to return.
+
+        Returns:
+            List of relation-like objects.
+        """
+        # First get the entity to find its relation_ids
+        entity = self._store._get_entities_by_ids([entity_id])
+        if not entity:
+            return []
+
+        relation_ids = entity[0].get("relation_ids", [])[:limit]
+        if not relation_ids:
+            return []
+
+        # Get relation details
+        relations_data = self._store._get_relations_by_ids(relation_ids)
+
+        class RelationData:
+            def __init__(self, d):
+                self.id = d["id"]
+                self.text = d["text"]
+                self.subject = d.get("subject", "")
+                self.predicate = d.get("predicate", "")
+                self.object = d.get("object", "")
+                self.entity_ids = d.get("entity_ids", [])
+                self.passage_ids = d.get("passage_ids", [])
+
+        return [RelationData(r) for r in relations_data]
+
+    def get_stats(self) -> Dict[str, int]:
+        """
+        Get graph statistics.
+
+        Returns:
+            Dict with entity_count, relation_count, passage_count.
+        """
+        return self._store.get_collection_stats()
+
     # ==================== SubGraph Creation ====================
 
     def create_subgraph(self) -> SubGraph:

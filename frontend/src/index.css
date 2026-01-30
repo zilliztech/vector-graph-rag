@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+/* Design system colors */
+@theme {
+  /* Primary colors */
+  --color-primary: #0F172A;
+  --color-secondary: #64748B;
+  --color-background: #FAFAFA;
+  --color-surface: #FFFFFF;
+  --color-border: #E2E8F0;
+
+  /* Accent colors */
+  --color-accent: #2563EB;
+  --color-success: #059669;
+  --color-warning: #D97706;
+
+  /* Graph node colors */
+  --color-entity: #3B82F6;
+  --color-relation: #8B5CF6;
+  --color-passage: #10B981;
+  --color-evicted: #94A3B8;
+  --color-selected: #F59E0B;
+}
+
+/* Base styles */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* React Flow overrides */
+.react-flow__attribution {
+  display: none !important;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
