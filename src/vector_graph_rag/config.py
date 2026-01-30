@@ -31,12 +31,12 @@ class Settings(BaseSettings):
         description="LLM model for triplet extraction and reranking",
     )
     embedding_model: str = Field(
-        default="facebook/contriever",
+        default="text-embedding-3-large",
         description="Embedding model for vector representations (HuggingFace model name or OpenAI model name)",
     )
     embedding_dimension: int = Field(
-        default=768,
-        description="Dimension of embedding vectors (768 for contriever, 1536 for text-embedding-3-small)",
+        default=3072,
+        description="Dimension of embedding vectors (3072 for text-embedding-3-large, 1024 for bge-large)",
     )
 
     # Milvus Index Settings
@@ -118,7 +118,7 @@ class Settings(BaseSettings):
 
     # Processing Settings
     batch_size: int = Field(
-        default=100, description="Batch size for embedding and insertion"
+        default=32, description="Batch size for embedding and insertion"
     )
 
     # NER Cache Settings

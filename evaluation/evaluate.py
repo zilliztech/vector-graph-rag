@@ -251,6 +251,9 @@ class VectorGraphRAGEvaluator:
         relation_number_threshold: Optional[int] = None,
         llm_model: Optional[str] = None,
         use_llm_cache: bool = True,
+        embedding_model: Optional[str] = None,
+        embedding_instruction: Optional[str] = None,
+        embedding_instruction_template: Optional[str] = None,
     ):
         """
         Initialize the evaluator.
@@ -271,7 +274,13 @@ class VectorGraphRAGEvaluator:
             relation_number_threshold: Max expanded relations, eviction if exceeded (default: 1000)
             llm_model: LLM model for reranking (default: gpt-4o-mini)
             use_llm_cache: Whether to use LLM response caching (default: True)
+            embedding_model: Embedding model to use (e.g., facebook/contriever, text-embedding-3-large)
+            embedding_instruction: Instruction for embedding model (for BGE/Qwen3 style models)
+            embedding_instruction_template: Instruction template style (bge or qwen3)
         """
+        self.embedding_model = embedding_model
+        self.embedding_instruction = embedding_instruction
+        self.embedding_instruction_template = embedding_instruction_template
         self.dataset_name = dataset_name
         self.data_dir = data_dir
         self.top_k = top_k
@@ -311,6 +320,24 @@ class VectorGraphRAGEvaluator:
         if llm_model is not None:
             settings.llm_model = llm_model
         settings.use_llm_cache = use_llm_cache
+        if embedding_model is not None:
+            settings.embedding_model = embedding_model
+
+        # Apply monkey-patching for embedding instruction if specified
+        if embedding_instruction or embedding_instruction_template:
+            from vector_graph_rag.storage.embeddings import EmbeddingModel
+            original_embedding_init = EmbeddingModel.__init__
+
+            def patched_embedding_init(self_emb, settings=None, model=None, instruction=None, instruction_template=None):
+                actual_instruction = instruction if instruction is not None else embedding_instruction
+                actual_template = instruction_template if instruction_template is not None else embedding_instruction_template
+                original_embedding_init(self_emb, settings, model, actual_instruction, actual_template)
+
+            EmbeddingModel.__init__ = patched_embedding_init
+            self._original_embedding_init = original_embedding_init
+        else:
+            self._original_embedding_init = None
+
         self.rag = VectorGraphRAG(settings=settings)
 
     def has_existing_index(self) -> bool:
@@ -637,14 +664,48 @@ def main():
         action="store_true",
         help="Disable LLM response caching",
     )
+    parser.add_argument(
+        "--embedding-model",
+        type=str,
+        default="BAAI/bge-large-en-v1.5",
+        help="Embedding model to use (default: BAAI/bge-large-en-v1.5, or text-embedding-3-large for OpenAI)",
+    )
+    parser.add_argument(
+        "--embedding-instruction",
+        type=str,
+        default=None,
+        help="Instruction for embedding model (auto-set for BGE models if not specified)",
+    )
+    parser.add_argument(
+        "--embedding-instruction-template",
+        type=str,
+        choices=["bge", "qwen3"],
+        default=None,
+        help="Instruction template style (auto-set for BGE models if not specified)",
+    )
 
     args = parser.parse_args()
+
+    # Auto-set BGE instruction if using BGE model and no instruction specified
+    if args.embedding_model and "bge" in args.embedding_model.lower():
+        if args.embedding_instruction is None:
+            args.embedding_instruction = "Represent this sentence for searching relevant passages"
+        if args.embedding_instruction_template is None:
+            args.embedding_instruction_template = "bge"
 
     # Setup logging
     log_path = setup_logging(log_dir=args.log_dir, dataset_name=args.dataset)
     print(f"Logging to: {log_path}")
     logging.info(f"Starting evaluation for dataset: {args.dataset}")
     logging.info(f"Arguments: {vars(args)}")
+
+    # Print embedding model info
+    print(f"Using embedding model: {args.embedding_model}")
+    if args.embedding_instruction:
+        print(f"Embedding instruction: {args.embedding_instruction}")
+    logging.info(f"Embedding model: {args.embedding_model}")
+    if args.embedding_instruction:
+        logging.info(f"Embedding instruction: {args.embedding_instruction}")
 
     # Create evaluator
     evaluator = VectorGraphRAGEvaluator(
@@ -662,6 +723,9 @@ def main():
         relation_number_threshold=args.relation_number_threshold,
         llm_model=args.llm_model,
         use_llm_cache=not args.no_llm_cache,
+        embedding_model=args.embedding_model,
+        embedding_instruction=args.embedding_instruction,
+        embedding_instruction_template=args.embedding_instruction_template,
     )
 
     # Build index
