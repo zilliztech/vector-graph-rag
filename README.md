@@ -51,9 +51,9 @@ A Graph RAG implementation using pure vector search with Milvus.
 
 **Query:** *"What did Einstein develop?"*
 1. Extract query entity: `Einstein`
-2. Vector search finds: entity `Einstein`, relations mentioning `Einstein`
-3. Subgraph expansion retrieves connected entities: `theory of relativity`, `Princeton`
-4. LLM reranking selects: `(Einstein, developed, theory of relativity)`
+2. Vector search finds similar entities and relations from Milvus
+3. Subgraph expansion traverses the graph to collect candidate relations
+4. **LLM reranking** (key step): ranks all candidate relations by relevance to the question, selects `(Einstein, developed, theory of relativity)` over `(Einstein, worked at, Princeton)`
 5. Retrieve source passage → Generate answer: *"Einstein developed the theory of relativity."*
 
 ## Quick Start
