@@ -81,10 +81,10 @@ class Settings(BaseSettings):
 
     # Retrieval Settings
     entity_top_k: int = Field(
-        default=10, description="Number of top entities to retrieve"
+        default=20, description="Number of top entities to retrieve"
     )
     relation_top_k: int = Field(
-        default=10, description="Number of top relations to retrieve"
+        default=20, description="Number of top relations to retrieve"
     )
     entity_similarity_threshold: float = Field(
         default=0.9,
@@ -124,8 +124,8 @@ class Settings(BaseSettings):
     # NER Cache Settings
     ner_cache_dir: Optional[str] = Field(
         default_factory=lambda: os.path.join(
-            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),  # -> vector-graph-rag-reference/
-            "data", "ner_cache"
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),  # -> vector-graph-rag/
+            "evaluation", "data", "ner_cache"
         ),
         description="Directory containing NER cache TSV files (HippoRAG format). "
         "Files should be named {dataset}_queries.named_entity_output.tsv",

@@ -2,6 +2,60 @@
 
 A Graph RAG implementation using pure vector search with Milvus.
 
+## How It Works
+
+### Indexing Pipeline
+
+```
+┌──────────────┐    ┌─────────────────────┐    ┌─────────────────────────────┐
+│  Documents   │───▶│  Triplet Extraction │───▶│   Entities  +  Relations    │
+│              │    │       (LLM)         │    │  (Einstein)   (developed)   │
+└──────────────┘    └─────────────────────┘    └──────────────┬──────────────┘
+                                                              │
+                    ┌─────────────────────┐                   │ Embedding
+                    │       Milvus        │◀──────────────────┘
+                    │  ┌───────────────┐  │
+                    │  │ Entity Vectors│  │
+                    │  │Relation Vectors│ │
+                    │  │Passage Vectors │ │
+                    │  └───────────────┘  │
+                    └─────────────────────┘
+```
+
+### Query Pipeline
+
+```
+┌──────────────┐    ┌─────────────────────┐    ┌─────────────────────────────┐
+│   Question   │───▶│  Entity Extraction  │───▶│      Vector Search          │
+│              │    │       (NER)         │    │  (Entities + Relations)     │
+└──────────────┘    └─────────────────────┘    └──────────────┬──────────────┘
+                                                              │
+                                                              ▼
+┌──────────────┐    ┌─────────────────────┐    ┌─────────────────────────────┐
+│    Answer    │◀───│  Answer Generation  │◀───│    Subgraph Expansion       │
+│              │    │       (LLM)         │    │  (Graph Traversal)          │
+└──────────────┘    └─────────────────────┘    └──────────────┬──────────────┘
+                              ▲                               │
+                              │                               ▼
+                    ┌─────────┴───────────┐    ┌─────────────────────────────┐
+                    │  Passage Retrieval  │◀───│      LLM Reranking          │
+                    │                     │    │  (Filter relevant relations)│
+                    └─────────────────────┘    └─────────────────────────────┘
+```
+
+### Example
+
+**Indexing:** Given document *"Einstein developed the theory of relativity at Princeton."*
+- Extracted entities: `Einstein`, `theory of relativity`, `Princeton`
+- Extracted relations: `(Einstein, developed, theory of relativity)`, `(Einstein, worked at, Princeton)`
+
+**Query:** *"What did Einstein develop?"*
+1. Extract query entity: `Einstein`
+2. Vector search finds: entity `Einstein`, relations mentioning `Einstein`
+3. Subgraph expansion retrieves connected entities: `theory of relativity`, `Princeton`
+4. LLM reranking selects: `(Einstein, developed, theory of relativity)`
+5. Retrieve source passage → Generate answer: *"Einstein developed the theory of relativity."*
+
 ## Quick Start
 
 ### Prerequisites
@@ -246,6 +300,25 @@ uv run vector-graph-rag query --question "What is X?" --dataset my_dataset
                     │  (LLM/Emb)  │
                     └─────────────┘
 ```
+
+## Evaluation Results
+
+We evaluated Vector Graph RAG on three multi-hop QA datasets, comparing against Naive RAG baseline and state-of-the-art methods from HippoRAG papers.
+
+### Recall@5 Comparison
+
+| Method | MuSiQue | HotpotQA | 2WikiMultiHopQA | Average |
+|--------|---------|----------|-----------------|---------|
+| Naive RAG | 55.6% | 90.8% | 73.7% | 73.4% |
+| IRCoT + HippoRAG¹ | 57.6% | 83.0% | <u>93.9%</u> | 78.2% |
+| NV-Embed-v2² | 69.7% | <u>94.5%</u> | 76.5% | 80.2% |
+| HippoRAG 2² | **74.7%** | **96.3%** | 90.4% | <u>87.1%</u> |
+| Vector Graph RAG | <u>73.0%</u> | **96.3%** | **94.1%** | **87.8%** |
+
+¹ From [HippoRAG (NeurIPS 2024)](https://arxiv.org/abs/2405.14831) - best result with IRCoT + ColBERTv2
+² From [HippoRAG 2 (2025)](https://arxiv.org/abs/2502.14802)
+
+See [evaluation/README.md](evaluation/README.md) for detailed reproduction steps
 
 ## License
 

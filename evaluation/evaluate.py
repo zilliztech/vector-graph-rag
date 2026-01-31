@@ -555,7 +555,7 @@ def main():
     parser.add_argument(
         "--data-dir",
         type=str,
-        default="data",
+        default="evaluation/data",
         help="Directory containing data files",
     )
     parser.add_argument(
@@ -613,14 +613,14 @@ def main():
     parser.add_argument(
         "--entity-top-k",
         type=int,
-        default=10,
-        help="Number of top entities to retrieve (default: 10)",
+        default=20,
+        help="Number of top entities to retrieve (default: 20)",
     )
     parser.add_argument(
         "--relation-top-k",
         type=int,
-        default=10,
-        help="Number of top relations to retrieve (default: 10)",
+        default=20,
+        help="Number of top relations to retrieve (default: 20)",
     )
     parser.add_argument(
         "--entity-similarity-threshold",
