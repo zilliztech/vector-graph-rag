@@ -2,11 +2,12 @@
 Main Vector Graph RAG class with user-friendly API.
 """
 
-from typing import List, Optional, Union
+import uuid
+from typing import List, Optional
 from tqdm import tqdm
 
 from vector_graph_rag.config import Settings, get_settings
-from vector_graph_rag.models import Document, QueryResult, ExtractionResult, RetrievalDetail, RerankResult
+from vector_graph_rag.models import Document, Triplet, QueryResult, ExtractionResult, RetrievalDetail, RerankResult
 from vector_graph_rag.llm.extractor import TripletExtractor
 from vector_graph_rag.llm.reranker import LLMReranker, AnswerGenerator
 from vector_graph_rag.storage.embeddings import EmbeddingModel
@@ -177,24 +178,24 @@ class VectorGraphRAG:
         passages = [id_to_text[pid] for pid in passage_ids if pid in id_to_text]
         return passage_ids, passages
 
-    def add_documents(
+    def add_texts(
         self,
-        documents: Union[List[str], List[Document]],
+        texts: List[str],
         ids: Optional[List[str]] = None,
+        metadatas: Optional[List[dict]] = None,
         extract_triplets: bool = True,
         show_progress: bool = True,
     ) -> ExtractionResult:
         """
-        Add documents to the knowledge base.
+        Add text strings to the knowledge base.
 
-        This method:
-        1. Extracts triplets from documents (if enabled)
-        2. Builds the knowledge graph structure
-        3. Indexes entities, relations, and passages in Milvus
+        This is a convenience method that converts texts to Document objects
+        and calls add_documents().
 
         Args:
-            documents: List of text strings or Document objects.
-            ids: Optional list of IDs for the documents. If not provided, UUIDs are generated.
+            texts: List of text strings.
+            ids: Optional list of IDs. If not provided, UUIDs are generated.
+            metadatas: Optional list of metadata dicts.
             extract_triplets: Whether to extract triplets using LLM.
             show_progress: Whether to show progress bars.
 
@@ -202,39 +203,72 @@ class VectorGraphRAG:
             ExtractionResult with graph statistics.
 
         Example:
-            >>> rag.add_documents([
+            >>> rag.add_texts([
             ...     "Albert Einstein developed the theory of relativity.",
             ...     "The theory of relativity changed physics forever.",
             ... ])
             >>>
             >>> # With custom IDs
-            >>> rag.add_documents(
+            >>> rag.add_texts(
             ...     ["Document 1", "Document 2"],
             ...     ids=["doc_001", "doc_002"]
             ... )
         """
-        # Convert to Document objects if needed
-        if documents and isinstance(documents[0], str):
-            docs = []
-            for i, text in enumerate(documents):
-                doc_id = ids[i] if ids and i < len(ids) else None
-                docs.append(Document(id=doc_id, text=text))
-        else:
-            docs = list(documents)
-            # Apply IDs if provided
-            if ids:
-                for i, doc in enumerate(docs):
-                    if i < len(ids) and not doc.id:
-                        doc.id = ids[i]
+        documents = []
+        for i, text in enumerate(texts):
+            doc_id = ids[i] if ids and i < len(ids) else str(uuid.uuid4())
+            metadata = metadatas[i] if metadatas and i < len(metadatas) else {}
+            documents.append(Document(page_content=text, metadata=metadata, id=doc_id))
 
-        # Extract triplets
+        return self.add_documents(
+            documents, extract_triplets=extract_triplets, show_progress=show_progress
+        )
+
+    def add_documents(
+        self,
+        documents: List[Document],
+        extract_triplets: bool = True,
+        show_progress: bool = True,
+    ) -> ExtractionResult:
+        """
+        Add Document objects to the knowledge base.
+
+        This method:
+        1. Extracts triplets from documents (if enabled)
+        2. Builds the knowledge graph structure
+        3. Indexes entities, relations, and passages in Milvus
+
+        Args:
+            documents: List of langchain_core Document objects.
+                       Each Document has page_content (text) and metadata.
+                       If Document.id is None, a UUID will be generated.
+                       Pre-extracted triplets can be stored in metadata["triplets"].
+            extract_triplets: Whether to extract triplets using LLM.
+            show_progress: Whether to show progress bars.
+
+        Returns:
+            ExtractionResult with graph statistics.
+
+        Example:
+            >>> from langchain_core.documents import Document
+            >>> rag.add_documents([
+            ...     Document(page_content="Einstein developed relativity."),
+            ...     Document(page_content="Relativity changed physics.", id="doc_002"),
+            ... ])
+        """
+        # Ensure all documents have IDs
+        for doc in documents:
+            if not doc.id:
+                doc.id = str(uuid.uuid4())
+
+        # Extract triplets if needed
         if extract_triplets:
-            docs = self._triplet_extractor.extract_from_documents(
-                docs, show_progress=show_progress
+            documents = self._triplet_extractor.extract_from_documents(
+                documents, show_progress=show_progress
             )
 
         # Build ExtractionResult
-        self._extraction_result = self._graph_builder.build_from_documents(docs)
+        self._extraction_result = self._graph_builder.build_from_documents(documents)
 
         # Generate embeddings
         if show_progress:
@@ -369,17 +403,17 @@ class VectorGraphRAG:
             ...     },
             ... ])
         """
-        from vector_graph_rag.models import Triplet
-
         docs = []
         for doc_data in documents:
             passage = doc_data["passage"]
-            doc_id = doc_data.get("id")  # May be None
-            triplets = [
-                Triplet(subject=t[0], predicate=t[1], object=t[2])
-                for t in doc_data.get("triplets", [])
-            ]
-            docs.append(Document(id=doc_id, text=passage, triplets=triplets))
+            doc_id = doc_data.get("id") or str(uuid.uuid4())
+            # Store triplets in metadata as list of [subject, predicate, object]
+            triplets = doc_data.get("triplets", [])
+            docs.append(Document(
+                page_content=passage,
+                metadata={"triplets": triplets},
+                id=doc_id,
+            ))
 
         return self.add_documents(
             docs, extract_triplets=False, show_progress=show_progress
@@ -485,56 +519,6 @@ class VectorGraphRAG:
             retrieval_detail=retrieval_detail,
             rerank_result=rerank_result,
         )
-
-    def query_with_debug(
-        self,
-        question: str,
-        use_reranking: bool = True,
-    ) -> tuple[QueryResult, RetrievalResult]:
-        """
-        Query with full debug information including subgraph expansion history.
-
-        Args:
-            question: The question to answer.
-            use_reranking: Whether to use LLM reranking.
-
-        Returns:
-            Tuple of (QueryResult, RetrievalResult).
-            RetrievalResult contains the SubGraph with expansion_history.
-
-        Example:
-            >>> result, debug_info = rag.query_with_debug("What did Einstein develop?")
-            >>> print(debug_info.subgraph.expansion_history)
-        """
-        retriever = self._ensure_retriever()
-        retrieval_result = retriever.retrieve(question)
-
-        candidate_ids = retrieval_result.expanded_relation_ids
-        candidate_texts = retrieval_result.expanded_relation_texts
-
-        if use_reranking and candidate_ids:
-            reranked_ids, reranked_texts = self._reranker.rerank(
-                question, candidate_ids, candidate_texts
-            )
-        else:
-            reranked_ids = candidate_ids[: self.settings.final_top_k]
-            reranked_texts = candidate_texts[: self.settings.final_top_k]
-
-        passage_ids, passages = self._get_passages_from_relations(reranked_ids)
-        final_passages = passages[: self.settings.final_top_k]
-
-        answer = self._answer_generator.generate(question, final_passages)
-
-        query_result = QueryResult(
-            query=question,
-            answer=answer,
-            retrieved_passages=final_passages,
-            retrieved_relations=retrieval_result.relation_texts,
-            expanded_relations=candidate_texts,
-            reranked_relations=reranked_texts,
-        )
-
-        return query_result, retrieval_result
 
     def query_simple(self, question: str) -> str:
         """

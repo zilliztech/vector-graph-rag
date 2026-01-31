@@ -34,8 +34,7 @@ dependencies = [
     "tenacity>=8.2.0",
     "transformers>=4.30.0",
     "torch>=2.0.0",
-    "langchain-openai>=1.1.7",
-    "langchain-core>=1.2.7",
+    "langchain-core>=0.3.0",
 ]
 
 [project.optional-dependencies]
@@ -78,9 +77,6 @@ torch = [
     { index = "pytorch-cpu", marker = "sys_platform == 'linux' and platform_machine == 'aarch64'" },
     { index = "pytorch-cu124", marker = "sys_platform == 'linux' and platform_machine == 'x86_64'" },
 ]
-
-[project.scripts]
-vector-graph-rag = "vector_graph_rag.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/zilliztech/vector-graph-rag"

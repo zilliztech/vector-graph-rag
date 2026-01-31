@@ -213,39 +213,24 @@ class TripletExtractor:
         Extract triplets from multiple documents.
 
         Args:
-            documents: List of Document objects to process.
+            documents: List of langchain Document objects to process.
             show_progress: Whether to show progress bar.
 
         Returns:
-            Documents with extracted triplets populated.
+            Documents with extracted triplets stored in metadata["triplets"].
         """
         iterator = (
             tqdm(documents, desc="Extracting triplets") if show_progress else documents
         )
 
         for doc in iterator:
-            triplets = self.extract(doc.text)
-            doc.triplets = triplets
+            triplets = self.extract(doc.page_content)
+            # Store triplets as list of [subject, predicate, object] in metadata
+            doc.metadata["triplets"] = [
+                [t.subject, t.predicate, t.object] for t in triplets
+            ]
 
         return documents
-
-    def extract_from_texts(
-        self,
-        texts: List[str],
-        show_progress: bool = True,
-    ) -> List[Document]:
-        """
-        Extract triplets from a list of text strings.
-
-        Args:
-            texts: List of text strings to process.
-            show_progress: Whether to show progress bar.
-
-        Returns:
-            List of Document objects with extracted triplets.
-        """
-        documents = [Document(id=i, text=text) for i, text in enumerate(texts)]
-        return self.extract_from_documents(documents, show_progress=show_progress)
 
 
 class EntityExtractor:

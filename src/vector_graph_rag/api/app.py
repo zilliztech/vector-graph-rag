@@ -302,7 +302,7 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
 
             result = rag.add_documents_with_triplets(documents_with_triplets, show_progress=False)
         else:
-            result = rag.add_documents(
+            result = rag.add_texts(
                 request.documents,
                 ids=request.ids,
                 extract_triplets=request.extract_triplets,

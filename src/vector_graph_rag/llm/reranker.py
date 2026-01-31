@@ -4,17 +4,12 @@ LLM-based reranking for candidate relations.
 
 import json
 from typing import List, Optional, Tuple
-from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage, AIMessage
-from langchain_core.prompts import ChatPromptTemplate
+from openai import OpenAI
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from vector_graph_rag.config import Settings, get_settings
 from vector_graph_rag.llm.cache import get_llm_cache, LLMCache
 
-
-# Optimized few-shot examples for reranking (Group 2 - Better Fewshot)
-# Achieved +2.85% improvement on MuSiQue, +0.79% on HotpotQA over baseline
 
 RERANK_EXAMPLE_1_INPUT = """I will provide you with a set of relationship descriptions from a knowledge graph. Select exactly 5 relationships most useful for answering this multi-hop question.
 
@@ -134,12 +129,9 @@ class LLMReranker:
 
         self.model = model or self.settings.llm_model
 
-        self.client = ChatOpenAI(
-            model=self.model,
-            temperature=0,
+        self.client = OpenAI(
             api_key=self.settings.openai_api_key,
             base_url=self.settings.openai_base_url,
-            max_tokens=None,
         )
 
         # Use settings.use_llm_cache if use_cache not explicitly provided
@@ -189,22 +181,29 @@ class LLMReranker:
 
         # Use 3 diverse few-shot examples for better multi-hop reasoning
         messages = [
-            HumanMessage(content=RERANK_EXAMPLE_1_INPUT),
-            AIMessage(content=RERANK_EXAMPLE_1_OUTPUT),
-            HumanMessage(content=RERANK_EXAMPLE_2_INPUT),
-            AIMessage(content=RERANK_EXAMPLE_2_OUTPUT),
-            HumanMessage(content=RERANK_EXAMPLE_3_INPUT),
-            AIMessage(content=RERANK_EXAMPLE_3_OUTPUT),
-            HumanMessage(content=prompt),
+            {"role": "user", "content": RERANK_EXAMPLE_1_INPUT},
+            {"role": "assistant", "content": RERANK_EXAMPLE_1_OUTPUT},
+            {"role": "user", "content": RERANK_EXAMPLE_2_INPUT},
+            {"role": "assistant", "content": RERANK_EXAMPLE_2_OUTPUT},
+            {"role": "user", "content": RERANK_EXAMPLE_3_INPUT},
+            {"role": "assistant", "content": RERANK_EXAMPLE_3_OUTPUT},
+            {"role": "user", "content": prompt},
         ]
 
-        # gpt-5 series doesn't support 'stop' parameter
-        invoke_kwargs = {"response_format": {"type": "json_object"}}
-        if not self.model.startswith("gpt-5"):
-            invoke_kwargs["stop"] = ['\n\n']
+        # Build API call kwargs
+        api_kwargs = {
+            "model": self.model,
+            "messages": messages,
+            "response_format": {"type": "json_object"},
+        }
 
-        response = self.client.invoke(messages, **invoke_kwargs)
-        result = response.content or "{}"
+        # gpt-5 series doesn't support 'temperature' and 'stop' parameters
+        if not self.model.startswith("gpt-5"):
+            api_kwargs["temperature"] = 0
+            api_kwargs["stop"] = ['\n\n']
+
+        response = self.client.chat.completions.create(**api_kwargs)
+        result = response.choices[0].message.content or "{}"
 
         # Store in cache
         if self.cache:
@@ -331,12 +330,9 @@ Answer:"""
 
         self.model = model or self.settings.llm_model
 
-        self.client = ChatOpenAI(
-            model=self.model,
-            temperature=0,
+        self.client = OpenAI(
             api_key=self.settings.openai_api_key,
             base_url=self.settings.openai_base_url,
-            max_tokens=None,
         )
 
         # Use settings.use_llm_cache if use_cache not explicitly provided
@@ -367,10 +363,19 @@ Answer:"""
             if cached is not None:
                 return cached
 
-        messages = [HumanMessage(content=prompt)]
-        response = self.client.invoke(messages)
+        messages = [{"role": "user", "content": prompt}]
 
-        result = response.content or "I don't know."
+        # Build API call kwargs - gpt-5 series doesn't support temperature parameter
+        api_kwargs = {
+            "model": self.model,
+            "messages": messages,
+        }
+        if not self.model.startswith("gpt-5"):
+            api_kwargs["temperature"] = 0
+
+        response = self.client.chat.completions.create(**api_kwargs)
+
+        result = response.choices[0].message.content or "I don't know."
 
         # Store in cache
         if self.cache:

@@ -83,8 +83,8 @@ class QueryRequest(BaseModel):
     graph_name: Optional[str] = (
         None  # Graph/dataset to query (uses default if not specified)
     )
-    entity_top_k: int = 10
-    relation_top_k: int = 10
+    entity_top_k: int = 20
+    relation_top_k: int = 20
     entity_similarity_threshold: float = 0.9
     relation_similarity_threshold: float = -1.0
     expansion_degree: int = 1

@@ -2,8 +2,13 @@
 Data models for Vector Graph RAG.
 """
 
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Dict
 from pydantic import BaseModel, Field
+
+# Re-export Document from langchain_core for unified API
+from langchain_core.documents import Document
+
+__all__ = ["Document", "Triplet", "Entity", "Relation", "Passage", "QueryResult", "ExtractionResult"]
 
 
 class Triplet(BaseModel):
@@ -82,29 +87,6 @@ class Relation(BaseModel):
     )
     embedding: Optional[List[float]] = Field(
         default=None, description="Relation embedding"
-    )
-
-
-class Document(BaseModel):
-    """
-    A document/passage to be processed.
-
-    Attributes:
-        id: Unique identifier for the document (string, UUID or user-provided).
-        text: The document text content.
-        metadata: Optional metadata dictionary.
-        triplets: Extracted triplets from this document.
-        embedding: Optional embedding vector.
-    """
-
-    id: Optional[str] = Field(default=None, description="Document ID")
-    text: str = Field(..., description="Document text content")
-    metadata: dict = Field(default_factory=dict, description="Optional metadata")
-    triplets: List[Triplet] = Field(
-        default_factory=list, description="Extracted triplets"
-    )
-    embedding: Optional[List[float]] = Field(
-        default=None, description="Document embedding"
     )
 
 
@@ -225,5 +207,5 @@ class ExtractionResult(BaseModel):
     documents: List[Document] = Field(default_factory=list)
     entities: List[Entity] = Field(default_factory=list)
     relations: List[Relation] = Field(default_factory=list)
-    entity_to_relation_ids: dict[str, List[str]] = Field(default_factory=dict)
-    relation_to_passage_ids: dict[str, List[str]] = Field(default_factory=dict)
+    entity_to_relation_ids: Dict[str, List[str]] = Field(default_factory=dict)
+    relation_to_passage_ids: Dict[str, List[str]] = Field(default_factory=dict)

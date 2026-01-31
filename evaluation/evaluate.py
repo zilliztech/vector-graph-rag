@@ -401,7 +401,7 @@ class VectorGraphRAGEvaluator:
                     passage = str(item)
                 passages.append(passage)
             print(f"Auto triplet extraction for {len(passages)} passages...")
-            self.rag.add_documents(passages, show_progress=True)
+            self.rag.add_texts(passages, show_progress=True)
 
         # Get stats from extraction result
         stats = self.rag.get_stats()

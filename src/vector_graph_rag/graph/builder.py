@@ -140,15 +140,21 @@ class GraphBuilder:
         for doc in documents:
             # Use document's ID if provided, otherwise generate one
             passage_id = doc.id if doc.id else generate_id()
-            self.passages[passage_id] = doc.text
+            self.passages[passage_id] = doc.page_content
             self.passage_ids.append(passage_id)
 
             # Update the document's ID if it was generated
             if not doc.id:
                 doc.id = passage_id
 
-            for triplet in doc.triplets:
-                self._add_relation(triplet, passage_id)
+            # Get triplets from metadata (stored as [[subj, pred, obj], ...])
+            raw_triplets = doc.metadata.get("triplets", [])
+            for raw in raw_triplets:
+                if isinstance(raw, list) and len(raw) >= 3:
+                    triplet = Triplet(subject=raw[0], predicate=raw[1], object=raw[2])
+                    self._add_relation(triplet, passage_id)
+                elif isinstance(raw, Triplet):
+                    self._add_relation(raw, passage_id)
 
     def build_from_documents(self, documents: List[Document]) -> ExtractionResult:
         """
