@@ -1,93 +1,43 @@
 # Vector Graph RAG
 
-A Graph RAG implementation using pure vector search with Milvus.
+🔗 A Graph RAG implementation using pure vector search with Milvus.
 
-## How It Works
+## ✨ Features
 
-### Indexing Pipeline
+- **🚀 No Graph Database Required** - Pure vector search approach, no need for Neo4j or other graph databases
+- **📦 Zero Configuration** - Uses Milvus Lite by default, works out of the box with a single file
+- **🎯 High Accuracy** - LLM-based reranking for precise relation filtering
+- **🔍 Multi-hop Reasoning** - Subgraph expansion enables complex multi-hop question answering
+- **📊 State-of-the-Art Performance** - Outperforms HippoRAG on multi-hop QA benchmarks (87.8% avg Recall@5)
+- **🛠️ Simple API** - Just 3 lines of code to get started
 
-```
-┌──────────────┐    ┌─────────────────────┐    ┌─────────────────────────────┐
-│  Documents   │───▶│  Triplet Extraction │───▶│   Entities  +  Relations    │
-│              │    │       (LLM)         │    │  (Einstein)   (developed)   │
-└──────────────┘    └─────────────────────┘    └──────────────┬──────────────┘
-                                                              │
-                    ┌─────────────────────┐                   │ Embedding
-                    │       Milvus        │◀──────────────────┘
-                    │  ┌───────────────┐  │
-                    │  │ Entity Vectors│  │
-                    │  │Relation Vectors│ │
-                    │  │Passage Vectors │ │
-                    │  └───────────────┘  │
-                    └─────────────────────┘
-```
-
-### Query Pipeline
-
-```
-┌──────────────┐    ┌─────────────────────┐    ┌─────────────────────────────┐
-│   Question   │───▶│  Entity Extraction  │───▶│      Vector Search          │
-│              │    │       (NER)         │    │  (Entities + Relations)     │
-└──────────────┘    └─────────────────────┘    └──────────────┬──────────────┘
-                                                              │
-                                                              ▼
-┌──────────────┐    ┌─────────────────────┐    ┌─────────────────────────────┐
-│    Answer    │◀───│  Answer Generation  │◀───│    Subgraph Expansion       │
-│              │    │       (LLM)         │    │  (Graph Traversal)          │
-└──────────────┘    └─────────────────────┘    └──────────────┬──────────────┘
-                              ▲                               │
-                              │                               ▼
-                    ┌─────────┴───────────┐    ┌─────────────────────────────┐
-                    │  Passage Retrieval  │◀───│      LLM Reranking          │
-                    │                     │    │  (Filter relevant relations)│
-                    └─────────────────────┘    └─────────────────────────────┘
-```
-
-### Example
-
-**Indexing:** Given document *"Einstein developed the theory of relativity at Princeton."*
-- Extracted entities: `Einstein`, `theory of relativity`, `Princeton`
-- Extracted relations: `(Einstein, developed, theory of relativity)`, `(Einstein, worked at, Princeton)`
-
-**Query:** *"What did Einstein develop?"*
-1. Extract query entity: `Einstein`
-2. Vector search finds similar entities and relations from Milvus
-3. Subgraph expansion traverses the graph to collect candidate relations
-4. **LLM reranking** (key step): ranks all candidate relations by relevance to the question, selects `(Einstein, developed, theory of relativity)` over `(Einstein, worked at, Princeton)`
-5. Retrieve source passage → Generate answer: *"Einstein developed the theory of relativity."*
-
-## Installation
+## 📦 Installation
 
 ```bash
-# Using pip
 pip install vector-graph-rag
-
-# Using uv
+# or
 uv add vector-graph-rag
 ```
 
-## Quick Start
+## 🚀 Quick Start
 
 ```python
 from vector_graph_rag import VectorGraphRAG
 
-# Initialize (reads OPENAI_API_KEY from environment)
-rag = VectorGraphRAG()
+rag = VectorGraphRAG()  # reads OPENAI_API_KEY from environment
 
-# Add documents
 rag.add_texts([
     "Albert Einstein developed the theory of relativity.",
     "The theory of relativity revolutionized our understanding of space and time.",
 ])
 
-# Query
 result = rag.query("What did Einstein develop?")
 print(result.answer)
 ```
 
 ### With Pre-extracted Triplets
 
-If you already have knowledge graph triplets, you can skip the LLM extraction step:
+Skip LLM extraction if you already have knowledge graph triplets:
 
 ```python
 rag.add_documents_with_triplets([
@@ -105,226 +55,83 @@ rag.add_documents_with_triplets([
 
 ```python
 rag = VectorGraphRAG(
-    milvus_uri="./my_data.db",       # Custom Milvus storage path
-    llm_model="gpt-4o",              # Use different LLM model
-    embedding_model="text-embedding-3-large",  # Use different embedding model
+    milvus_uri="./my_data.db",
+    llm_model="gpt-4o",
+    embedding_model="text-embedding-3-large",
 )
 ```
 
-### Environment Variables
+> **Note:** Set `OPENAI_API_KEY` environment variable before running.
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `OPENAI_API_KEY` | OpenAI API key for LLM and embeddings | Required |
+## 🔬 How It Works
 
-## API Reference
-
-Base URL: `http://localhost:8000`
-
-### Health Check
+### Indexing Pipeline
 
 ```
-GET /health
+Documents → Triplet Extraction (LLM) → Entities + Relations → Embedding → Milvus
 ```
 
-**Response:**
-```json
-{
-  "status": "ok",
-  "message": "Vector Graph RAG API is running"
-}
-```
-
-### List Graphs
+### Query Pipeline
 
 ```
-GET /graphs
+Question → Entity Extraction → Vector Search → Subgraph Expansion → LLM Reranking → Answer
 ```
 
-List all available graphs (datasets) in Milvus.
+### Example
 
-**Response:**
-```json
-{
-  "graphs": [
-    {
-      "name": "my_dataset",
-      "entity_collection": "my_dataset_vgrag_entities",
-      "relation_collection": "my_dataset_vgrag_relations",
-      "passage_collection": "my_dataset_vgrag_passages",
-      "has_all_collections": true
-    }
-  ],
-  "milvus_config": {
-    "uri": "./vector_graph_rag.db",
-    "database": null,
-    "has_token": false
-  }
-}
-```
+**Indexing:** *"Einstein developed the theory of relativity at Princeton."*
+- Entities: `Einstein`, `theory of relativity`, `Princeton`
+- Relations: `(Einstein, developed, theory of relativity)`, `(Einstein, worked at, Princeton)`
 
-### Get Graph Statistics
+**Query:** *"What did Einstein develop?"*
+1. Extract entity: `Einstein`
+2. Vector search finds similar entities and relations
+3. Subgraph expansion collects candidate relations
+4. **LLM reranking** selects `(Einstein, developed, theory of relativity)`
+5. Generate answer: *"Einstein developed the theory of relativity."*
 
-```
-GET /stats?graph_name={graph_name}
-```
+## 📊 Evaluation Results
 
-**Query Parameters:**
-- `graph_name` (optional): Name of the graph to query
-
-**Response:**
-```json
-{
-  "entities": 100,
-  "relations": 250,
-  "passages": 50
-}
-```
-
-### Query Knowledge Graph
-
-```
-POST /query
-```
-
-Query the knowledge graph and get an answer with the retrieved subgraph.
-
-**Request Body:**
-```json
-{
-  "question": "What is the relationship between A and B?",
-  "graph_name": "my_dataset",
-  "entity_top_k": 10,
-  "relation_top_k": 10,
-  "entity_similarity_threshold": 0.9,
-  "relation_similarity_threshold": -1.0,
-  "expansion_degree": 1
-}
-```
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `question` | string | Required | The question to ask |
-| `graph_name` | string | null | Graph/dataset to query |
-| `entity_top_k` | int | 10 | Max entities to retrieve |
-| `relation_top_k` | int | 10 | Max relations to retrieve |
-| `entity_similarity_threshold` | float | 0.9 | Min similarity for entities |
-| `relation_similarity_threshold` | float | -1.0 | Min similarity for relations |
-| `expansion_degree` | int | 1 | Graph expansion hops |
-
-**Response:**
-```json
-{
-  "question": "What is the relationship between A and B?",
-  "answer": "A and B are connected through...",
-  "query_entities": ["A", "B"],
-  "subgraph": {
-    "entity_ids": ["e1", "e2"],
-    "relation_ids": ["r1"],
-    "passage_ids": ["p1"],
-    "entities": [
-      {
-        "id": "e1",
-        "name": "Entity A",
-        "relation_ids": ["r1"],
-        "passage_ids": ["p1"]
-      }
-    ],
-    "relations": [
-      {
-        "id": "r1",
-        "text": "A is related to B",
-        "subject": "A",
-        "predicate": "related_to",
-        "object": "B",
-        "entity_ids": ["e1", "e2"],
-        "passage_ids": ["p1"]
-      }
-    ],
-    "passages": [
-      {
-        "id": "p1",
-        "text": "The passage text..."
-      }
-    ],
-    "expansion_history": []
-  },
-  "retrieved_passages": ["The passage text..."],
-  "stats": {
-    "entities": 2,
-    "relations": 1,
-    "passages": 1
-  },
-  "retrieval_detail": {
-    "entity_ids": ["e1", "e2"],
-    "entity_texts": ["Entity A", "Entity B"],
-    "entity_scores": [0.95, 0.92],
-    "relation_ids": ["r1"],
-    "relation_texts": ["A is related to B"],
-    "relation_scores": [0.88]
-  },
-  "rerank_result": {
-    "selected_relation_ids": ["r1"],
-    "selected_relation_texts": ["A is related to B"]
-  }
-}
-```
-
-### Add Documents
-
-```
-POST /add_documents
-```
-
-Add documents to the knowledge graph.
-
-**Request Body:**
-```json
-["Document 1 text...", "Document 2 text..."]
-```
-
-**Response:**
-```json
-{
-  "status": "ok",
-  "message": "Added 2 documents"
-}
-```
-
-## Architecture
-
-```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   Frontend  │────▶│  FastAPI    │────▶│   Milvus    │
-│   (React)   │     │  Backend    │     │  (Vector DB)│
-└─────────────┘     └─────────────┘     └─────────────┘
-                           │
-                           ▼
-                    ┌─────────────┐
-                    │   OpenAI    │
-                    │  (LLM/Emb)  │
-                    └─────────────┘
-```
-
-## Evaluation Results
-
-We evaluated Vector Graph RAG on three multi-hop QA datasets, comparing against Naive RAG baseline and state-of-the-art methods from HippoRAG papers.
-
-### Recall@5 Comparison
+Evaluated on three multi-hop QA datasets:
 
 | Method | MuSiQue | HotpotQA | 2WikiMultiHopQA | Average |
 |--------|---------|----------|-----------------|---------|
 | Naive RAG | 55.6% | 90.8% | 73.7% | 73.4% |
-| IRCoT + HippoRAG¹ | 57.6% | 83.0% | <u>93.9%</u> | 78.2% |
-| NV-Embed-v2² | 69.7% | <u>94.5%</u> | 76.5% | 80.2% |
-| HippoRAG 2² | **74.7%** | **96.3%** | 90.4% | <u>87.1%</u> |
-| Vector Graph RAG | <u>73.0%</u> | **96.3%** | **94.1%** | **87.8%** |
+| IRCoT + HippoRAG¹ | 57.6% | 83.0% | 93.9% | 78.2% |
+| HippoRAG 2² | **74.7%** | **96.3%** | 90.4% | 87.1% |
+| **Vector Graph RAG** | 73.0% | **96.3%** | **94.1%** | **87.8%** |
 
-¹ From [HippoRAG (NeurIPS 2024)](https://arxiv.org/abs/2405.14831) - best result with IRCoT + ColBERTv2
-² From [HippoRAG 2 (2025)](https://arxiv.org/abs/2502.14802)
+¹ [HippoRAG (NeurIPS 2024)](https://arxiv.org/abs/2405.14831) ² [HippoRAG 2 (2025)](https://arxiv.org/abs/2502.14802)
 
-See [evaluation/README.md](evaluation/README.md) for detailed reproduction steps
+See [evaluation/README.md](evaluation/README.md) for reproduction steps.
 
-## License
+## 🛠️ Development
+
+### Running the Demo (Frontend + API)
+
+```bash
+# Backend
+uv sync --extra api
+uv run uvicorn api.main:app --host 0.0.0.0 --port 8000
+
+# Frontend
+cd frontend && npm install && npm run dev
+```
+
+### REST API
+
+The API server provides endpoints for integration:
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/health` | GET | Health check |
+| `/graphs` | GET | List available graphs |
+| `/stats` | GET | Get graph statistics |
+| `/query` | POST | Query the knowledge graph |
+| `/add_documents` | POST | Add documents |
+
+See API docs at `http://localhost:8000/docs` after starting the server.
+
+## 📄 License
 
 MIT
