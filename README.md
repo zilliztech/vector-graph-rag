@@ -56,50 +56,65 @@ A Graph RAG implementation using pure vector search with Milvus.
 4. **LLM reranking** (key step): ranks all candidate relations by relevance to the question, selects `(Einstein, developed, theory of relativity)` over `(Einstein, worked at, Princeton)`
 5. Retrieve source passage → Generate answer: *"Einstein developed the theory of relativity."*
 
+## Installation
+
+```bash
+# Using pip
+pip install vector-graph-rag
+
+# Using uv
+uv add vector-graph-rag
+```
+
 ## Quick Start
 
-### Prerequisites
+```python
+from vector_graph_rag import VectorGraphRAG
 
-- Python 3.10+
-- Node.js 18+
-- [uv](https://docs.astral.sh/uv/) (Python package manager)
+# Initialize (reads OPENAI_API_KEY from environment)
+rag = VectorGraphRAG()
 
-### Installation
+# Add documents
+rag.add_texts([
+    "Albert Einstein developed the theory of relativity.",
+    "The theory of relativity revolutionized our understanding of space and time.",
+])
 
-```bash
-# Install Python dependencies
-uv sync --extra api
-
-# Install frontend dependencies
-cd frontend && npm install
+# Query
+result = rag.query("What did Einstein develop?")
+print(result.answer)
 ```
 
-### Running the Application
+### With Pre-extracted Triplets
 
-#### Backend API
+If you already have knowledge graph triplets, you can skip the LLM extraction step:
 
-```bash
-uv run uvicorn api.main:app --host 0.0.0.0 --port 8000
+```python
+rag.add_documents_with_triplets([
+    {
+        "passage": "Einstein developed relativity at Princeton.",
+        "triplets": [
+            ["Einstein", "developed", "relativity"],
+            ["Einstein", "worked at", "Princeton"],
+        ],
+    },
+])
 ```
 
-The API will be available at `http://localhost:8000`.
+### Custom Configuration
 
-#### Frontend
-
-```bash
-cd frontend
-npm run dev -- --host 0.0.0.0
+```python
+rag = VectorGraphRAG(
+    milvus_uri="./my_data.db",       # Custom Milvus storage path
+    llm_model="gpt-4o",              # Use different LLM model
+    embedding_model="text-embedding-3-large",  # Use different embedding model
+)
 ```
-
-The frontend will be available at `http://localhost:5173` (or next available port).
 
 ### Environment Variables
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `MILVUS_URI` | Milvus connection URI | `./vector_graph_rag.db` |
-| `MILVUS_TOKEN` | Milvus authentication token | None |
-| `MILVUS_DB` | Milvus database name | None |
 | `OPENAI_API_KEY` | OpenAI API key for LLM and embeddings | Required |
 
 ## API Reference
@@ -274,16 +289,6 @@ Add documents to the knowledge graph.
   "status": "ok",
   "message": "Added 2 documents"
 }
-```
-
-## CLI Usage
-
-```bash
-# Build knowledge graph from documents
-uv run vector-graph-rag build --input docs.txt --dataset my_dataset
-
-# Query the knowledge graph
-uv run vector-graph-rag query --question "What is X?" --dataset my_dataset
 ```
 
 ## Architecture
