@@ -7,7 +7,7 @@ from typing import List, Optional
 from tqdm import tqdm
 
 from vector_graph_rag.config import Settings, get_settings
-from vector_graph_rag.models import Document, Triplet, QueryResult, ExtractionResult, RetrievalDetail, RerankResult
+from vector_graph_rag.models import Document, Triplet, QueryResult, ExtractionResult, RetrievalDetail, RerankResult, EvictionResult
 from vector_graph_rag.llm.extractor import TripletExtractor
 from vector_graph_rag.llm.reranker import LLMReranker, AnswerGenerator
 from vector_graph_rag.storage.embeddings import EmbeddingModel
@@ -506,6 +506,13 @@ class VectorGraphRAG:
         # Generate answer
         answer = self._answer_generator.generate(question, final_passages)
 
+        # Build eviction result
+        eviction_result = EvictionResult(
+            occurred=retrieval_result.eviction_occurred,
+            before_count=retrieval_result.eviction_before_count,
+            after_count=retrieval_result.eviction_after_count,
+        )
+
         return QueryResult(
             query=question,
             answer=answer,
@@ -518,6 +525,7 @@ class VectorGraphRAG:
             passages=final_passages,
             retrieval_detail=retrieval_detail,
             rerank_result=rerank_result,
+            eviction_result=eviction_result,
         )
 
     def query_simple(self, question: str) -> str:

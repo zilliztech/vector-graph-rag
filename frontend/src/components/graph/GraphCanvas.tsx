@@ -11,7 +11,7 @@ import {
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { useGraphStore, type GraphNodeData } from '@/stores/graphStore'
-import { layoutGraph } from '@/utils/graphLayout'
+import { layoutGraph, forceDirectedLayout } from '@/utils/graphLayout'
 import EntityNode from './EntityNode'
 import RelationEdge from './RelationEdge'
 
@@ -48,11 +48,24 @@ function GraphCanvas() {
       return
     }
 
-    const layoutedNodes = layoutGraph(storeNodes, storeEdges, {
-      direction: 'LR',
-      nodeSpacing: 60,
-      rankSpacing: 120,
-    })
+    // Use force-directed layout for larger graphs (better space utilization)
+    // Use dagre layout for smaller graphs (cleaner hierarchy)
+    const useForceLayout = storeNodes.length > 30 || storeEdges.length > 50
+
+    // Make the layout area larger (4x screen size) so the graph isn't cramped
+    const layoutedNodes = useForceLayout
+      ? forceDirectedLayout(storeNodes, storeEdges, {
+          width: 4000,
+          height: 2500,
+          iterations: 200,
+          repulsion: 8000,
+          attraction: 0.005,
+        })
+      : layoutGraph(storeNodes, storeEdges, {
+          direction: 'LR',
+          nodeSpacing: 50,
+          rankSpacing: 120,
+        })
 
     setNodes(layoutedNodes as Node[])
     setEdges(storeEdges as Edge[])
@@ -85,11 +98,15 @@ function GraphCanvas() {
     const data = node.data as GraphNodeData | undefined
     switch (data?.status) {
       case 'seed':
-        return '#f59e0b'
+        return '#f59e0b' // amber
       case 'selected':
-        return '#10b981'
-      case 'evicted':
-        return '#94a3b8'
+        return '#10b981' // emerald
+      case 'expanded':
+        return '#3b82f6' // blue
+      case 'filtered':
+        return '#94a3b8' // slate
+      case 'undiscovered':
+        return '#e2e8f0' // light slate
       default:
         return '#3b82f6'
     }
@@ -134,8 +151,8 @@ function GraphCanvas() {
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
-        fitViewOptions={{ padding: 0.2 }}
-        minZoom={0.1}
+        fitViewOptions={{ padding: 0.1, maxZoom: 0.6 }}
+        minZoom={0.05}
         maxZoom={2}
         defaultEdgeOptions={{
           type: 'relation',

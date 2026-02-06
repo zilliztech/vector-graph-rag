@@ -8,7 +8,7 @@ import type { TimelineStep, StepStatus } from '@/types/api'
 
 function ProcessTimeline() {
   const { timelineSteps, currentStepIndex, setCurrentStep, isSearching } = useSearchStore()
-  const { setVisibility } = useGraphStore()
+  const { setStepStatus } = useGraphStore()
 
   const handleStepClick = useCallback(
     (index: number) => {
@@ -16,9 +16,10 @@ function ProcessTimeline() {
       if (!step) return
 
       setCurrentStep(index)
-      setVisibility(step.entityIds, step.relationIds, step.highlightIds)
+      // Update graph colors based on this step's node status
+      setStepStatus(step.nodeStatus)
     },
-    [timelineSteps, setCurrentStep, setVisibility]
+    [timelineSteps, setCurrentStep, setStepStatus]
   )
 
   if (timelineSteps.length === 0 && !isSearching) {

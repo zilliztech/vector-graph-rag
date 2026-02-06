@@ -10,9 +10,11 @@ Provides RESTful API endpoints for:
 """
 
 import os
+import tempfile
+import shutil
 from pathlib import Path
 from typing import List, Optional, Dict, Any
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -71,6 +73,31 @@ class AddDocumentsResponse(BaseModel):
     num_entities: int = Field(..., description="Number of entities created")
     num_relations: int = Field(..., description="Number of relations created")
     document_ids: List[str] = Field(default_factory=list, description="IDs of added documents")
+
+
+class ImportRequest(BaseModel):
+    """Request to import documents from various sources."""
+    sources: List[str] = Field(
+        ...,
+        description="List of file paths or URLs to import",
+        examples=["/path/to/doc.pdf", "https://example.com/article"]
+    )
+    chunk_documents: bool = Field(True, description="Whether to chunk large documents")
+    chunk_size: int = Field(1000, description="Max characters per chunk")
+    chunk_overlap: int = Field(200, description="Overlap between chunks")
+    extract_triplets: bool = Field(True, description="Extract triplets using LLM")
+    graph_name: Optional[str] = Field(None, description="Target graph name")
+
+
+class ImportResponse(BaseModel):
+    """Response from document import."""
+    success: bool
+    num_sources: int = Field(..., description="Number of input sources")
+    num_documents: int = Field(..., description="Number of documents after conversion")
+    num_chunks: int = Field(..., description="Number of chunks after splitting")
+    num_entities: int = Field(..., description="Number of entities extracted")
+    num_relations: int = Field(..., description="Number of relations extracted")
+    errors: List[str] = Field(default_factory=list, description="Any errors during import")
 
 
 class QueryRequest(BaseModel):
@@ -145,6 +172,13 @@ class RerankResultSchema(BaseModel):
     selected_relation_texts: List[str] = Field(default_factory=list, description="Selected relation texts")
 
 
+class EvictionResultSchema(BaseModel):
+    """Schema for eviction results (when relations exceed threshold)."""
+    occurred: bool = Field(default=False, description="Whether eviction occurred")
+    before_count: int = Field(default=0, description="Number of relations before eviction")
+    after_count: int = Field(default=0, description="Number of relations after eviction")
+
+
 class QueryResponse(BaseModel):
     """Response for a query."""
     question: str = Field(..., description="Original question")
@@ -155,6 +189,7 @@ class QueryResponse(BaseModel):
     stats: Dict[str, Any] = Field(default_factory=dict, description="Query statistics")
     retrieval_detail: Optional[RetrievalDetailSchema] = Field(default=None, description="Initial retrieval details")
     rerank_result: Optional[RerankResultSchema] = Field(default=None, description="LLM rerank results")
+    eviction_result: Optional[EvictionResultSchema] = Field(default=None, description="Eviction results if relations exceeded threshold")
 
 
 class DocumentResponse(BaseModel):
@@ -195,6 +230,17 @@ class NeighborResponse(BaseModel):
     entity_id: str = Field(..., description="Central entity ID")
     neighbors: List[EntitySchema] = Field(default_factory=list, description="Neighbor entities")
     relations: List[RelationSchema] = Field(default_factory=list, description="Connecting relations")
+
+
+class SettingsResponse(BaseModel):
+    """Response for system settings."""
+    llm_model: str = Field(..., description="LLM model name")
+    embedding_model: str = Field(..., description="Embedding model name")
+    embedding_dimension: int = Field(..., description="Embedding dimension")
+    milvus_uri: str = Field(..., description="Milvus connection URI")
+    milvus_db: Optional[str] = Field(None, description="Milvus database name")
+    openai_api_key_set: bool = Field(..., description="Whether OpenAI API key is configured")
+    openai_base_url: Optional[str] = Field(None, description="Custom OpenAI base URL")
 
 
 # ==================== Application Factory ====================
@@ -272,6 +318,64 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
             graphs=[GraphInfo(**g) for g in graphs]
         )
 
+    @app.get("/settings", response_model=SettingsResponse, tags=["System"])
+    async def get_system_settings():
+        """
+        Get current system settings.
+
+        Returns configuration information including models, Milvus connection, etc.
+        """
+        settings = app.state.settings
+        return SettingsResponse(
+            llm_model=settings.llm_model,
+            embedding_model=settings.embedding_model,
+            embedding_dimension=settings.embedding_dimension,
+            milvus_uri=settings.milvus_uri,
+            milvus_db=settings.milvus_db,
+            openai_api_key_set=bool(settings.openai_api_key),
+            openai_base_url=settings.openai_base_url,
+        )
+
+    @app.delete("/graph/{graph_name}", response_model=DeleteResponse, tags=["System"])
+    async def delete_graph(graph_name: str):
+        """
+        Delete a graph (knowledge base) and all its collections.
+
+        This will permanently delete all entities, relations, and passages
+        associated with the graph.
+        """
+        try:
+            # Delete all collections for this graph
+            deleted = MilvusStore.delete_graph(
+                graph_name=graph_name,
+                milvus_uri=app.state.settings.milvus_uri,
+                milvus_token=app.state.settings.milvus_token,
+                milvus_db=app.state.settings.milvus_db,
+            )
+
+            # Clear cached instances for this graph
+            if graph_name in app.state.rag_instances:
+                del app.state.rag_instances[graph_name]
+            if graph_name in app.state.graph_instances:
+                del app.state.graph_instances[graph_name]
+
+            if deleted:
+                return DeleteResponse(
+                    success=True,
+                    message=f"Successfully deleted graph '{graph_name}' and all its collections"
+                )
+            else:
+                return DeleteResponse(
+                    success=False,
+                    message=f"Graph '{graph_name}' not found or already deleted"
+                )
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to delete graph: {str(e)}"
+            )
+
     @app.post("/add_documents", response_model=AddDocumentsResponse, tags=["Documents"])
     async def add_documents(
         request: AddDocumentsRequest,
@@ -315,6 +419,133 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
             num_relations=len(result.relations),
             document_ids=[doc.id for doc in result.documents if doc.id],
         )
+
+    @app.post("/import", response_model=ImportResponse, tags=["Documents"])
+    async def import_documents(request: ImportRequest):
+        """
+        Import text documents from files or URLs.
+
+        Supported formats:
+        - Documents: PDF, DOCX
+        - Web: URLs (webpage content)
+        - Text: TXT, MD, HTML
+        """
+        from vector_graph_rag.loaders import DocumentImporter
+
+        # Initialize importer
+        importer = DocumentImporter(
+            chunk_documents=request.chunk_documents,
+            chunk_size=request.chunk_size,
+            chunk_overlap=request.chunk_overlap,
+        )
+
+        # Load and convert documents
+        load_result = importer.import_sources(sources=request.sources)
+
+        if not load_result.documents:
+            return ImportResponse(
+                success=False,
+                num_sources=len(request.sources),
+                num_documents=0,
+                num_chunks=0,
+                num_entities=0,
+                num_relations=0,
+                errors=load_result.errors or ["No documents loaded"],
+            )
+
+        # Get or create RAG instance
+        rag = get_rag(request.graph_name)
+
+        # Add documents to graph
+        result = rag.add_documents(
+            documents=load_result.documents,
+            extract_triplets=request.extract_triplets,
+            show_progress=False,
+        )
+
+        return ImportResponse(
+            success=True,
+            num_sources=len(request.sources),
+            num_documents=len(load_result.documents),
+            num_chunks=len(load_result.documents),  # After chunking
+            num_entities=len(result.entities),
+            num_relations=len(result.relations),
+            errors=load_result.errors,
+        )
+
+    @app.post("/upload", response_model=ImportResponse, tags=["Documents"])
+    async def upload_files(
+        files: List[UploadFile] = File(...),
+        chunk_documents: bool = Form(True),
+        chunk_size: int = Form(1000),
+        chunk_overlap: int = Form(200),
+        extract_triplets: bool = Form(True),
+        graph_name: Optional[str] = Form(None),
+    ):
+        """
+        Upload and import text documents directly.
+
+        Accepts multipart form upload of files.
+        Supported formats: PDF, DOCX, TXT, MD, HTML
+        """
+        from vector_graph_rag.loaders import DocumentImporter
+
+        temp_paths = []
+        try:
+            # Save uploaded files to temp directory
+            for file in files:
+                suffix = Path(file.filename).suffix
+                with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+                    shutil.copyfileobj(file.file, tmp)
+                    temp_paths.append(tmp.name)
+
+            # Import using the standard pipeline
+            importer = DocumentImporter(
+                chunk_documents=chunk_documents,
+                chunk_size=chunk_size,
+                chunk_overlap=chunk_overlap,
+            )
+
+            load_result = importer.import_sources(sources=temp_paths)
+
+            if not load_result.documents:
+                return ImportResponse(
+                    success=False,
+                    num_sources=len(files),
+                    num_documents=0,
+                    num_chunks=0,
+                    num_entities=0,
+                    num_relations=0,
+                    errors=load_result.errors or ["No documents loaded"],
+                )
+
+            # Get or create RAG instance
+            rag = get_rag(graph_name)
+
+            # Add documents to graph
+            result = rag.add_documents(
+                documents=load_result.documents,
+                extract_triplets=extract_triplets,
+                show_progress=False,
+            )
+
+            return ImportResponse(
+                success=True,
+                num_sources=len(files),
+                num_documents=len(load_result.documents),
+                num_chunks=len(load_result.documents),
+                num_entities=len(result.entities),
+                num_relations=len(result.relations),
+                errors=load_result.errors,
+            )
+
+        finally:
+            # Cleanup temp files
+            for path in temp_paths:
+                try:
+                    Path(path).unlink()
+                except Exception:
+                    pass
 
     @app.post("/query", response_model=QueryResponse, tags=["Query"])
     async def query(
@@ -408,6 +639,16 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
                 selected_relation_texts=rr.selected_relation_texts,
             )
 
+        # Convert eviction_result to schema
+        eviction_result_schema = None
+        if result.eviction_result:
+            er = result.eviction_result
+            eviction_result_schema = EvictionResultSchema(
+                occurred=er.occurred,
+                before_count=er.before_count,
+                after_count=er.after_count,
+            )
+
         return QueryResponse(
             question=result.query,
             answer=result.answer,
@@ -422,6 +663,7 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
             },
             retrieval_detail=retrieval_detail_schema,
             rerank_result=rerank_result_schema,
+            eviction_result=eviction_result_schema,
         )
 
     # ==================== Graph Exploration ====================

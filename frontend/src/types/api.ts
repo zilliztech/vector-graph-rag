@@ -21,6 +21,7 @@ export interface QueryResponse {
   stats: Record<string, unknown>
   retrieval_detail?: RetrievalDetail
   rerank_result?: RerankResult
+  eviction_result?: EvictionResult
 }
 
 export interface SubGraph {
@@ -81,12 +82,48 @@ export interface RerankResult {
   selected_relation_texts: string[]
 }
 
+export interface EvictionResult {
+  occurred: boolean
+  before_count: number
+  after_count: number
+}
+
 // Graph Stats Response
 export interface GraphStats {
   entity_count: number
   relation_count: number
   passage_count: number
   graph_name: string
+}
+
+// Graph Info (for listing available datasets)
+export interface GraphInfo {
+  name: string
+  entity_collection: string
+  relation_collection: string
+  passage_collection: string
+  has_all_collections: boolean
+}
+
+export interface ListGraphsResponse {
+  graphs: GraphInfo[]
+}
+
+// System Settings
+export interface SystemSettings {
+  llm_model: string
+  embedding_model: string
+  embedding_dimension: number
+  milvus_uri: string
+  milvus_db: string | null
+  openai_api_key_set: boolean
+  openai_base_url: string | null
+}
+
+// Delete response
+export interface DeleteResponse {
+  success: boolean
+  message: string
 }
 
 // Neighbors Response
@@ -97,19 +134,32 @@ export interface NeighborResponse {
 }
 
 // Graph Node status for visualization
-export type NodeStatus = 'seed' | 'expanded' | 'evicted' | 'selected' | 'default'
+// 'undiscovered' = not yet found at this step (gray/faded)
+// 'seed' = initial vector search results (orange)
+// 'expanded' = found through graph expansion (blue)
+// 'filtered' = was considered but filtered out (gray dashed)
+// 'selected' = selected by LLM rerank (green highlighted)
+export type NodeStatus = 'undiscovered' | 'seed' | 'expanded' | 'filtered' | 'selected'
 
 // Timeline step status
 export type StepStatus = 'pending' | 'active' | 'completed'
+
+// Status assignment for each step
+export interface StepNodeStatus {
+  seedEntityIds: string[]
+  seedRelationIds: string[]
+  expandedEntityIds: string[]
+  expandedRelationIds: string[]
+  filteredRelationIds: string[]
+  selectedRelationIds: string[]
+}
 
 export interface TimelineStep {
   id: string
   label: string
   status: StepStatus
   description?: string
-  entityIds: string[]
-  relationIds: string[]
-  highlightIds?: string[]
+  nodeStatus: StepNodeStatus
   stats?: {
     entityCount: number
     relationCount: number

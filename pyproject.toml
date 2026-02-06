@@ -35,6 +35,7 @@ dependencies = [
     "transformers>=4.30.0",
     "torch>=2.0.0",
     "langchain-core>=0.3.0",
+    "python-multipart>=0.0.22",
 ]
 
 [project.optional-dependencies]
@@ -49,6 +50,10 @@ api = [
 ]
 all = [
     "vector-graph-rag[dev,api]",
+]
+loaders = [
+    "markitdown[docx,pdf]>=0.1.4",
+    "trafilatura>=2.0.0",
 ]
 
 # ==================== PyTorch Index Configuration ====================
@@ -86,6 +91,11 @@ Repository = "https://github.com/zilliztech/vector-graph-rag"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "trafilatura>=2.0.0",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/vector_graph_rag"]

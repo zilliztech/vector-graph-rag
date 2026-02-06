@@ -4,10 +4,12 @@ import type { QueryRequest } from '@/types/api'
 
 // Query keys
 export const queryKeys = {
+  graphs: ['graphs'] as const,
   graphStats: (graphName: string) => ['graphStats', graphName] as const,
   neighbors: (entityId: string, graphName: string) =>
     ['neighbors', entityId, graphName] as const,
   health: ['health'] as const,
+  settings: ['settings'] as const,
 }
 
 // Search mutation
@@ -61,5 +63,38 @@ export const useHealth = () => {
     queryFn: () => api.health(),
     staleTime: 30 * 1000, // 30 seconds
     retry: 2,
+  })
+}
+
+// List graphs query
+export const useGraphs = () => {
+  return useQuery({
+    queryKey: queryKeys.graphs,
+    queryFn: () => api.listGraphs(),
+    staleTime: 60 * 1000, // 1 minute
+    retry: 1,
+  })
+}
+
+// System settings query
+export const useSettings = () => {
+  return useQuery({
+    queryKey: queryKeys.settings,
+    queryFn: () => api.getSettings(),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 1,
+  })
+}
+
+// Delete graph mutation
+export const useDeleteGraph = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (graphName: string) => api.deleteGraph(graphName),
+    onSuccess: () => {
+      // Invalidate graphs list to refresh UI
+      queryClient.invalidateQueries({ queryKey: queryKeys.graphs })
+    },
   })
 }

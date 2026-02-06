@@ -923,6 +923,60 @@ class MilvusStore:
 
         return graphs
 
+    @classmethod
+    def delete_graph(
+        cls,
+        graph_name: str,
+        milvus_uri: str = "./vector_graph_rag.db",
+        milvus_token: Optional[str] = None,
+        milvus_db: Optional[str] = None,
+        entity_suffix: str = "vgrag_entities",
+        relation_suffix: str = "vgrag_relations",
+        passage_suffix: str = "vgrag_passages",
+    ) -> bool:
+        """
+        Delete a graph and all its collections.
+
+        Args:
+            graph_name: Name of the graph to delete (collection prefix).
+            milvus_uri: Milvus connection URI.
+            milvus_token: Milvus authentication token.
+            milvus_db: Milvus database name.
+            entity_suffix: Suffix for entity collections.
+            relation_suffix: Suffix for relation collections.
+            passage_suffix: Suffix for passage collections.
+
+        Returns:
+            True if at least one collection was deleted, False otherwise.
+        """
+        # Create a temporary client
+        client_kwargs: Dict[str, Any] = {"uri": milvus_uri}
+        if milvus_token:
+            client_kwargs["token"] = milvus_token
+        if milvus_db:
+            client_kwargs["db_name"] = milvus_db
+
+        client = MilvusClient(**client_kwargs)
+
+        # Collection names for this graph
+        entity_col = f"{graph_name}_{entity_suffix}"
+        relation_col = f"{graph_name}_{relation_suffix}"
+        passage_col = f"{graph_name}_{passage_suffix}"
+
+        deleted = False
+
+        # Delete each collection if it exists
+        for collection_name in [entity_col, relation_col, passage_col]:
+            try:
+                if client.has_collection(collection_name):
+                    client.drop_collection(collection_name)
+                    deleted = True
+            except Exception as e:
+                # Log error but continue with other collections
+                print(f"Error deleting collection {collection_name}: {e}")
+
+        return deleted
+
     def get_collection_stats(self) -> Dict[str, int]:
         """
         Get statistics for all collections.

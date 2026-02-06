@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 # Re-export Document from langchain_core for unified API
 from langchain_core.documents import Document
 
-__all__ = ["Document", "Triplet", "Entity", "Relation", "Passage", "QueryResult", "ExtractionResult"]
+__all__ = ["Document", "Triplet", "Entity", "Relation", "Passage", "QueryResult", "ExtractionResult", "EvictionResult"]
 
 
 class Triplet(BaseModel):
@@ -145,6 +145,21 @@ class RerankResult(BaseModel):
     selected_relation_texts: List[str] = Field(default_factory=list)
 
 
+class EvictionResult(BaseModel):
+    """
+    Result of eviction (when relations exceed threshold).
+
+    Attributes:
+        occurred: Whether eviction actually occurred.
+        before_count: Number of relations before eviction.
+        after_count: Number of relations after eviction.
+    """
+
+    occurred: bool = Field(default=False, description="Whether eviction occurred")
+    before_count: int = Field(default=0, description="Relations before eviction")
+    after_count: int = Field(default=0, description="Relations after eviction")
+
+
 class QueryResult(BaseModel):
     """
     Result of a Graph RAG query.
@@ -189,6 +204,9 @@ class QueryResult(BaseModel):
     )
     rerank_result: Optional[RerankResult] = Field(
         default=None, description="LLM rerank result"
+    )
+    eviction_result: Optional["EvictionResult"] = Field(
+        default=None, description="Eviction result if relations exceeded threshold"
     )
 
 

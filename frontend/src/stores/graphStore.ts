@@ -7,6 +7,7 @@ import type {
   NodeStatus,
   RetrievalDetail,
   RerankResult,
+  StepNodeStatus,
 } from '@/types/api'
 
 // Custom node data type with index signature for React Flow compatibility
@@ -30,6 +31,12 @@ export interface GraphEdgeData {
   object: string
   status: NodeStatus
   passageIds: string[]
+  // For handling multiple edges between same node pair
+  edgeIndex: number
+  totalEdges: number
+  // Status of connected nodes (to determine if label should be shown)
+  sourceNodeStatus: NodeStatus
+  targetNodeStatus: NodeStatus
   [key: string]: unknown
 }
 
@@ -43,10 +50,8 @@ interface GraphState {
   retrievalDetail: RetrievalDetail | null
   rerankResult: RerankResult | null
 
-  // Visibility filters based on timeline step
-  visibleEntityIds: Set<string>
-  visibleRelationIds: Set<string>
-  highlightIds: Set<string>
+  // Current step status for coloring
+  currentNodeStatus: StepNodeStatus | null
 
   // Selection state
   selectedNodeId: string | null
@@ -58,14 +63,52 @@ interface GraphState {
     retrievalDetail?: RetrievalDetail,
     rerankResult?: RerankResult
   ) => void
-  setVisibility: (
-    entityIds: string[],
-    relationIds: string[],
-    highlightIds?: string[]
-  ) => void
+  setStepStatus: (nodeStatus: StepNodeStatus) => void
   setSelectedNode: (nodeId: string | null) => void
   setHoveredNode: (nodeId: string | null) => void
   clearGraph: () => void
+}
+
+// Determine entity status based on current step's nodeStatus
+function getEntityStatus(
+  entityId: string,
+  nodeStatus: StepNodeStatus | null
+): NodeStatus {
+  if (!nodeStatus) return 'undiscovered'
+
+  // Check in order of priority
+  if (nodeStatus.seedEntityIds.includes(entityId)) {
+    return 'seed'
+  }
+  if (nodeStatus.expandedEntityIds.includes(entityId)) {
+    return 'expanded'
+  }
+
+  return 'undiscovered'
+}
+
+// Determine relation status based on current step's nodeStatus
+function getRelationStatus(
+  relationId: string,
+  nodeStatus: StepNodeStatus | null
+): NodeStatus {
+  if (!nodeStatus) return 'undiscovered'
+
+  // Check in order of priority (selected > filtered > expanded > seed > undiscovered)
+  if (nodeStatus.selectedRelationIds.includes(relationId)) {
+    return 'selected'
+  }
+  if (nodeStatus.filteredRelationIds.includes(relationId)) {
+    return 'filtered'
+  }
+  if (nodeStatus.seedRelationIds.includes(relationId)) {
+    return 'seed'
+  }
+  if (nodeStatus.expandedRelationIds.includes(relationId)) {
+    return 'expanded'
+  }
+
+  return 'undiscovered'
 }
 
 // Convert entity to React Flow node
@@ -92,7 +135,11 @@ function entityToNode(
 function relationToEdge(
   relation: Relation,
   status: NodeStatus,
-  entityMap: Map<string, Entity>
+  entityMap: Map<string, Entity>,
+  edgeIndex: number,
+  totalEdges: number,
+  sourceNodeStatus: NodeStatus,
+  targetNodeStatus: NodeStatus
 ): Edge<GraphEdgeData> | null {
   const [sourceId, targetId] = relation.entity_ids
   if (!entityMap.has(sourceId) || !entityMap.has(targetId)) {
@@ -113,38 +160,112 @@ function relationToEdge(
       object: relation.object,
       status,
       passageIds: relation.passage_ids,
+      edgeIndex,
+      totalEdges,
+      sourceNodeStatus,
+      targetNodeStatus,
     },
   }
 }
 
-// Determine node status based on retrieval detail and rerank result
-function getNodeStatus(
-  id: string,
-  retrievalDetail: RetrievalDetail | null,
-  rerankResult: RerankResult | null,
-  highlightIds: Set<string>
-): NodeStatus {
-  // Check if highlighted (current step's new additions)
-  if (highlightIds.has(id)) {
-    return 'selected'
-  }
+// Create a key for edge pairs (order-independent)
+function getEdgePairKey(sourceId: string, targetId: string): string {
+  return [sourceId, targetId].sort().join('|')
+}
 
-  // Check if it's a seed node
-  if (retrievalDetail) {
-    if (
-      retrievalDetail.entity_ids.includes(id) ||
-      retrievalDetail.relation_ids.includes(id)
-    ) {
-      return 'seed'
+// Build nodes and edges with given status
+function buildNodesAndEdges(
+  subgraph: SubGraph,
+  nodeStatus: StepNodeStatus | null
+): { nodes: Node<GraphNodeData>[]; edges: Edge<GraphEdgeData>[] } {
+  // Start with existing entities
+  const entityMap = new Map(subgraph.entities.map((e) => [e.id, e]))
+
+  // Track placeholder entities we need to create
+  const placeholderEntities = new Map<string, Entity>()
+
+  // First pass: find all missing entities referenced by relations
+  subgraph.relations.forEach((relation) => {
+    const [sourceId, targetId] = relation.entity_ids
+
+    // Create placeholder for missing source entity
+    if (!entityMap.has(sourceId) && !placeholderEntities.has(sourceId)) {
+      placeholderEntities.set(sourceId, {
+        id: sourceId,
+        name: relation.subject,
+        relation_ids: [],
+        passage_ids: [],
+      })
     }
-  }
 
-  // Check if selected by rerank
-  if (rerankResult?.selected_relation_ids.includes(id)) {
-    return 'selected'
-  }
+    // Create placeholder for missing target entity
+    if (!entityMap.has(targetId) && !placeholderEntities.has(targetId)) {
+      placeholderEntities.set(targetId, {
+        id: targetId,
+        name: relation.object,
+        relation_ids: [],
+        passage_ids: [],
+      })
+    }
+  })
 
-  return 'expanded'
+  // Merge placeholder entities into entityMap
+  placeholderEntities.forEach((entity, id) => {
+    entityMap.set(id, entity)
+  })
+
+  // Build all nodes with status (existing entities)
+  const nodes: Node<GraphNodeData>[] = subgraph.entities.map((entity) => {
+    const status = getEntityStatus(entity.id, nodeStatus)
+    return entityToNode(entity, status)
+  })
+
+  // Add placeholder nodes (always 'undiscovered' status since they're not in the subgraph's entity list)
+  placeholderEntities.forEach((entity) => {
+    nodes.push(entityToNode(entity, 'undiscovered'))
+  })
+
+  // Count edges between each pair of nodes (now all relations should have both endpoints)
+  const edgePairCounts = new Map<string, number>()
+  subgraph.relations.forEach((relation) => {
+    const [sourceId, targetId] = relation.entity_ids
+    const key = getEdgePairKey(sourceId, targetId)
+    edgePairCounts.set(key, (edgePairCounts.get(key) || 0) + 1)
+  })
+
+  // Track current index for each pair
+  const edgePairIndices = new Map<string, number>()
+
+  // Build a map of entity status for quick lookup
+  const entityStatusMap = new Map<string, NodeStatus>()
+  subgraph.entities.forEach((entity) => {
+    entityStatusMap.set(entity.id, getEntityStatus(entity.id, nodeStatus))
+  })
+  // Placeholder entities are always 'undiscovered'
+  placeholderEntities.forEach((_, id) => {
+    entityStatusMap.set(id, 'undiscovered')
+  })
+
+  // Build all edges with status and offset info
+  const edges: Edge<GraphEdgeData>[] = []
+  subgraph.relations.forEach((relation) => {
+    const [sourceId, targetId] = relation.entity_ids
+
+    const key = getEdgePairKey(sourceId, targetId)
+    const totalEdges = edgePairCounts.get(key) || 1
+    const edgeIndex = edgePairIndices.get(key) || 0
+    edgePairIndices.set(key, edgeIndex + 1)
+
+    const status = getRelationStatus(relation.id, nodeStatus)
+    const sourceNodeStatus = entityStatusMap.get(sourceId) || 'undiscovered'
+    const targetNodeStatus = entityStatusMap.get(targetId) || 'undiscovered'
+    const edge = relationToEdge(relation, status, entityMap, edgeIndex, totalEdges, sourceNodeStatus, targetNodeStatus)
+    if (edge) {
+      edges.push(edge)
+    }
+  })
+
+  return { nodes, edges }
 }
 
 export const useGraphStore = create<GraphState>((set, get) => ({
@@ -154,99 +275,50 @@ export const useGraphStore = create<GraphState>((set, get) => ({
   subgraph: null,
   retrievalDetail: null,
   rerankResult: null,
-  visibleEntityIds: new Set(),
-  visibleRelationIds: new Set(),
-  highlightIds: new Set(),
+  currentNodeStatus: null,
   selectedNodeId: null,
   hoveredNodeId: null,
 
   // Actions
   setSubgraph: (subgraph, retrievalDetail, rerankResult) => {
-    const entityMap = new Map(subgraph.entities.map((e) => [e.id, e]))
-    const highlightIds = new Set<string>()
+    // Build with all nodes visible (final step status)
+    const finalStatus: StepNodeStatus = {
+      seedEntityIds: retrievalDetail?.entity_ids || [],
+      seedRelationIds: retrievalDetail?.relation_ids || [],
+      expandedEntityIds: subgraph.entity_ids.filter(
+        id => !retrievalDetail?.entity_ids.includes(id)
+      ),
+      expandedRelationIds: subgraph.relation_ids.filter(
+        id => !retrievalDetail?.relation_ids.includes(id)
+      ),
+      filteredRelationIds: subgraph.relation_ids.filter(
+        id => !rerankResult?.selected_relation_ids.includes(id)
+      ),
+      selectedRelationIds: rerankResult?.selected_relation_ids || [],
+    }
 
-    // Build nodes
-    const nodes = subgraph.entities.map((entity) => {
-      const status = getNodeStatus(
-        entity.id,
-        retrievalDetail || null,
-        rerankResult || null,
-        highlightIds
-      )
-      return entityToNode(entity, status)
-    })
-
-    // Build edges
-    const edges: Edge<GraphEdgeData>[] = []
-    subgraph.relations.forEach((relation) => {
-      const status = getNodeStatus(
-        relation.id,
-        retrievalDetail || null,
-        rerankResult || null,
-        highlightIds
-      )
-      const edge = relationToEdge(relation, status, entityMap)
-      if (edge) {
-        edges.push(edge)
-      }
-    })
+    const { nodes, edges } = buildNodesAndEdges(subgraph, finalStatus)
 
     set({
       subgraph,
       retrievalDetail: retrievalDetail || null,
       rerankResult: rerankResult || null,
+      currentNodeStatus: finalStatus,
       nodes,
       edges,
-      visibleEntityIds: new Set(subgraph.entity_ids),
-      visibleRelationIds: new Set(subgraph.relation_ids),
-      highlightIds: new Set(),
     })
   },
 
-  setVisibility: (entityIds, relationIds, highlightIdsList) => {
-    const { subgraph, retrievalDetail, rerankResult } = get()
+  setStepStatus: (nodeStatus) => {
+    const { subgraph } = get()
     if (!subgraph) return
 
-    const visibleEntityIds = new Set(entityIds)
-    const visibleRelationIds = new Set(relationIds)
-    const highlightIds = new Set(highlightIdsList || [])
-
-    const entityMap = new Map(subgraph.entities.map((e) => [e.id, e]))
-
-    // Filter and rebuild nodes
-    const nodes = subgraph.entities
-      .filter((entity) => visibleEntityIds.has(entity.id))
-      .map((entity) => {
-        const status = highlightIds.has(entity.id)
-          ? 'selected'
-          : getNodeStatus(entity.id, retrievalDetail, rerankResult, new Set())
-        return entityToNode(entity, status)
-      })
-
-    // Filter and rebuild edges
-    const edges: Edge<GraphEdgeData>[] = []
-    subgraph.relations
-      .filter((relation) => visibleRelationIds.has(relation.id))
-      .forEach((relation) => {
-        // Only include edge if both endpoints are visible
-        const [sourceId, targetId] = relation.entity_ids
-        if (visibleEntityIds.has(sourceId) && visibleEntityIds.has(targetId)) {
-          const status = highlightIds.has(relation.id)
-            ? 'selected'
-            : getNodeStatus(relation.id, retrievalDetail, rerankResult, new Set())
-          const edge = relationToEdge(relation, status, entityMap)
-          if (edge) {
-            edges.push(edge)
-          }
-        }
-      })
+    const { nodes, edges } = buildNodesAndEdges(subgraph, nodeStatus)
 
     set({
+      currentNodeStatus: nodeStatus,
       nodes,
       edges,
-      visibleEntityIds,
-      visibleRelationIds,
-      highlightIds,
     })
   },
 
@@ -261,9 +333,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       subgraph: null,
       retrievalDetail: null,
       rerankResult: null,
-      visibleEntityIds: new Set(),
-      visibleRelationIds: new Set(),
-      highlightIds: new Set(),
+      currentNodeStatus: null,
       selectedNodeId: null,
       hoveredNodeId: null,
     }),

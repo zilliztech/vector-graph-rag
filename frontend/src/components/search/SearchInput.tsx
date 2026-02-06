@@ -3,12 +3,14 @@ import { Search, Loader2, X } from 'lucide-react'
 import { cn } from '@/utils/cn'
 import { useSearchStore } from '@/stores/searchStore'
 import { useGraphStore } from '@/stores/graphStore'
+import { useDatasetStore } from '@/stores/datasetStore'
 import { useSearch } from '@/api/queries'
 
 function SearchInput() {
   const [inputValue, setInputValue] = useState('')
   const { setQuery, setSearching, setResult, setError, reset } = useSearchStore()
   const { setSubgraph, clearGraph } = useGraphStore()
+  const { currentDataset } = useDatasetStore()
 
   const searchMutation = useSearch()
 
@@ -22,7 +24,10 @@ function SearchInput() {
     clearGraph()
 
     try {
-      const result = await searchMutation.mutateAsync({ question: query })
+      const result = await searchMutation.mutateAsync({
+        question: query,
+        graph_name: currentDataset || undefined,
+      })
       setResult(result)
       setSubgraph(result.subgraph, result.retrieval_detail, result.rerank_result)
     } catch (error) {
@@ -31,7 +36,7 @@ function SearchInput() {
     } finally {
       setSearching(false)
     }
-  }, [inputValue, searchMutation, setQuery, setSearching, setResult, setError, setSubgraph, clearGraph])
+  }, [inputValue, searchMutation, currentDataset, setQuery, setSearching, setResult, setError, setSubgraph, clearGraph])
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {

@@ -38,6 +38,11 @@ class RetrievalResult:
     query: str = ""
     query_entities: List[str] = field(default_factory=list)
 
+    # Eviction info (when relations exceed threshold)
+    eviction_before_count: int = 0
+    eviction_after_count: int = 0
+    eviction_occurred: bool = False
+
     def __post_init__(self):
         """Populate expanded relation fields from subgraph if available."""
         if self.subgraph and not self.expanded_relation_ids:
@@ -229,7 +234,7 @@ class GraphRetriever:
         query: str,
         expanded_relation_ids: List[str],
         relation_number_threshold: int,
-    ) -> Tuple[List[str], List[str]]:
+    ) -> Tuple[List[str], List[str], bool, int]:
         """
         Apply eviction strategy if expanded relations exceed threshold.
 
@@ -241,9 +246,11 @@ class GraphRetriever:
             relation_number_threshold: Maximum number of relations to keep.
 
         Returns:
-            Tuple of (filtered_relation_ids, filtered_relation_texts).
+            Tuple of (filtered_relation_ids, filtered_relation_texts, eviction_occurred, before_count).
         """
-        if len(expanded_relation_ids) <= relation_number_threshold:
+        before_count = len(expanded_relation_ids)
+
+        if before_count <= relation_number_threshold:
             # No eviction needed, fetch all relation texts
             ids_str = ", ".join(f'"{rid}"' for rid in expanded_relation_ids)
             filter_expr = f"id in [{ids_str}]"
@@ -255,10 +262,10 @@ class GraphRetriever:
             id_to_text = {r["id"]: r["text"] for r in results}
             # Sort by ID to match HippoRAG's behavior (Milvus client.get returns sorted by ID)
             sorted_ids = sorted(expanded_relation_ids)
-            return sorted_ids, [id_to_text.get(rid, "") for rid in sorted_ids]
+            return sorted_ids, [id_to_text.get(rid, "") for rid in sorted_ids], False, before_count
 
         # Eviction needed: use vector search to filter most relevant relations
-        print(f"Use Eviction Strategy. ({len(expanded_relation_ids)} -> {relation_number_threshold})")
+        print(f"Use Eviction Strategy. ({before_count} -> {relation_number_threshold})")
 
         query_embedding = self.embedding_model.embed(query)
         ids_str = ", ".join(f'"{rid}"' for rid in expanded_relation_ids)
@@ -275,7 +282,7 @@ class GraphRetriever:
         filtered_ids = [r["entity"]["id"] for r in search_results[:relation_number_threshold]]
         filtered_texts = [r["entity"]["text"] for r in search_results[:relation_number_threshold]]
 
-        return filtered_ids, filtered_texts
+        return filtered_ids, filtered_texts, True, before_count
 
     def retrieve(
         self,
@@ -334,7 +341,7 @@ class GraphRetriever:
 
         # Apply eviction strategy if needed
         threshold = relation_number_threshold or self.settings.relation_number_threshold
-        expanded_ids, expanded_texts = self._apply_eviction(
+        expanded_ids, expanded_texts, eviction_occurred, eviction_before = self._apply_eviction(
             query,
             list(subgraph.relation_ids),
             threshold,
@@ -352,6 +359,9 @@ class GraphRetriever:
             expanded_relation_texts=expanded_texts,
             query=query,
             query_entities=query_entities,
+            eviction_before_count=eviction_before,
+            eviction_after_count=len(expanded_ids),
+            eviction_occurred=eviction_occurred,
         )
 
     def retrieve_passages_naive(
