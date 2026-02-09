@@ -53,6 +53,17 @@ We compare against methods from HippoRAG papers:
 ¹ [HippoRAG: Neurobiologically Inspired Long-Term Memory for LLMs (NeurIPS 2024)](https://arxiv.org/abs/2405.14831)
 ² [From RAG to Memory: Non-Parametric Continual Learning for LLMs (2025)](https://arxiv.org/abs/2502.14802)
 
+## Pre-extracted Triplets
+
+For fair comparison with HippoRAG, we use **the same pre-extracted triplets** from HippoRAG's repository rather than re-extracting them. This ensures our evaluation isolates the **retrieval algorithm improvements** without interference from triplet extraction quality differences.
+
+The triplet files (`openie_*_results_*.json`) are sourced from [HippoRAG commit 5ddedf0](https://github.com/OSU-NLP-Group/HippoRAG/tree/5ddedf0f516c7bbed777ba54da680c8bb8fb8f84/output):
+- `openie_musique_results_ner_gpt-3.5-turbo-1106_11656.json`
+- `openie_hotpotqa_results_ner_gpt-3.5-turbo-1106_9221.json`
+- `openie_2wikimultihopqa_results_ner_gpt-3.5-turbo-1106_6119.json`
+
+These triplets were extracted using GPT-3.5-Turbo (1106) with HippoRAG's OpenIE pipeline. By using identical triplets, our benchmark results directly compare the retrieval algorithms.
+
 ## Reproduction Steps
 
 ### Prerequisites
@@ -76,7 +87,7 @@ evaluation/data/
 ├── hotpotqa_corpus.json
 ├── 2wikimultihopqa.json
 ├── 2wikimultihopqa_corpus.json
-└── openie_*_results_*.json  # Pre-extracted triplets
+└── openie_*_results_*.json  # Pre-extracted triplets from HippoRAG
 ```
 
 ### Running Evaluations
