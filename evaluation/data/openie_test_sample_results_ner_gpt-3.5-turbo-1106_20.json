@@ -1,0 +1,506 @@
+{
+    "docs": [
+        {
+            "title": "Albert Einstein",
+            "text": "Albert Einstein (1879-1955) was a German-born theoretical physicist. He published the special theory of relativity in 1905. The general theory of relativity was published in 1915. Einstein won the Nobel Prize in Physics in 1921.",
+            "passage": "Albert Einstein\nAlbert Einstein (1879-1955) was a German-born theoretical physicist. He published the special theory of relativity in 1905. The general theory of relativity was published in 1915. Einstein won the Nobel Prize in Physics in 1921.",
+            "extracted_entities": [
+                "Albert Einstein",
+                "theory of relativity",
+                "1905",
+                "1915",
+                "Nobel Prize"
+            ],
+            "extracted_triples": [
+                [
+                    "Albert Einstein",
+                    "published",
+                    "special theory of relativity"
+                ],
+                [
+                    "Albert Einstein",
+                    "published",
+                    "general theory of relativity"
+                ],
+                [
+                    "special theory of relativity",
+                    "published in",
+                    "1905"
+                ],
+                [
+                    "general theory of relativity",
+                    "published in",
+                    "1915"
+                ]
+            ]
+        },
+        {
+            "title": "Theory of Relativity",
+            "text": "The theory of relativity revolutionized physics. It consists of special relativity and general relativity. Special relativity deals with objects moving at constant speeds, while general relativity describes gravity.",
+            "passage": "Theory of Relativity\nThe theory of relativity revolutionized physics. It consists of special relativity and general relativity. Special relativity deals with objects moving at constant speeds, while general relativity describes gravity.",
+            "extracted_entities": [
+                "theory of relativity",
+                "physics",
+                "special relativity",
+                "general relativity"
+            ],
+            "extracted_triples": [
+                [
+                    "theory of relativity",
+                    "revolutionized",
+                    "physics"
+                ],
+                [
+                    "theory of relativity",
+                    "consists of",
+                    "special relativity"
+                ],
+                [
+                    "theory of relativity",
+                    "consists of",
+                    "general relativity"
+                ]
+            ]
+        },
+        {
+            "title": "Eiffel Tower",
+            "text": "The Eiffel Tower is located in Paris, France. It was completed in 1889. The tower is one of the most recognizable structures in the world and a symbol of France.",
+            "passage": "Eiffel Tower\nThe Eiffel Tower is located in Paris, France. It was completed in 1889. The tower is one of the most recognizable structures in the world and a symbol of France.",
+            "extracted_entities": [
+                "Eiffel Tower",
+                "Paris",
+                "France",
+                "1889"
+            ],
+            "extracted_triples": [
+                [
+                    "Eiffel Tower",
+                    "located in",
+                    "Paris"
+                ],
+                [
+                    "Eiffel Tower",
+                    "located in",
+                    "France"
+                ],
+                [
+                    "Eiffel Tower",
+                    "completed in",
+                    "1889"
+                ]
+            ]
+        },
+        {
+            "title": "Paris",
+            "text": "Paris is the capital city of France. It is known as the City of Light. Paris is famous for its art, culture, and landmarks like the Eiffel Tower and the Louvre Museum.",
+            "passage": "Paris\nParis is the capital city of France. It is known as the City of Light. Paris is famous for its art, culture, and landmarks like the Eiffel Tower and the Louvre Museum.",
+            "extracted_entities": [
+                "Paris",
+                "France",
+                "City of Light",
+                "Eiffel Tower",
+                "Louvre Museum"
+            ],
+            "extracted_triples": [
+                [
+                    "Paris",
+                    "is capital of",
+                    "France"
+                ],
+                [
+                    "Paris",
+                    "known as",
+                    "City of Light"
+                ]
+            ]
+        },
+        {
+            "title": "Sherlock Holmes",
+            "text": "Sherlock Holmes is a fictional detective created by Arthur Conan Doyle. The character first appeared in 1887. Holmes is known for his logical reasoning and attention to detail.",
+            "passage": "Sherlock Holmes\nSherlock Holmes is a fictional detective created by Arthur Conan Doyle. The character first appeared in 1887. Holmes is known for his logical reasoning and attention to detail.",
+            "extracted_entities": [
+                "Sherlock Holmes",
+                "Arthur Conan Doyle",
+                "1887"
+            ],
+            "extracted_triples": [
+                [
+                    "Arthur Conan Doyle",
+                    "created",
+                    "Sherlock Holmes"
+                ],
+                [
+                    "Sherlock Holmes",
+                    "appeared in",
+                    "1887"
+                ]
+            ]
+        },
+        {
+            "title": "Arthur Conan Doyle",
+            "text": "Arthur Conan Doyle was a British writer. He created the character Sherlock Holmes. Doyle wrote many stories featuring Holmes and his assistant Dr. Watson.",
+            "passage": "Arthur Conan Doyle\nArthur Conan Doyle was a British writer. He created the character Sherlock Holmes. Doyle wrote many stories featuring Holmes and his assistant Dr. Watson.",
+            "extracted_entities": [
+                "Arthur Conan Doyle",
+                "British writer",
+                "Sherlock Holmes",
+                "Dr. Watson"
+            ],
+            "extracted_triples": [
+                [
+                    "Arthur Conan Doyle",
+                    "created",
+                    "Sherlock Holmes"
+                ],
+                [
+                    "Arthur Conan Doyle",
+                    "wrote",
+                    "stories"
+                ]
+            ]
+        },
+        {
+            "title": "Steve Jobs",
+            "text": "Steve Jobs co-founded Apple Inc. in 1976. He was the CEO of Apple until 2011. Jobs was known for his innovation in personal computing and mobile devices.",
+            "passage": "Steve Jobs\nSteve Jobs co-founded Apple Inc. in 1976. He was the CEO of Apple until 2011. Jobs was known for his innovation in personal computing and mobile devices.",
+            "extracted_entities": [
+                "Steve Jobs",
+                "Apple Inc.",
+                "1976",
+                "2011"
+            ],
+            "extracted_triples": [
+                [
+                    "Steve Jobs",
+                    "co-founded",
+                    "Apple Inc."
+                ],
+                [
+                    "Steve Jobs",
+                    "co-founded in",
+                    "1976"
+                ],
+                [
+                    "Steve Jobs",
+                    "was CEO of",
+                    "Apple Inc."
+                ]
+            ]
+        },
+        {
+            "title": "Apple Inc.",
+            "text": "Apple Inc. is a technology company. The first iPhone was released in 2007. Apple is known for its innovative products including the iPhone, iPad, and Mac computers.",
+            "passage": "Apple Inc.\nApple Inc. is a technology company. The first iPhone was released in 2007. Apple is known for its innovative products including the iPhone, iPad, and Mac computers.",
+            "extracted_entities": [
+                "Apple Inc.",
+                "iPhone",
+                "2007",
+                "iPad",
+                "Mac"
+            ],
+            "extracted_triples": [
+                [
+                    "Apple Inc.",
+                    "released",
+                    "iPhone"
+                ],
+                [
+                    "iPhone",
+                    "released in",
+                    "2007"
+                ]
+            ]
+        },
+        {
+            "title": "Marie Curie",
+            "text": "Marie Curie was a Polish-French physicist. She discovered the elements polonium and radium. Curie was the first woman to win a Nobel Prize and the only person to win Nobel Prizes in two different sciences.",
+            "passage": "Marie Curie\nMarie Curie was a Polish-French physicist. She discovered the elements polonium and radium. Curie was the first woman to win a Nobel Prize and the only person to win Nobel Prizes in two different sciences.",
+            "extracted_entities": [
+                "Marie Curie",
+                "polonium",
+                "radium",
+                "Nobel Prize"
+            ],
+            "extracted_triples": [
+                [
+                    "Marie Curie",
+                    "discovered",
+                    "polonium"
+                ],
+                [
+                    "Marie Curie",
+                    "discovered",
+                    "radium"
+                ]
+            ]
+        },
+        {
+            "title": "Polonium",
+            "text": "Polonium is a chemical element with symbol Po. It was discovered by Marie Curie in 1898. Polonium is a radioactive element named after Curie's homeland of Poland.",
+            "passage": "Polonium\nPolonium is a chemical element with symbol Po. It was discovered by Marie Curie in 1898. Polonium is a radioactive element named after Curie's homeland of Poland.",
+            "extracted_entities": [
+                "Polonium",
+                "Po",
+                "Marie Curie",
+                "1898",
+                "Poland"
+            ],
+            "extracted_triples": [
+                [
+                    "Polonium",
+                    "has symbol",
+                    "Po"
+                ],
+                [
+                    "Marie Curie",
+                    "discovered",
+                    "Polonium"
+                ],
+                [
+                    "Polonium",
+                    "discovered in",
+                    "1898"
+                ]
+            ]
+        },
+        {
+            "title": "Solar System",
+            "text": "The solar system consists of the Sun and planets. Mercury is the closest planet to the Sun. The solar system also includes asteroids, comets, and other celestial bodies.",
+            "passage": "Solar System\nThe solar system consists of the Sun and planets. Mercury is the closest planet to the Sun. The solar system also includes asteroids, comets, and other celestial bodies.",
+            "extracted_entities": [
+                "solar system",
+                "Sun",
+                "planets",
+                "Mercury"
+            ],
+            "extracted_triples": [
+                [
+                    "solar system",
+                    "consists of",
+                    "Sun"
+                ],
+                [
+                    "solar system",
+                    "consists of",
+                    "planets"
+                ],
+                [
+                    "Mercury",
+                    "is closest to",
+                    "Sun"
+                ]
+            ]
+        },
+        {
+            "title": "Mercury",
+            "text": "Mercury is the smallest planet in the solar system. It orbits closest to the Sun. Mercury has extreme temperature variations due to its proximity to the Sun.",
+            "passage": "Mercury\nMercury is the smallest planet in the solar system. It orbits closest to the Sun. Mercury has extreme temperature variations due to its proximity to the Sun.",
+            "extracted_entities": [
+                "Mercury",
+                "solar system",
+                "Sun"
+            ],
+            "extracted_triples": [
+                [
+                    "Mercury",
+                    "is smallest planet in",
+                    "solar system"
+                ],
+                [
+                    "Mercury",
+                    "orbits closest to",
+                    "Sun"
+                ]
+            ]
+        },
+        {
+            "title": "Amazon Rainforest",
+            "text": "The Amazon rainforest is located in South America. It is the largest tropical rainforest in the world. The rainforest is home to millions of species of plants and animals.",
+            "passage": "Amazon Rainforest\nThe Amazon rainforest is located in South America. It is the largest tropical rainforest in the world. The rainforest is home to millions of species of plants and animals.",
+            "extracted_entities": [
+                "Amazon rainforest",
+                "South America"
+            ],
+            "extracted_triples": [
+                [
+                    "Amazon rainforest",
+                    "located in",
+                    "South America"
+                ]
+            ]
+        },
+        {
+            "title": "Amazon River",
+            "text": "The Amazon River is the longest river in South America. It flows through the Amazon rainforest. The river is one of the longest rivers in the world.",
+            "passage": "Amazon River\nThe Amazon River is the longest river in South America. It flows through the Amazon rainforest. The river is one of the longest rivers in the world.",
+            "extracted_entities": [
+                "Amazon River",
+                "South America",
+                "Amazon rainforest"
+            ],
+            "extracted_triples": [
+                [
+                    "Amazon River",
+                    "is longest river in",
+                    "South America"
+                ],
+                [
+                    "Amazon River",
+                    "flows through",
+                    "Amazon rainforest"
+                ]
+            ]
+        },
+        {
+            "title": "Mona Lisa",
+            "text": "The Mona Lisa is a famous painting by Leonardo da Vinci. It is displayed in the Louvre Museum in Paris. The painting is known for its mysterious smile and artistic technique.",
+            "passage": "Mona Lisa\nThe Mona Lisa is a famous painting by Leonardo da Vinci. It is displayed in the Louvre Museum in Paris. The painting is known for its mysterious smile and artistic technique.",
+            "extracted_entities": [
+                "Mona Lisa",
+                "Leonardo da Vinci",
+                "Louvre Museum",
+                "Paris"
+            ],
+            "extracted_triples": [
+                [
+                    "Leonardo da Vinci",
+                    "painted",
+                    "Mona Lisa"
+                ],
+                [
+                    "Mona Lisa",
+                    "displayed in",
+                    "Louvre Museum"
+                ]
+            ]
+        },
+        {
+            "title": "Leonardo da Vinci",
+            "text": "Leonardo da Vinci was an Italian Renaissance artist. He painted the Mona Lisa between 1503 and 1519. Da Vinci was also a scientist, inventor, and engineer.",
+            "passage": "Leonardo da Vinci\nLeonardo da Vinci was an Italian Renaissance artist. He painted the Mona Lisa between 1503 and 1519. Da Vinci was also a scientist, inventor, and engineer.",
+            "extracted_entities": [
+                "Leonardo da Vinci",
+                "Mona Lisa",
+                "1503",
+                "1519"
+            ],
+            "extracted_triples": [
+                [
+                    "Leonardo da Vinci",
+                    "painted",
+                    "Mona Lisa"
+                ],
+                [
+                    "Mona Lisa",
+                    "painted between",
+                    "1503"
+                ],
+                [
+                    "Mona Lisa",
+                    "painted between",
+                    "1519"
+                ]
+            ]
+        },
+        {
+            "title": "Mount Everest",
+            "text": "Mount Everest is located on the border between Nepal and China. It is the highest mountain in the world. The first successful ascent was in 1953 by Edmund Hillary and Tenzing Norgay.",
+            "passage": "Mount Everest\nMount Everest is located on the border between Nepal and China. It is the highest mountain in the world. The first successful ascent was in 1953 by Edmund Hillary and Tenzing Norgay.",
+            "extracted_entities": [
+                "Mount Everest",
+                "Nepal",
+                "China"
+            ],
+            "extracted_triples": [
+                [
+                    "Mount Everest",
+                    "located on border between",
+                    "Nepal"
+                ],
+                [
+                    "Mount Everest",
+                    "located on border between",
+                    "China"
+                ]
+            ]
+        },
+        {
+            "title": "Nepal",
+            "text": "Nepal is a country in South Asia. Kathmandu is the capital city of Nepal. Nepal is home to Mount Everest and many other Himalayan peaks.",
+            "passage": "Nepal\nNepal is a country in South Asia. Kathmandu is the capital city of Nepal. Nepal is home to Mount Everest and many other Himalayan peaks.",
+            "extracted_entities": [
+                "Nepal",
+                "South Asia",
+                "Kathmandu",
+                "Mount Everest"
+            ],
+            "extracted_triples": [
+                [
+                    "Nepal",
+                    "is country in",
+                    "South Asia"
+                ],
+                [
+                    "Kathmandu",
+                    "is capital of",
+                    "Nepal"
+                ]
+            ]
+        },
+        {
+            "title": "Laws of Motion",
+            "text": "The laws of motion were formulated by Isaac Newton. They describe the motion of objects and planets. Newton's three laws of motion are fundamental principles of classical mechanics.",
+            "passage": "Laws of Motion\nThe laws of motion were formulated by Isaac Newton. They describe the motion of objects and planets. Newton's three laws of motion are fundamental principles of classical mechanics.",
+            "extracted_entities": [
+                "laws of motion",
+                "Isaac Newton",
+                "objects",
+                "planets"
+            ],
+            "extracted_triples": [
+                [
+                    "Isaac Newton",
+                    "formulated",
+                    "laws of motion"
+                ],
+                [
+                    "laws of motion",
+                    "describe motion of",
+                    "objects"
+                ],
+                [
+                    "laws of motion",
+                    "describe motion of",
+                    "planets"
+                ]
+            ]
+        },
+        {
+            "title": "Isaac Newton",
+            "text": "Isaac Newton was an English physicist and mathematician. He formulated the laws of motion and universal gravitation. Newton's work laid the foundation for classical physics.",
+            "passage": "Isaac Newton\nIsaac Newton was an English physicist and mathematician. He formulated the laws of motion and universal gravitation. Newton's work laid the foundation for classical physics.",
+            "extracted_entities": [
+                "Isaac Newton",
+                "laws of motion",
+                "universal gravitation"
+            ],
+            "extracted_triples": [
+                [
+                    "Isaac Newton",
+                    "formulated",
+                    "laws of motion"
+                ],
+                [
+                    "Isaac Newton",
+                    "formulated",
+                    "universal gravitation"
+                ]
+            ]
+        }
+    ],
+    "ents_by_doc": {},
+    "avg_ent_chars": 15.2,
+    "avg_ent_words": 2.1,
+    "current_cost": 0.05,
+    "approx_total_cost": 0.05
+}
