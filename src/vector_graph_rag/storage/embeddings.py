@@ -177,14 +177,29 @@ class OpenAIEmbedding:
         if isinstance(texts, str):
             texts = [texts]
 
-        response = self.client.embeddings.create(model=self.model_name, input=texts)
+        # Filter out empty/whitespace-only texts (OpenAI API rejects them)
+        valid_indices = [i for i, t in enumerate(texts) if t and t.strip()]
+        valid_texts = [texts[i] for i in valid_indices]
+
+        if not valid_texts:
+            return np.zeros((len(texts), 1536))
+
+        response = self.client.embeddings.create(model=self.model_name, input=valid_texts)
         sorted_data = sorted(response.data, key=lambda x: x.index)
-        embeddings = np.array([item.embedding for item in sorted_data])
+        valid_embeddings = np.array([item.embedding for item in sorted_data])
 
         if normalize:
-            norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
-            embeddings = embeddings / norms
+            norms = np.linalg.norm(valid_embeddings, axis=1, keepdims=True)
+            valid_embeddings = valid_embeddings / norms
 
+        # Reassemble with zero vectors for empty texts
+        if len(valid_indices) == len(texts):
+            return valid_embeddings
+
+        dim = valid_embeddings.shape[1]
+        embeddings = np.zeros((len(texts), dim))
+        for idx, valid_idx in enumerate(valid_indices):
+            embeddings[valid_idx] = valid_embeddings[idx]
         return embeddings
 
 
