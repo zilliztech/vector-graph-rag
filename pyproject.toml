@@ -1,6 +1,6 @@
 [project]
 name = "vector-graph-rag"
-version = "0.1.0"
+version = "0.1.1"
 description = "A Graph RAG implementation using pure vector search with Milvus"
 readme = "README.md"
 license = { text = "MIT" }
@@ -36,6 +36,7 @@ dependencies = [
     "torch>=2.0.0",
     "langchain-core>=0.3.0",
     "python-multipart>=0.0.22",
+    "setuptools<71",  # Required for pkg_resources used by milvus-lite
 ]
 
 [project.optional-dependencies]
@@ -54,6 +55,7 @@ all = [
 loaders = [
     "markitdown[docx,pdf]>=0.1.4",
     "trafilatura>=2.0.0",
+    "lxml_html_clean",  # Required by trafilatura/justext
 ]
 
 # ==================== PyTorch Index Configuration ====================
