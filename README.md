@@ -73,26 +73,18 @@ pip install "vector-graph-rag[loaders]"
 
 ```python
 from vector_graph_rag import VectorGraphRAG
-from vector_graph_rag.loaders import URLFetcher, DocumentImporter
+from vector_graph_rag.loaders import DocumentImporter
 
-# Import from URLs
-fetcher = URLFetcher()
-result = fetcher.fetch_batch([
+# Import from URLs, PDFs, DOCX, etc. (with automatic chunking)
+importer = DocumentImporter(chunk_size=1000, chunk_overlap=200)
+result = importer.import_sources([
     "https://en.wikipedia.org/wiki/Albert_Einstein",
-    "https://example.com/article.html",
+    "/path/to/document.pdf",
+    "/path/to/report.docx",
 ])
 
 rag = VectorGraphRAG(milvus_uri="./my_graph.db")
 rag.add_documents(result.documents, extract_triplets=True)
-
-# Or import from files (PDF, DOCX, etc.) with chunking
-importer = DocumentImporter(chunk_size=1000, chunk_overlap=200)
-docs = importer.import_sources([
-    "/path/to/document.pdf",
-    "/path/to/report.docx",
-    "https://example.com/page",  # URLs also supported
-])
-rag.add_documents(docs.documents, extract_triplets=True)
 
 # Query
 result = rag.query("What did Einstein discover?")
