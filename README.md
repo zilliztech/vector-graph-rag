@@ -63,6 +63,42 @@ rag = VectorGraphRAG(
 
 > **Note:** Set `OPENAI_API_KEY` environment variable before running.
 
+### Import from URLs and Files
+
+Import web pages, PDFs, and other documents:
+
+```bash
+pip install "vector-graph-rag[loaders]"
+```
+
+```python
+from vector_graph_rag import VectorGraphRAG
+from vector_graph_rag.loaders import URLFetcher, DocumentImporter
+
+# Import from URLs
+fetcher = URLFetcher()
+result = fetcher.fetch_batch([
+    "https://en.wikipedia.org/wiki/Albert_Einstein",
+    "https://example.com/article.html",
+])
+
+rag = VectorGraphRAG(milvus_uri="./my_graph.db")
+rag.add_documents(result.documents, extract_triplets=True)
+
+# Or import from files (PDF, DOCX, etc.) with chunking
+importer = DocumentImporter(chunk_size=1000, chunk_overlap=200)
+docs = importer.import_sources([
+    "/path/to/document.pdf",
+    "/path/to/report.docx",
+    "https://example.com/page",  # URLs also supported
+])
+rag.add_documents(docs.documents, extract_triplets=True)
+
+# Query
+result = rag.query("What did Einstein discover?")
+print(result.answer)
+```
+
 ## 🔬 How It Works
 
 ### Indexing Pipeline
