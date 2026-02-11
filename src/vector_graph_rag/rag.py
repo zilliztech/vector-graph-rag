@@ -55,6 +55,8 @@ class VectorGraphRAG:
         self,
         settings: Optional[Settings] = None,
         milvus_uri: Optional[str] = None,
+        milvus_db: Optional[str] = None,
+        collection_prefix: Optional[str] = None,
         openai_api_key: Optional[str] = None,
         llm_model: Optional[str] = None,
         embedding_model: Optional[str] = None,
@@ -65,6 +67,8 @@ class VectorGraphRAG:
         Args:
             settings: Full settings object (overrides other parameters).
             milvus_uri: Milvus connection URI. Defaults to local file.
+            milvus_db: Milvus database name. Defaults to None (use server default).
+            collection_prefix: Prefix for collection names (e.g., graph/dataset name).
             openai_api_key: OpenAI API key. Uses environment variable if not provided.
             llm_model: LLM model name. Defaults to "gpt-4o-mini".
             embedding_model: Embedding model name. Defaults to "text-embedding-3-small".
@@ -78,6 +82,13 @@ class VectorGraphRAG:
             ...     milvus_uri="./my_data.db",
             ...     llm_model="gpt-4o",
             ... )
+            >>>
+            >>> # Separate graphs with collection prefix
+            >>> rag = VectorGraphRAG(
+            ...     milvus_uri="http://localhost:19530",
+            ...     milvus_db="my_database",
+            ...     collection_prefix="paper_a",
+            ... )
         """
         # Build settings
         if settings:
@@ -86,6 +97,10 @@ class VectorGraphRAG:
             settings_kwargs = {}
             if milvus_uri:
                 settings_kwargs["milvus_uri"] = milvus_uri
+            if milvus_db:
+                settings_kwargs["milvus_db"] = milvus_db
+            if collection_prefix:
+                settings_kwargs["collection_prefix"] = collection_prefix
             if openai_api_key:
                 settings_kwargs["openai_api_key"] = openai_api_key
             if llm_model:
@@ -697,6 +712,8 @@ class VectorGraphRAG:
 
 def create_rag(
     milvus_uri: Optional[str] = None,
+    milvus_db: Optional[str] = None,
+    collection_prefix: Optional[str] = None,
     openai_api_key: Optional[str] = None,
     llm_model: str = "gpt-4o-mini",
     embedding_model: str = "text-embedding-3-small",
@@ -708,6 +725,8 @@ def create_rag(
 
     Args:
         milvus_uri: Milvus connection URI. Defaults to local file.
+        milvus_db: Milvus database name. Defaults to None (use server default).
+        collection_prefix: Prefix for collection names (e.g., graph/dataset name).
         openai_api_key: OpenAI API key. Uses environment variable if not provided.
         llm_model: LLM model name.
         embedding_model: Embedding model name.
@@ -722,6 +741,8 @@ def create_rag(
     """
     return VectorGraphRAG(
         milvus_uri=milvus_uri,
+        milvus_db=milvus_db,
+        collection_prefix=collection_prefix,
         openai_api_key=openai_api_key,
         llm_model=llm_model,
         embedding_model=embedding_model,
