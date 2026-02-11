@@ -57,6 +57,9 @@ loaders = [
     "trafilatura>=2.0.0",
     "lxml_html_clean",  # Required by trafilatura/justext
 ]
+docs = [
+    "mkdocs-material>=9.0.0",
+]
 
 # ==================== PyTorch Index Configuration ====================
 # Define PyTorch indexes for different backends
@@ -87,7 +90,7 @@ torch = [
 
 [project.urls]
 Homepage = "https://github.com/zilliztech/vector-graph-rag"
-Documentation = "https://github.com/zilliztech/vector-graph-rag#readme"
+Documentation = "https://zilliztech.github.io/vector-graph-rag/"
 Repository = "https://github.com/zilliztech/vector-graph-rag"
 
 [build-system]
