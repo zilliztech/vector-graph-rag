@@ -33,14 +33,38 @@ print(result.answer)
 !!! note
     Set the `OPENAI_API_KEY` environment variable before running.
 
-## Custom Configuration
+## Configuration
+
+### Basic
 
 ```python
 rag = VectorGraphRAG(
-    milvus_uri="./my_data.db",
+    milvus_uri="./my_data.db",       # local file (Milvus Lite)
     llm_model="gpt-4o",
     embedding_model="text-embedding-3-large",
 )
+```
+
+### With Remote Milvus
+
+```python
+rag = VectorGraphRAG(
+    milvus_uri="http://localhost:19530",
+    milvus_db="my_database",           # optional: specify database
+    collection_prefix="my_project",    # optional: isolate collections
+)
+```
+
+Collections will be named `my_project_vgrag_entities`, `my_project_vgrag_relations`, `my_project_vgrag_passages`.
+
+### Multiple Knowledge Bases
+
+Use `collection_prefix` to maintain separate graphs in the same Milvus instance:
+
+```python
+# Different documents → different prefixes
+legal_rag = VectorGraphRAG(milvus_uri="./data.db", collection_prefix="legal")
+finance_rag = VectorGraphRAG(milvus_uri="./data.db", collection_prefix="finance")
 ```
 
 ## With Pre-extracted Triplets
@@ -61,7 +85,7 @@ rag.add_documents_with_triplets([
 
 ## Import from URLs and Files
 
-Import web pages, PDFs, and other documents:
+Import web pages, PDFs, and other documents with automatic chunking:
 
 ```bash
 pip install "vector-graph-rag[loaders]"
