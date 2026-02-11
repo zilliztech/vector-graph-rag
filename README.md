@@ -1,15 +1,15 @@
 # Vector Graph RAG
 
-🔗 A Graph RAG implementation using pure vector search with Milvus.
+Graph RAG with pure vector search — no graph database needed, single-pass LLM reranking, optimized for knowledge-intensive domains.
 
 ## ✨ Features
 
-- **🚀 No Graph Database Required** - Pure vector search approach, no need for Neo4j or other graph databases
-- **📦 Zero Configuration** - Uses Milvus Lite by default, works out of the box with a single file
-- **🎯 High Accuracy** - LLM-based reranking for precise relation filtering
-- **🔍 Multi-hop Reasoning** - Subgraph expansion enables complex multi-hop question answering
-- **📊 State-of-the-Art Performance** - Outperforms HippoRAG on multi-hop QA benchmarks (87.8% avg Recall@5)
-- **🛠️ Simple API** - Just 3 lines of code to get started
+- **No Graph Database Required** - Pure vector search with Milvus, no Neo4j or other graph databases needed
+- **Single-Pass LLM Reranking** - One LLM call to rerank, no iterative agent loops (unlike IRCoT or multi-step reflection)
+- **Knowledge-Intensive Friendly** - Optimized for domains with dense factual content: legal, finance, medical, literature, etc.
+- **Zero Configuration** - Uses Milvus Lite by default, works out of the box with a single file
+- **Multi-hop Reasoning** - Subgraph expansion enables complex multi-hop question answering
+- **State-of-the-Art Performance** - 87.8% avg Recall@5 on multi-hop QA benchmarks, outperforming HippoRAG
 
 ## 📦 Installation
 
