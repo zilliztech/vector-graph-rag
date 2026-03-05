@@ -113,3 +113,8 @@ flowchart TD
 | **HippoRAG** | No | 1-2 | No | Medium |
 | **Microsoft GraphRAG** | Yes (Neo4j) | Multiple | Yes | High |
 | **Vector Graph RAG** | **No** | **2** (rerank + generation) | **No** | **Low** |
+
+## Known Limitations
+
+- **LLM dependency** — Triplet extraction and reranking quality heavily depends on the underlying LLM's capability. Weaker models may produce incomplete or inaccurate triplets, which directly affects retrieval quality.
+- **Graph consistency** — The knowledge graph topology is maintained as a logical layer on top of Milvus via cross-referenced ID fields. Since Milvus does not support transactions, multi-step mutations (e.g., cascade deletes) are not atomic and may leave inconsistent state if interrupted. For best results, prefer batch construction via `add_documents()` over frequent incremental updates.
