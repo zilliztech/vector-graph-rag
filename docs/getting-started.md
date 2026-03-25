@@ -14,6 +14,16 @@
     uv add vector-graph-rag
     ```
 
+=== "With document loaders"
+
+    ```bash
+    pip install "vector-graph-rag[loaders]"
+    ```
+
+!!! note "Prerequisites"
+    - Python 3.9+
+    - An OpenAI API key (set `OPENAI_API_KEY` environment variable)
+
 ## Quick Start
 
 ```python
@@ -30,18 +40,18 @@ result = rag.query("What did Einstein develop?")
 print(result.answer)
 ```
 
-!!! note
-    Set the `OPENAI_API_KEY` environment variable before running.
+!!! tip "Zero configuration"
+    By default, Vector Graph RAG uses Milvus Lite — a local file-based vector database that requires no server setup. Your data is stored in `./vector_graph_rag.db`.
 
 ## Configuration
 
-### Basic
+### Basic Configuration
 
 ```python
 rag = VectorGraphRAG(
-    milvus_uri="./my_data.db",       # local file (Milvus Lite)
-    llm_model="gpt-4o",
-    embedding_model="text-embedding-3-large",
+    milvus_uri="./my_data.db",                    # local file (Milvus Lite)
+    llm_model="gpt-4o",                           # LLM for extraction and reranking
+    embedding_model="text-embedding-3-large",      # embedding model
 )
 ```
 
@@ -55,7 +65,28 @@ rag = VectorGraphRAG(
 )
 ```
 
-Collections will be named `my_project_vgrag_entities`, `my_project_vgrag_relations`, `my_project_vgrag_passages`.
+!!! info "Collection naming"
+    With `collection_prefix="my_project"`, collections are named `my_project_vgrag_entities`, `my_project_vgrag_relations`, `my_project_vgrag_passages`.
+
+### Environment Variables
+
+All settings can be configured via environment variables with the `VGRAG_` prefix:
+
+```bash
+export OPENAI_API_KEY="sk-..."
+export VGRAG_MILVUS_URI="http://localhost:19530"
+export VGRAG_LLM_MODEL="gpt-4o"
+export VGRAG_EMBEDDING_MODEL="text-embedding-3-large"
+export VGRAG_COLLECTION_PREFIX="my_project"
+```
+
+Or use a `.env` file in your project root:
+
+```ini
+OPENAI_API_KEY=sk-...
+VGRAG_MILVUS_URI=http://localhost:19530
+VGRAG_LLM_MODEL=gpt-4o
+```
 
 ### Multiple Knowledge Bases
 
@@ -67,7 +98,18 @@ legal_rag = VectorGraphRAG(milvus_uri="./data.db", collection_prefix="legal")
 finance_rag = VectorGraphRAG(milvus_uri="./data.db", collection_prefix="finance")
 ```
 
-## With Pre-extracted Triplets
+## Adding Documents
+
+### From Text Strings
+
+```python
+rag.add_texts([
+    "Einstein developed relativity at Princeton.",
+    "The theory changed modern physics.",
+])
+```
+
+### With Pre-extracted Triplets
 
 Skip LLM extraction if you already have knowledge graph triplets:
 
@@ -83,19 +125,13 @@ rag.add_documents_with_triplets([
 ])
 ```
 
-## Import from URLs and Files
+### From URLs and Files
 
 Import web pages, PDFs, and other documents with automatic chunking:
 
-```bash
-pip install "vector-graph-rag[loaders]"
-```
-
 ```python
-from vector_graph_rag import VectorGraphRAG
 from vector_graph_rag.loaders import DocumentImporter
 
-# Import from URLs, PDFs, DOCX, etc. (with automatic chunking)
 importer = DocumentImporter(chunk_size=1000, chunk_overlap=200)
 result = importer.import_sources([
     "https://en.wikipedia.org/wiki/Albert_Einstein",
@@ -105,27 +141,56 @@ result = importer.import_sources([
 
 rag = VectorGraphRAG(milvus_uri="./my_graph.db")
 rag.add_documents(result.documents, extract_triplets=True)
+```
 
-# Query
-result = rag.query("What did Einstein discover?")
-print(result.answer)
+!!! warning "Loader dependencies"
+    Install with `pip install "vector-graph-rag[loaders]"` to enable URL fetching and document conversion.
+
+## Querying
+
+### Full Query Result
+
+```python
+result = rag.query("What did Einstein develop?")
+print(result.answer)           # Generated answer
+print(result.query_entities)   # Extracted entities from question
+print(result.passages)         # Retrieved passages used for answer
+```
+
+### Simple String Answer
+
+```python
+answer = rag.query_simple("What did Einstein develop?")
+print(answer)  # Just the answer string
+```
+
+### Custom Retrieval Parameters
+
+```python
+result = rag.query(
+    "What did Einstein develop?",
+    entity_top_k=30,           # more entity candidates
+    relation_top_k=30,         # more relation candidates
+    expansion_degree=2,        # 2-hop expansion
+)
 ```
 
 ## REST API
 
-Run the API server for programmatic access:
+Run the API server for programmatic access or to power the frontend:
 
 ```bash
-uv sync --extra api
-uv run uvicorn api.main:app --host 0.0.0.0 --port 8000
+uv run uvicorn vector_graph_rag.api.app:app --host 0.0.0.0 --port 8000
 ```
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/health` | GET | Health check |
-| `/graphs` | GET | List available graphs |
-| `/stats` | GET | Get graph statistics |
-| `/query` | POST | Query the knowledge graph |
-| `/add_documents` | POST | Add documents |
+Interactive docs available at `http://localhost:8000/docs`.
 
-API docs are available at `http://localhost:8000/docs` after starting the server.
+See the [REST API Reference](rest-api.md) for full endpoint documentation.
+
+## Next Steps
+
+- **[How It Works](how-it-works.md)** — Understand the indexing and query pipelines
+- **[Design Philosophy](design-philosophy.md)** — Why pure vector search instead of graph databases
+- **[Python API](python-api.md)** — Complete API reference with all parameters
+- **[Use Cases](use-cases.md)** — Domain-specific examples and best practices
+- **[Frontend](frontend.md)** — Interactive graph visualization

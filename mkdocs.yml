@@ -9,22 +9,44 @@ theme:
   palette:
     - scheme: default
       primary: indigo
-      accent: indigo
+      accent: teal
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
     - scheme: slate
       primary: indigo
-      accent: indigo
+      accent: teal
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
   features:
     - content.code.copy
     - navigation.instant
+    - navigation.instant.progress
+    - navigation.tabs
+    - navigation.tabs.sticky
     - navigation.sections
     - navigation.top
     - search.highlight
+  icon:
+    repo: fontawesome/brands/github
+
+extra_css:
+  - stylesheets/custom.css
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Architecture:
+    - How It Works: how-it-works.md
+    - Design Philosophy: design-philosophy.md
+  - API Reference:
+    - Python API: python-api.md
+    - REST API: rest-api.md
+  - Frontend: frontend.md
+  - Evaluation: evaluation.md
+  - Use Cases: use-cases.md
+  - FAQ: faq.md
 
 markdown_extensions:
   - admonition
@@ -39,12 +61,11 @@ markdown_extensions:
           format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.tabbed:
       alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - tables
   - attr_list
-
-nav:
-  - Home: index.md
-  - Getting Started: getting-started.md
-  - How It Works: how-it-works.md
-  - Use Cases: use-cases.md
-  - Evaluation: evaluation.md
+  - md_in_html
+  - toc:
+      permalink: true
