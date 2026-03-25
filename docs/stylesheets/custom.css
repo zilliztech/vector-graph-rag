@@ -179,3 +179,95 @@
 .swatch-expanded { background: #3b82f6; }
 .swatch-selected { background: #10b981; }
 .swatch-filtered { background: #94a3b8; }
+
+/* ── Bar chart component ── */
+.bar-chart {
+  margin: 1.5rem 0;
+}
+.bar-group {
+  margin-bottom: 1.2rem;
+}
+.bar-group-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 0.4rem;
+  color: var(--vg-indigo);
+}
+[data-md-color-scheme="slate"] .bar-group-label {
+  color: var(--vg-teal-glow);
+}
+.bar-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.25rem;
+  gap: 0.5rem;
+}
+.bar-label {
+  width: 130px;
+  flex-shrink: 0;
+  font-size: 0.82rem;
+  text-align: right;
+  color: #555;
+}
+[data-md-color-scheme="slate"] .bar-label {
+  color: #aab2c0;
+}
+.bar-track {
+  flex: 1;
+  height: 26px;
+  background: var(--vg-surface);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--vg-border);
+  position: relative;
+}
+[data-md-color-scheme="slate"] .bar-track {
+  background: #2a2e42;
+  border-color: #3a3f55;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 4px 0 0 4px;
+  display: flex;
+  align-items: center;
+  padding-left: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: white;
+  transition: width 0.6s ease;
+}
+.bar-fill.naive {
+  background: linear-gradient(90deg, #90a4ae, #78909c);
+}
+.bar-fill.ours {
+  background: linear-gradient(90deg, var(--vg-teal), var(--vg-teal-dim));
+}
+.bar-value {
+  font-size: 0.82rem;
+  font-weight: 600;
+  width: 52px;
+  flex-shrink: 0;
+  text-align: left;
+}
+.bar-value.naive { color: #78909c; }
+.bar-value.ours { color: var(--vg-teal-dim); }
+[data-md-color-scheme="slate"] .bar-value.naive { color: #b0bec5; }
+[data-md-color-scheme="slate"] .bar-value.ours { color: var(--vg-teal-glow); }
+.bar-legend {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+}
+.bar-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.bar-legend-color {
+  width: 16px;
+  height: 12px;
+  border-radius: 2px;
+}
+.bar-legend-color.naive { background: #90a4ae; }
+.bar-legend-color.ours { background: var(--vg-teal); }
