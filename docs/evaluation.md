@@ -20,13 +20,20 @@ Vector Graph RAG is evaluated on three standard multi-hop QA benchmarks used in 
 ### Recall@5 vs. Naive RAG
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#3949ab', 'secondaryColor': '#00bcd4'}}}%%
+---
+config:
+    xyChart:
+        width: 700
+        height: 400
+    themeVariables:
+        xyChart:
+            backgroundColor: "transparent"
+---
 xychart-beta
-    title "Recall@5 Comparison"
-    x-axis ["MuSiQue", "HotpotQA", "2WikiMultiHopQA", "Average"]
+    title "Recall@5: Naive RAG vs Vector Graph RAG"
+    x-axis ["MuSiQue (Naive)", "MuSiQue (Ours)", "HotpotQA (Naive)", "HotpotQA (Ours)", "2Wiki (Naive)", "2Wiki (Ours)", "Avg (Naive)", "Avg (Ours)"]
     y-axis "Recall@5 (%)" 40 --> 100
-    bar [55.6, 90.8, 73.7, 73.4]
-    bar [73.0, 96.3, 94.1, 87.8]
+    bar [55.6, 73.0, 90.8, 96.3, 73.7, 94.1, 73.4, 87.8]
 ```
 
 | Method | MuSiQue | HotpotQA | 2WikiMultiHopQA | Average |
@@ -42,14 +49,14 @@ xychart-beta
 
 | Method | MuSiQue | HotpotQA | 2WikiMultiHopQA | Average |
 |--------|---------|----------|-----------------|---------|
-| HippoRAG (ColBERTv2)^1^ | 51.9% | 77.7% | 89.1% | 72.9% |
-| IRCoT + HippoRAG^1^ | 57.6% | 83.0% | 93.9% | 78.2% |
-| NV-Embed-v2^2^ | 69.7% | 94.5% | 76.5% | 80.2% |
-| HippoRAG 2^2^ | **74.7%** | **96.3%** | 90.4% | 87.1% |
+| HippoRAG (ColBERTv2)[^1] | 51.9% | 77.7% | 89.1% | 72.9% |
+| IRCoT + HippoRAG[^1] | 57.6% | 83.0% | 93.9% | 78.2% |
+| NV-Embed-v2[^2] | 69.7% | 94.5% | 76.5% | 80.2% |
+| HippoRAG 2[^2] | **74.7%** | **96.3%** | 90.4% | 87.1% |
 | **Vector Graph RAG** | 73.0% | **96.3%** | **94.1%** | **87.8%** |
 
-^1^ [HippoRAG: Neurobiologically Inspired Long-Term Memory for LLMs (NeurIPS 2024)](https://arxiv.org/abs/2405.14831)
-^2^ [From RAG to Memory: Non-Parametric Continual Learning for LLMs (2025)](https://arxiv.org/abs/2502.14802)
+[^1]: [HippoRAG: Neurobiologically Inspired Long-Term Memory for LLMs (NeurIPS 2024)](https://arxiv.org/abs/2405.14831)
+[^2]: [From RAG to Memory: Non-Parametric Continual Learning for LLMs (2025)](https://arxiv.org/abs/2502.14802)
 
 !!! note "Analysis"
     - **Best average performance** (87.8%) among all compared methods
