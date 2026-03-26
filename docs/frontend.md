@@ -2,7 +2,7 @@
 
 The Vector Graph RAG frontend provides an interactive visualization of the graph retrieval process, allowing users to explore each step of the pipeline and inspect individual entities and relations in real time.
 
-![Query result with graph visualization](assets/screenshots/query-result.png)
+![Vector Graph RAG Demo](https://github.com/user-attachments/assets/1185b651-ed72-4408-9dcd-25a74b12835b)
 
 ## Overview
 
@@ -37,25 +37,25 @@ flowchart TD
 
 Vector similarity search finds the initial set of entities and relations that best match the user's query. These appear as **orange nodes** on the graph canvas. This is the starting point for graph exploration — the "seeds" from which the subgraph will grow.
 
-![Step 1: Retrieve Seeds — orange nodes show initial matches](assets/screenshots/step1-seeds.png)
+![Step 1: Retrieve Seeds — orange nodes show initial matches](https://github.com/user-attachments/assets/ed58be59-f5ae-4ad6-9226-60da5cbc5df3)
 
 ### Step 2: Expand Subgraph
 
 Graph traversal expands outward from the seed entities, discovering connected entities and relations through the knowledge graph structure stored in Milvus. Newly discovered nodes appear as **blue nodes**, while seed nodes remain orange. This step captures the broader context surrounding the initial matches.
 
-![Step 2: Expand Subgraph — blue nodes show discovered entities](assets/screenshots/step2-expand.png)
+![Step 2: Expand Subgraph — blue nodes show discovered entities](https://github.com/user-attachments/assets/c9576c74-1788-4e87-89d9-d2cdcd8ebd08)
 
 ### Step 3: LLM Rerank
 
 The LLM evaluates all candidate relations from the expanded subgraph and selects the most relevant ones for answering the query. **Green edges** highlight the chosen paths, while **gray dashed lines** indicate relations that were considered but not selected. This single-pass reranking avoids the cost of iterative retrieval.
 
-![Step 3: LLM Rerank — green edges show selected relations](assets/screenshots/step3-rerank.png)
+![Step 3: LLM Rerank — green edges show selected relations](https://github.com/user-attachments/assets/55a785a6-a925-4798-99af-400f23168d89)
 
 ### Step 4: Generate Answer
 
 Using the selected relations as context, the LLM generates the final natural language answer. The answer appears in the **Answer Panel** alongside the graph visualization, giving users full transparency into what information was used.
 
-![Step 4: Generate Answer — final result with answer panel](assets/screenshots/step4-answer.png)
+![Step 4: Generate Answer — final result with answer panel](https://github.com/user-attachments/assets/8cc8e594-aed7-4ef5-8c3b-e5ff54275b64)
 
 ---
 
