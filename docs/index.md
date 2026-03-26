@@ -1,8 +1,10 @@
+<div style="text-align: center; margin-bottom: 1rem;">
+  <img src="assets/logo.svg" alt="Vector Graph RAG" width="140">
+</div>
+
 # Vector Graph RAG
 
 **Graph RAG with pure vector search** — no graph database needed, single-pass LLM reranking, optimized for knowledge-intensive domains.
-
-<!-- TODO: Add hero screenshot via GitHub image hosting -->
 
 ## Why Vector Graph RAG?
 

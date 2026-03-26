@@ -28,6 +28,8 @@ theme:
     - navigation.sections
     - navigation.top
     - search.highlight
+  logo: assets/logo.svg
+  favicon: assets/logo.png
   icon:
     repo: fontawesome/brands/github
 

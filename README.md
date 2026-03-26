@@ -1,4 +1,6 @@
 <h1 align="center">
+  <img src="https://github.com/user-attachments/assets/60afcee1-049a-4d2c-845d-8953b4fae083" alt="" width="120" valign="middle">
+  <br>
   Vector Graph RAG
 </h1>
 
