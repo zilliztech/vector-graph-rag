@@ -183,11 +183,11 @@ Evaluated on three multi-hop QA benchmarks (Recall@5):
 
 Vector Graph RAG supports three Milvus deployment modes — just change `milvus_uri`:
 
-| Mode | `milvus_uri` | Best for |
-|------|-------------|----------|
-| **Milvus Lite** (default) | `./vector_graph_rag.db` | Personal use, dev — zero config |
-| **Milvus Server** | `http://localhost:19530` | Multi-dataset, team environments |
-| ⭐ **Zilliz Cloud** | `https://in03-xxx.api.gcp-us-west1.zillizcloud.com` | Production, fully managed — [free tier available](https://cloud.zilliz.com/signup?utm_source=github&utm_medium=referral&utm_campaign=vector-graph-rag-readme) |
+| Mode | `milvus_uri` | `milvus_token` | Best for |
+|------|-------------|----------------|----------|
+| **Milvus Lite** (default) | `./vector_graph_rag.db` | — | Personal use, dev — zero config |
+| **Milvus Server** | `http://localhost:19530` | Optional | Multi-dataset, team environments |
+| ⭐ **Zilliz Cloud** | `https://in03-xxx.api.gcp-us-west1.zillizcloud.com` | API key | Production, fully managed — [free tier available](https://cloud.zilliz.com/signup?utm_source=github&utm_medium=referral&utm_campaign=vector-graph-rag-readme) |
 
 > **Recommended:** [Zilliz Cloud](https://cloud.zilliz.com/signup?utm_source=github&utm_medium=referral&utm_campaign=vector-graph-rag-readme) gives you zero-config, zero-ops Milvus with concurrent access and real-time indexing — no Docker needed.
 

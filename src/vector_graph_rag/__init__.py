@@ -18,7 +18,7 @@ from vector_graph_rag.llm.reranker import LLMReranker
 from vector_graph_rag.rag import VectorGraphRAG, create_rag
 from vector_graph_rag.llm.cache import LLMCache, get_llm_cache
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 __all__ = [
     "Settings",

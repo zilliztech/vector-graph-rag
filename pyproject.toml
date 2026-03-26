@@ -22,7 +22,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "pymilvus>=2.4.0",
+    "pymilvus>=2.4.0,<2.6.10",
     "milvus-lite>=2.4.0",
     "numpy>=1.24.0",
     "scipy>=1.10.0",

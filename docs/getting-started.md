@@ -65,6 +65,26 @@ rag = VectorGraphRAG(
 )
 ```
 
+### With Zilliz Cloud
+
+```python
+rag = VectorGraphRAG(
+    milvus_uri="https://in03-xxx.api.gcp-us-west1.zillizcloud.com",
+    milvus_token="your-api-key",
+)
+```
+
+!!! tip "Free tier available"
+    [Sign up for Zilliz Cloud](https://cloud.zilliz.com/signup?utm_source=github&utm_medium=referral&utm_campaign=vector-graph-rag-docs) to get a free cluster. Use the cluster endpoint as `milvus_uri` and your API key as `milvus_token`.
+
+### Milvus Deployment Modes
+
+| Mode | `milvus_uri` | `milvus_token` | Best for |
+|------|-------------|----------------|----------|
+| **Milvus Lite** (default) | `./vector_graph_rag.db` | — | Personal use, dev — zero config |
+| **Milvus Server** | `http://localhost:19530` | Optional | Multi-dataset, team environments |
+| ⭐ **Zilliz Cloud** | `https://in03-xxx.api.gcp-us-west1.zillizcloud.com` | API key | Production, fully managed |
+
 !!! info "Collection naming"
     With `collection_prefix="my_project"`, collections are named `my_project_vgrag_entities`, `my_project_vgrag_relations`, `my_project_vgrag_passages`.
 
