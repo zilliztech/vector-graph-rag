@@ -19,68 +19,7 @@ Vector Graph RAG is evaluated on three standard multi-hop QA benchmarks used in 
 
 ### Recall@5 vs. Naive RAG
 
-<div class="bar-chart" markdown>
-<div class="bar-legend">
-  <div class="bar-legend-item"><div class="bar-legend-color naive"></div> Naive RAG</div>
-  <div class="bar-legend-item"><div class="bar-legend-color ours"></div> Vector Graph RAG</div>
-</div>
-
-<div class="bar-group">
-  <div class="bar-group-label">MuSiQue</div>
-  <div class="bar-row">
-    <div class="bar-label">Naive RAG</div>
-    <div class="bar-track"><div class="bar-fill naive" style="width: 55.6%"></div></div>
-    <div class="bar-value naive">55.6%</div>
-  </div>
-  <div class="bar-row">
-    <div class="bar-label">Vector Graph RAG</div>
-    <div class="bar-track"><div class="bar-fill ours" style="width: 73.0%"></div></div>
-    <div class="bar-value ours">73.0%</div>
-  </div>
-</div>
-
-<div class="bar-group">
-  <div class="bar-group-label">HotpotQA</div>
-  <div class="bar-row">
-    <div class="bar-label">Naive RAG</div>
-    <div class="bar-track"><div class="bar-fill naive" style="width: 90.8%"></div></div>
-    <div class="bar-value naive">90.8%</div>
-  </div>
-  <div class="bar-row">
-    <div class="bar-label">Vector Graph RAG</div>
-    <div class="bar-track"><div class="bar-fill ours" style="width: 96.3%"></div></div>
-    <div class="bar-value ours">96.3%</div>
-  </div>
-</div>
-
-<div class="bar-group">
-  <div class="bar-group-label">2WikiMultiHopQA</div>
-  <div class="bar-row">
-    <div class="bar-label">Naive RAG</div>
-    <div class="bar-track"><div class="bar-fill naive" style="width: 73.7%"></div></div>
-    <div class="bar-value naive">73.7%</div>
-  </div>
-  <div class="bar-row">
-    <div class="bar-label">Vector Graph RAG</div>
-    <div class="bar-track"><div class="bar-fill ours" style="width: 94.1%"></div></div>
-    <div class="bar-value ours">94.1%</div>
-  </div>
-</div>
-
-<div class="bar-group">
-  <div class="bar-group-label">Average</div>
-  <div class="bar-row">
-    <div class="bar-label">Naive RAG</div>
-    <div class="bar-track"><div class="bar-fill naive" style="width: 73.4%"></div></div>
-    <div class="bar-value naive">73.4%</div>
-  </div>
-  <div class="bar-row">
-    <div class="bar-label">Vector Graph RAG</div>
-    <div class="bar-track"><div class="bar-fill ours" style="width: 87.8%"></div></div>
-    <div class="bar-value ours">87.8%</div>
-  </div>
-</div>
-</div>
+![Recall@5: Naive RAG vs Vector Graph RAG](https://github.com/user-attachments/assets/221a0c8d-a414-4234-ac8b-ba4223aaa2cc)
 
 | Method | MuSiQue | HotpotQA | 2WikiMultiHopQA | Average |
 |--------|---------|----------|-----------------|---------|
@@ -92,6 +31,8 @@ Vector Graph RAG is evaluated on three standard multi-hop QA benchmarks used in 
     Vector Graph RAG improves over Naive RAG by **+19.6% on average**, with the largest gains on datasets requiring cross-document reasoning (MuSiQue +31.4%, 2WikiMultiHopQA +27.7%).
 
 ### Comparison with State-of-the-Art
+
+![Recall@5: Comparison with State-of-the-Art](https://github.com/user-attachments/assets/77ba6c59-aac2-4290-be54-e3ee1c8d53ca)
 
 | Method | MuSiQue | HotpotQA | 2WikiMultiHopQA | Average |
 |--------|---------|----------|-----------------|---------|

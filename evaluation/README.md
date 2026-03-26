@@ -32,6 +32,8 @@ We use **Recall@K** as the primary metric, measuring whether the ground-truth su
 
 ### Recall@5 Comparison with Baselines
 
+![Recall@5: Naive RAG vs Vector Graph RAG](https://github.com/user-attachments/assets/221a0c8d-a414-4234-ac8b-ba4223aaa2cc)
+
 | Method | MuSiQue | HotpotQA | 2WikiMultiHopQA | Average |
 |--------|---------|----------|-----------------|---------|
 | Naive RAG | 55.6% | 90.8% | 73.7% | 73.4% |
@@ -41,6 +43,8 @@ We use **Recall@K** as the primary metric, measuring whether the ground-truth su
 ### Comparison with State-of-the-Art
 
 We compare against methods from HippoRAG papers:
+
+![Recall@5: Comparison with State-of-the-Art](https://github.com/user-attachments/assets/77ba6c59-aac2-4290-be54-e3ee1c8d53ca)
 
 | Method | MuSiQue | HotpotQA | 2WikiMultiHopQA | Average |
 |--------|---------|----------|-----------------|---------|

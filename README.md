@@ -162,6 +162,10 @@ Question → Entity Extraction → Vector Search → Subgraph Expansion → LLM 
 
 Evaluated on three multi-hop QA benchmarks (Recall@5):
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/221a0c8d-a414-4234-ac8b-ba4223aaa2cc" alt="Recall@5: Naive RAG vs Vector Graph RAG" width="700">
+</p>
+
 | Method | MuSiQue | HotpotQA | 2WikiMultiHopQA | Average |
 |--------|---------|----------|-----------------|---------|
 | Naive RAG | 55.6% | 90.8% | 73.7% | 73.4% |
