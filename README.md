@@ -222,6 +222,10 @@ uv run uvicorn vector_graph_rag.api.app:app --host 0.0.0.0 --port 8000
 cd frontend && npm install && npm run dev
 ```
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/8cc8e594-aed7-4ef5-8c3b-e5ff54275b64" alt="Frontend — interactive graph visualization with 4-step retrieval" width="800">
+</p>
+
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/api/health` | GET | Health check |
