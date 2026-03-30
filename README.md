@@ -181,15 +181,22 @@ Evaluated on three multi-hop QA benchmarks (Recall@5):
 
 ## 🗄️ Milvus Backend
 
-Vector Graph RAG supports three Milvus deployment modes — just change `milvus_uri`:
+Just change `milvus_uri` to switch between deployment modes:
 
-| Mode | `milvus_uri` | `milvus_token` | Best for |
-|------|-------------|----------------|----------|
-| **Milvus Lite** (default) | `./vector_graph_rag.db` | — | Personal use, dev — zero config |
-| **Milvus Server** | `http://localhost:19530` | Optional | Multi-dataset, team environments |
-| ⭐ **Zilliz Cloud** | `https://in03-xxx.api.gcp-us-west1.zillizcloud.com` | API key | Production, fully managed — [free tier available](https://cloud.zilliz.com/signup?utm_source=github&utm_medium=referral&utm_campaign=vector-graph-rag-readme) |
+**Milvus Lite** (default) — zero config, no services to start, data stored in a local file:
 
-> **Recommended:** [Zilliz Cloud](https://cloud.zilliz.com/signup?utm_source=github&utm_medium=referral&utm_campaign=vector-graph-rag-readme) gives you zero-config, zero-ops Milvus with concurrent access and real-time indexing — no Docker needed.
+```python
+rag = VectorGraphRAG(milvus_uri="./my_graph.db")  # just works
+```
+
+⭐ **Zilliz Cloud** — fully managed, no Docker needed, [free tier available](https://cloud.zilliz.com/signup?utm_source=github&utm_medium=referral&utm_campaign=vector-graph-rag-readme):
+
+```python
+rag = VectorGraphRAG(
+    milvus_uri="https://in03-xxx.api.gcp-us-west1.zillizcloud.com",
+    milvus_token="your-api-key",
+)
+```
 
 <details>
 <summary>Sign up for a free Zilliz Cloud cluster 👈</summary>
@@ -198,13 +205,21 @@ You can [sign up](https://cloud.zilliz.com/signup?utm_source=github&utm_medium=r
 
 ![Sign up and get API key](https://raw.githubusercontent.com/zilliztech/CodeIndexer/master/assets/signup_and_get_apikey.png)
 
-Use your endpoint as `milvus_uri` and your API key as `milvus_token`:
+</details>
+
+<details>
+<summary>Self-hosted Milvus Server (Docker)</summary>
+
+For multi-user or team environments, you can run a standalone Milvus instance:
+
+```bash
+# Start Milvus with Docker
+wget https://github.com/milvus-io/milvus/releases/download/v2.5.8/milvus-standalone-docker-compose.yml -O docker-compose.yml
+docker compose up -d
+```
 
 ```python
-rag = VectorGraphRAG(
-    milvus_uri="https://in03-xxx.api.gcp-us-west1.zillizcloud.com",
-    milvus_token="your-api-key",
-)
+rag = VectorGraphRAG(milvus_uri="http://localhost:19530")
 ```
 
 </details>
