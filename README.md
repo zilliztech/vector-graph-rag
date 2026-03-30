@@ -189,7 +189,7 @@ Just change `milvus_uri` to switch between deployment modes:
 rag = VectorGraphRAG(milvus_uri="./my_graph.db")  # just works
 ```
 
-⭐ **Zilliz Cloud** — fully managed, [free tier available](https://cloud.zilliz.com/signup?utm_source=github&utm_medium=referral&utm_campaign=vector-graph-rag-readme) 👇:
+⭐ **Zilliz Cloud** — fully managed, [free tier available](https://cloud.zilliz.com/signup?utm_source=github&utm_medium=referral&utm_campaign=vector-graph-rag-readme) — [sign up](https://cloud.zilliz.com/signup?utm_source=github&utm_medium=referral&utm_campaign=vector-graph-rag-readme) 👇:
 
 ```python
 rag = VectorGraphRAG(
@@ -199,7 +199,7 @@ rag = VectorGraphRAG(
 ```
 
 <details>
-<summary>Sign up for a free Zilliz Cloud cluster</summary>
+<summary>⭐ Sign up for a free Zilliz Cloud cluster</summary>
 
 You can [sign up](https://cloud.zilliz.com/signup?utm_source=github&utm_medium=referral&utm_campaign=vector-graph-rag-readme) on Zilliz Cloud to get a free cluster and API key.
 
@@ -208,15 +208,9 @@ You can [sign up](https://cloud.zilliz.com/signup?utm_source=github&utm_medium=r
 </details>
 
 <details>
-<summary>Self-hosted Milvus Server (Docker)</summary>
+<summary>Self-hosted Milvus Server (Docker) — for advanced users</summary>
 
-For multi-user or team environments, you can run a standalone Milvus instance:
-
-```bash
-# Start Milvus with Docker
-wget https://github.com/milvus-io/milvus/releases/download/v2.5.8/milvus-standalone-docker-compose.yml -O docker-compose.yml
-docker compose up -d
-```
+If you need a dedicated Milvus instance for multi-user or team environments, you can deploy Milvus standalone with Docker Compose. This requires Docker and some infrastructure knowledge. See the [official installation guide](https://milvus.io/docs/install_standalone-docker-compose.md) for detailed steps.
 
 ```python
 rag = VectorGraphRAG(milvus_uri="http://localhost:19530")
