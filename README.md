@@ -183,13 +183,13 @@ Evaluated on three multi-hop QA benchmarks (Recall@5):
 
 Just change `milvus_uri` to switch between deployment modes:
 
-**Milvus Lite** (default) — zero config, no services to start, data stored in a local file:
+**Milvus Lite** (default) — zero config, single-process, data stored in a local file. Great for prototyping and small datasets:
 
 ```python
 rag = VectorGraphRAG(milvus_uri="./my_graph.db")  # just works
 ```
 
-⭐ **Zilliz Cloud** — fully managed, no Docker needed, [free tier available](https://cloud.zilliz.com/signup?utm_source=github&utm_medium=referral&utm_campaign=vector-graph-rag-readme):
+⭐ **Zilliz Cloud** — fully managed, [free tier available](https://cloud.zilliz.com/signup?utm_source=github&utm_medium=referral&utm_campaign=vector-graph-rag-readme) 👇:
 
 ```python
 rag = VectorGraphRAG(
@@ -199,7 +199,7 @@ rag = VectorGraphRAG(
 ```
 
 <details>
-<summary>Sign up for a free Zilliz Cloud cluster 👈</summary>
+<summary>Sign up for a free Zilliz Cloud cluster</summary>
 
 You can [sign up](https://cloud.zilliz.com/signup?utm_source=github&utm_medium=referral&utm_campaign=vector-graph-rag-readme) on Zilliz Cloud to get a free cluster and API key.
 
