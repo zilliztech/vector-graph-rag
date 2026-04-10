@@ -2,9 +2,12 @@
 Main Vector Graph RAG class with user-friendly API.
 """
 
+import logging
 import uuid
 from typing import List, Optional
 from tqdm import tqdm
+
+logger = logging.getLogger(__name__)
 
 from vector_graph_rag.config import Settings, get_settings
 from vector_graph_rag.models import Document, Triplet, QueryResult, ExtractionResult, RetrievalDetail, RerankResult, EvictionResult
@@ -297,7 +300,7 @@ class VectorGraphRAG:
 
         # Generate embeddings
         if show_progress:
-            print("Generating embeddings...")
+            logger.info("Generating embeddings...")
 
         entity_texts = self._graph_builder.get_entity_texts()
         relation_texts = self._graph_builder.get_relation_texts()
@@ -367,7 +370,7 @@ class VectorGraphRAG:
 
         # Insert into Milvus
         if show_progress:
-            print("Inserting into Milvus...")
+            logger.info("Inserting into Milvus...")
 
         # Use private methods for entities and relations
         self._store._insert_entities(

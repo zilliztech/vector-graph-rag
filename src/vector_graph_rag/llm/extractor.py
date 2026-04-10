@@ -3,8 +3,11 @@ Triplet extraction using LLM prompt engineering.
 """
 
 import json
+import logging
 import re
 from typing import List, Optional
+
+logger = logging.getLogger(__name__)
 from openai import OpenAI
 from tenacity import retry, stop_after_attempt, wait_exponential
 from tqdm import tqdm
@@ -309,9 +312,9 @@ class EntityExtractor:
                         self.ner_tsv_cache[query] = triples_data['named_entities']
                 except (json.JSONDecodeError, KeyError, TypeError):
                     pass
-            print(f"Loaded {len(self.ner_tsv_cache)} NER entries from {cache_file}")
+            logger.info("Loaded %d NER entries from %s", len(self.ner_tsv_cache), cache_file)
         except Exception as e:
-            print(f"Warning: Could not load NER cache file {cache_file}: {e}")
+            logger.warning("Could not load NER cache file %s: %s", cache_file, e)
 
     def _build_prompt(self, question: str) -> str:
         """Build prompt for caching."""

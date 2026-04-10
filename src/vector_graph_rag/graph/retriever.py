@@ -2,8 +2,11 @@
 Graph-based retriever using vector similarity search.
 """
 
+import logging
 from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass, field
+
+logger = logging.getLogger(__name__)
 
 from vector_graph_rag.config import Settings, get_settings
 from vector_graph_rag.storage.embeddings import EmbeddingModel
@@ -265,7 +268,7 @@ class GraphRetriever:
             return sorted_ids, [id_to_text.get(rid, "") for rid in sorted_ids], False, before_count
 
         # Eviction needed: use vector search to filter most relevant relations
-        print(f"Use Eviction Strategy. ({before_count} -> {relation_number_threshold})")
+        logger.info("Use Eviction Strategy. (%d -> %d)", before_count, relation_number_threshold)
 
         query_embedding = self.embedding_model.embed(query)
         ids_str = ", ".join(f'"{rid}"' for rid in expanded_relation_ids)

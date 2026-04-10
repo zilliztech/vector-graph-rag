@@ -10,8 +10,11 @@ Note: Entity and Relation methods are private (prefixed with _) as they are inte
 Users should interact with passages through the Graph abstraction layer.
 """
 
+import logging
 import uuid
 from typing import List, Optional, Dict, Any
+
+logger = logging.getLogger(__name__)
 from pymilvus import MilvusClient, DataType
 from tqdm import tqdm
 
@@ -973,7 +976,7 @@ class MilvusStore:
                     deleted = True
             except Exception as e:
                 # Log error but continue with other collections
-                print(f"Error deleting collection {collection_name}: {e}")
+                logger.error("Error deleting collection %s: %s", collection_name, e)
 
         return deleted
 
