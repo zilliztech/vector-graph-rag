@@ -2,7 +2,9 @@
 Text chunking for large documents.
 Splits documents into smaller chunks while preserving semantic boundaries.
 """
+
 from typing import List, Optional
+
 from langchain_core.documents import Document
 
 
@@ -74,9 +76,7 @@ class TextChunker:
             return [text[i : i + self.chunk_size] for i in range(0, len(text), step)]
 
         for part in parts:
-            test_chunk = (
-                current_chunk + (chosen_separator if current_chunk else "") + part
-            )
+            test_chunk = current_chunk + (chosen_separator if current_chunk else "") + part
             if len(test_chunk) <= self.chunk_size:
                 current_chunk = test_chunk
             else:

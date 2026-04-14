@@ -11,14 +11,14 @@ Design principles:
 - Internal operations automatically handle Entity/Relation creation and linking
 """
 
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
 
 from vector_graph_rag.config import Settings, get_settings
-from vector_graph_rag.storage.milvus import MilvusStore, generate_id
-from vector_graph_rag.storage.embeddings import EmbeddingModel
-from vector_graph_rag.models import Entity, Relation, Passage, Triplet
 from vector_graph_rag.graph.knowledge_graph import SubGraph
 from vector_graph_rag.llm.extractor import processing_phrases
+from vector_graph_rag.models import Entity, Passage, Relation, Triplet
+from vector_graph_rag.storage.embeddings import EmbeddingModel
+from vector_graph_rag.storage.milvus import MilvusStore, generate_id
 
 
 class Graph:
@@ -128,8 +128,12 @@ class Graph:
                 existing = self._store._get_entities_by_ids([existing_id])
                 if existing:
                     current = existing[0]
-                    new_relation_ids = list(set(current.get("relation_ids", []) + (relation_ids or [])))
-                    new_passage_ids = list(set(current.get("passage_ids", []) + (passage_ids or [])))
+                    new_relation_ids = list(
+                        set(current.get("relation_ids", []) + (relation_ids or []))
+                    )
+                    new_passage_ids = list(
+                        set(current.get("passage_ids", []) + (passage_ids or []))
+                    )
                     self._store._update_entity(
                         existing_id,
                         relation_ids=new_relation_ids,
@@ -326,8 +330,12 @@ class Graph:
         relation_id = id or generate_id()
 
         # Create entities (if not exist) and get their IDs
-        subject_id = self._create_entity(subject, relation_ids=[relation_id], passage_ids=passage_ids)
-        object_id = self._create_entity(object_, relation_ids=[relation_id], passage_ids=passage_ids)
+        subject_id = self._create_entity(
+            subject, relation_ids=[relation_id], passage_ids=passage_ids
+        )
+        object_id = self._create_entity(
+            object_, relation_ids=[relation_id], passage_ids=passage_ids
+        )
 
         # Generate embedding
         embedding = self._embedding_model.embed(relation_text)
@@ -413,8 +421,12 @@ class Graph:
         # Build new text if any triplet field changed
         new_text = None
         if subject or predicate or object_:
-            new_subject = self._normalize_entity_name(subject) if subject else data.get("subject", "")
-            new_predicate = processing_phrases(predicate) if predicate else data.get("predicate", "")
+            new_subject = (
+                self._normalize_entity_name(subject) if subject else data.get("subject", "")
+            )
+            new_predicate = (
+                processing_phrases(predicate) if predicate else data.get("predicate", "")
+            )
             new_object = self._normalize_entity_name(object_) if object_ else data.get("object", "")
             new_text = f"{new_subject} {new_predicate} {new_object}"
 
@@ -453,7 +465,9 @@ class Graph:
             entities = self._store._get_entities_by_ids([eid])
             if entities:
                 e_data = entities[0]
-                new_relation_ids = [rid for rid in e_data.get("relation_ids", []) if rid != relation_id]
+                new_relation_ids = [
+                    rid for rid in e_data.get("relation_ids", []) if rid != relation_id
+                ]
                 self._store._update_entity(eid, relation_ids=new_relation_ids)
 
         # Update related passages (remove this relation from relation_ids)
@@ -461,7 +475,9 @@ class Graph:
             passages = self._store.get_passages_by_ids([pid])
             if passages:
                 p_data = passages[0]
-                new_relation_ids = [rid for rid in p_data.get("relation_ids", []) if rid != relation_id]
+                new_relation_ids = [
+                    rid for rid in p_data.get("relation_ids", []) if rid != relation_id
+                ]
                 self._store.update_passage(pid, relation_ids=new_relation_ids)
 
         # Delete the relation
@@ -528,7 +544,9 @@ class Graph:
                 relation_ids.append(relation_id)
 
                 # Get entity IDs for this triplet
-                subject_id = self._entity_name_to_id.get(self._normalize_entity_name(triplet.subject))
+                subject_id = self._entity_name_to_id.get(
+                    self._normalize_entity_name(triplet.subject)
+                )
                 object_id = self._entity_name_to_id.get(self._normalize_entity_name(triplet.object))
 
                 if subject_id and subject_id not in entity_ids:
@@ -596,12 +614,14 @@ class Graph:
         passages = []
         for r in results:
             data = r["entity"]
-            passages.append(Passage(
-                id=data["id"],
-                text=data["text"],
-                entity_ids=data.get("entity_ids", []),
-                relation_ids=data.get("relation_ids", []),
-            ))
+            passages.append(
+                Passage(
+                    id=data["id"],
+                    text=data["text"],
+                    entity_ids=data.get("entity_ids", []),
+                    relation_ids=data.get("relation_ids", []),
+                )
+            )
 
         return passages
 
@@ -657,7 +677,9 @@ class Graph:
             entities = self._store._get_entities_by_ids([eid])
             if entities:
                 e_data = entities[0]
-                new_passage_ids = [pid for pid in e_data.get("passage_ids", []) if pid != passage_id]
+                new_passage_ids = [
+                    pid for pid in e_data.get("passage_ids", []) if pid != passage_id
+                ]
                 self._store._update_entity(eid, passage_ids=new_passage_ids)
 
         # Update related relations (remove this passage from passage_ids)
@@ -665,7 +687,9 @@ class Graph:
             relations = self._store._get_relations_by_ids([rid])
             if relations:
                 r_data = relations[0]
-                new_passage_ids = [pid for pid in r_data.get("passage_ids", []) if pid != passage_id]
+                new_passage_ids = [
+                    pid for pid in r_data.get("passage_ids", []) if pid != passage_id
+                ]
                 self._store._update_relation(rid, passage_ids=new_passage_ids)
 
         # Delete the passage

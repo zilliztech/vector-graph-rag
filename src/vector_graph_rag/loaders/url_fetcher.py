@@ -2,12 +2,15 @@
 URL content fetcher using trafilatura.
 Direct markdown extraction with full structure preservation.
 """
-import trafilatura
+
 import tempfile
-import requests
 from pathlib import Path
-from .converter import ConversionResult, DocumentConverter
+
+import requests
+import trafilatura
 from langchain_core.documents import Document
+
+from .converter import ConversionResult, DocumentConverter
 
 
 class URLFetcher:
@@ -34,25 +37,25 @@ class URLFetcher:
         self.include_images = include_images
         self.converter = DocumentConverter()  # For PDF URLs
         self.headers = {
-            'User-Agent': self.USER_AGENT,
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Accept-Encoding': 'gzip, deflate',
-            'Connection': 'keep-alive',
+            "User-Agent": self.USER_AGENT,
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Accept-Encoding": "gzip, deflate",
+            "Connection": "keep-alive",
         }
 
     def _is_pdf_url(self, url: str) -> bool:
         """Check if URL points to a PDF file."""
         # Check by URL extension
-        if url.lower().endswith('.pdf'):
+        if url.lower().endswith(".pdf"):
             return True
 
         # Check by Content-Type header
         try:
             response = requests.head(url, headers=self.headers, timeout=5, allow_redirects=True)
-            content_type = response.headers.get('Content-Type', '').lower()
-            return 'application/pdf' in content_type
-        except:
+            content_type = response.headers.get("Content-Type", "").lower()
+            return "application/pdf" in content_type
+        except Exception:
             return False
 
     def _fetch_pdf_url(self, url: str) -> ConversionResult:
@@ -63,7 +66,7 @@ class URLFetcher:
             response.raise_for_status()
 
             # Create temporary file
-            with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as tmp_file:
+            with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp_file:
                 tmp_file.write(response.content)
                 tmp_path = tmp_file.name
 
@@ -72,13 +75,13 @@ class URLFetcher:
 
             # Update metadata to reflect URL source
             for doc in result.documents:
-                doc.metadata['source'] = url
-                doc.metadata['source_type'] = 'pdf_url'
+                doc.metadata["source"] = url
+                doc.metadata["source_type"] = "pdf_url"
 
             # Clean up temporary file
             try:
                 Path(tmp_path).unlink()
-            except:
+            except Exception:
                 pass
 
             return result
@@ -104,14 +107,14 @@ class URLFetcher:
                 return self._fetch_pdf_url(url)
 
             # Fetch HTML content for web pages with custom headers
-            response = requests.get(url, headers=self.headers, timeout=self.timeout, allow_redirects=True)
+            response = requests.get(
+                url, headers=self.headers, timeout=self.timeout, allow_redirects=True
+            )
             response.raise_for_status()
             html_content = response.text
 
             if not html_content:
-                return ConversionResult(
-                    documents=[], errors=[f"Failed to fetch URL: {url}"]
-                )
+                return ConversionResult(documents=[], errors=[f"Failed to fetch URL: {url}"])
 
             # Extract content as markdown (best option for text-focused RAG)
             content = trafilatura.extract(
@@ -122,9 +125,7 @@ class URLFetcher:
             )
 
             if not content:
-                return ConversionResult(
-                    documents=[], errors=[f"No content extracted from: {url}"]
-                )
+                return ConversionResult(documents=[], errors=[f"No content extracted from: {url}"])
 
             doc = Document(
                 page_content=content,
@@ -137,9 +138,7 @@ class URLFetcher:
             return ConversionResult(documents=[doc])
 
         except Exception as e:
-            return ConversionResult(
-                documents=[], errors=[f"Failed to fetch {url}: {str(e)}"]
-            )
+            return ConversionResult(documents=[], errors=[f"Failed to fetch {url}: {str(e)}"])
 
     def fetch_batch(self, urls: list[str]) -> ConversionResult:
         """Fetch multiple URLs."""

@@ -2,13 +2,16 @@
 Document converter using Microsoft MarkItDown.
 Supports text documents only: PDF, DOCX
 """
-from typing import List
+
 from pathlib import Path
-from pydantic import BaseModel
+from typing import List
+
 from langchain_core.documents import Document
+from pydantic import BaseModel
 
 try:
     from markitdown import MarkItDown
+
     HAS_MARKITDOWN = True
 except ImportError:
     HAS_MARKITDOWN = False
@@ -54,9 +57,7 @@ class DocumentConverter:
         """
         path = Path(source)
         if not path.exists():
-            return ConversionResult(
-                documents=[], errors=[f"File not found: {source}"]
-            )
+            return ConversionResult(documents=[], errors=[f"File not found: {source}"])
 
         try:
             result = self.md.convert(str(path))
@@ -73,9 +74,7 @@ class DocumentConverter:
             return ConversionResult(documents=[doc])
 
         except Exception as e:
-            return ConversionResult(
-                documents=[], errors=[f"Failed to convert {source}: {str(e)}"]
-            )
+            return ConversionResult(documents=[], errors=[f"Failed to convert {source}: {str(e)}"])
 
     def convert_batch(self, sources: List[str]) -> ConversionResult:
         """Convert multiple files."""

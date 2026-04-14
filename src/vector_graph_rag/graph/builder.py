@@ -4,17 +4,17 @@ Graph builder for constructing knowledge graph structures from extracted triplet
 
 import uuid
 from collections import defaultdict
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
 
+from vector_graph_rag.config import Settings, get_settings
+from vector_graph_rag.llm.extractor import processing_phrases
 from vector_graph_rag.models import (
     Document,
     Entity,
+    ExtractionResult,
     Relation,
     Triplet,
-    ExtractionResult,
 )
-from vector_graph_rag.config import Settings, get_settings
-from vector_graph_rag.llm.extractor import processing_phrases
 
 
 def generate_id() -> str:
@@ -171,10 +171,7 @@ class GraphBuilder:
         self._process_documents(documents)
 
         # Build result
-        entities = [
-            Entity(id=eid, name=self.entities[eid])
-            for eid in self.entity_ids
-        ]
+        entities = [Entity(id=eid, name=self.entities[eid]) for eid in self.entity_ids]
 
         relations = []
         for rid in self.relation_ids:

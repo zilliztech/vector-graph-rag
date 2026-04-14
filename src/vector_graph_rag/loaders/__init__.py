@@ -7,14 +7,16 @@ Supports importing from:
 
 Focus: Text documents only.
 """
-from typing import List
-from pathlib import Path
-from pydantic import BaseModel
-from langchain_core.documents import Document
 
-from .converter import DocumentConverter, ConversionResult
-from .url_fetcher import URLFetcher
+from pathlib import Path
+from typing import List
+
+from langchain_core.documents import Document
+from pydantic import BaseModel
+
 from .chunker import TextChunker
+from .converter import ConversionResult, DocumentConverter
+from .url_fetcher import URLFetcher
 
 
 class LoaderResult(BaseModel):
@@ -67,9 +69,7 @@ class DocumentImporter:
     ):
         self.converter = DocumentConverter()
         self.url_fetcher = URLFetcher()
-        self.chunker = (
-            TextChunker(chunk_size, chunk_overlap) if chunk_documents else None
-        )
+        self.chunker = TextChunker(chunk_size, chunk_overlap) if chunk_documents else None
 
     def import_sources(
         self,
@@ -112,9 +112,7 @@ class DocumentImporter:
         # Check if supported
         ext = path.suffix.lower()
         if ext not in self.SUPPORTED_EXTENSIONS:
-            return ConversionResult(
-                documents=[], errors=[f"Unsupported file type: {ext}"]
-            )
+            return ConversionResult(documents=[], errors=[f"Unsupported file type: {ext}"])
 
         # Handle different file types
         if ext in (".pdf", ".docx", ".doc"):
@@ -134,13 +132,9 @@ class DocumentImporter:
                 )
                 return ConversionResult(documents=[doc])
             except Exception as e:
-                return ConversionResult(
-                    documents=[], errors=[f"Failed to read {source}: {str(e)}"]
-                )
+                return ConversionResult(documents=[], errors=[f"Failed to read {source}: {str(e)}"])
         else:
-            return ConversionResult(
-                documents=[], errors=[f"Unsupported file type: {ext}"]
-            )
+            return ConversionResult(documents=[], errors=[f"Unsupported file type: {ext}"])
 
     def import_text(self, text: str, source: str = "text_input") -> LoaderResult:
         """
@@ -153,9 +147,7 @@ class DocumentImporter:
         Returns:
             LoaderResult with Document
         """
-        doc = Document(
-            page_content=text, metadata={"source": source, "source_type": "text"}
-        )
+        doc = Document(page_content=text, metadata={"source": source, "source_type": "text"})
 
         documents = [doc]
         if self.chunker:

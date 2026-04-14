@@ -12,14 +12,15 @@ Users should interact with passages through the Graph abstraction layer.
 
 import logging
 import uuid
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
 
-logger = logging.getLogger(__name__)
-from pymilvus import MilvusClient, DataType
+from pymilvus import DataType, MilvusClient
 from tqdm import tqdm
 
 from vector_graph_rag.config import Settings, get_settings
 from vector_graph_rag.storage.embeddings import EmbeddingModel
+
+logger = logging.getLogger(__name__)
 
 
 def generate_id() -> str:
@@ -67,11 +68,7 @@ class MilvusStore:
         self.client = MilvusClient(**client_kwargs)
 
         # Collection names with optional prefix
-        prefix = (
-            f"{self.settings.collection_prefix}_"
-            if self.settings.collection_prefix
-            else ""
-        )
+        prefix = f"{self.settings.collection_prefix}_" if self.settings.collection_prefix else ""
         self.entity_collection = f"{prefix}{self.settings.entity_collection}"
         self.relation_collection = f"{prefix}{self.settings.relation_collection}"
         self.passage_collection = f"{prefix}{self.settings.passage_collection}"
@@ -83,7 +80,6 @@ class MilvusStore:
         drop_existing: bool = False,
     ) -> None:
         """Create a single collection with standard schema."""
-        from pymilvus import DataType
 
         if self.client.has_collection(collection_name):
             if drop_existing:
@@ -181,9 +177,7 @@ class MilvusStore:
         iterator = range(0, len(ids), batch_size)
 
         if show_progress:
-            iterator = tqdm(
-                iterator, total=total_batches, desc=f"Inserting to {collection_name}"
-            )
+            iterator = tqdm(iterator, total=total_batches, desc=f"Inserting to {collection_name}")
 
         for start_idx in iterator:
             end_idx = min(start_idx + batch_size, len(ids))
@@ -400,7 +394,15 @@ class MilvusStore:
             collection_name=self.relation_collection,
             data=[query_embedding],
             limit=top_k,
-            output_fields=["id", "text", "entity_ids", "passage_ids", "subject", "predicate", "object"],
+            output_fields=[
+                "id",
+                "text",
+                "entity_ids",
+                "passage_ids",
+                "subject",
+                "predicate",
+                "object",
+            ],
         )
         return results[0] if results else []
 
@@ -480,7 +482,15 @@ class MilvusStore:
         results = self.client.query(
             collection_name=self.relation_collection,
             filter=f"id in [{ids_str}]",
-            output_fields=["id", "text", "entity_ids", "passage_ids", "subject", "predicate", "object"],
+            output_fields=[
+                "id",
+                "text",
+                "entity_ids",
+                "passage_ids",
+                "subject",
+                "predicate",
+                "object",
+            ],
         )
         return results
 

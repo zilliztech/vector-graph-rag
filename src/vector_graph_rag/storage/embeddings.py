@@ -5,13 +5,13 @@ Supports both HuggingFace models (e.g., facebook/contriever) and OpenAI models.
 Also supports instruction-based models like Qwen3-Embedding and BGE.
 """
 
-from typing import List, Optional, Union, Literal
+from typing import List, Literal, Optional, Union
+
 import numpy as np
 import torch
 from tqdm import tqdm
 
 from vector_graph_rag.config import Settings, get_settings
-
 
 # Predefined instruction templates for different models
 INSTRUCTION_TEMPLATES = {
@@ -50,16 +50,10 @@ def _get_model_family(model_name: str) -> Optional[str]:
     return None
 
 
-def _mean_pooling(
-    token_embeddings: torch.Tensor, attention_mask: torch.Tensor
-) -> torch.Tensor:
+def _mean_pooling(token_embeddings: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
     """Mean pooling with attention mask."""
-    token_embeddings = token_embeddings.masked_fill(
-        ~attention_mask[..., None].bool(), 0.0
-    )
-    sentence_embeddings = (
-        token_embeddings.sum(dim=1) / attention_mask.sum(dim=1)[..., None]
-    )
+    token_embeddings = token_embeddings.masked_fill(~attention_mask[..., None].bool(), 0.0)
+    sentence_embeddings = token_embeddings.sum(dim=1) / attention_mask.sum(dim=1)[..., None]
     return sentence_embeddings
 
 
@@ -107,9 +101,7 @@ class HuggingFaceEmbedding:
         template = template_config.get(text_type, "{text}")
         instruction = self.instruction or template_config.get("default_instruction", "")
 
-        return [
-            template.format(instruction=instruction, text=t) for t in texts
-        ]
+        return [template.format(instruction=instruction, text=t) for t in texts]
 
     def encode(
         self,
@@ -135,9 +127,7 @@ class HuggingFaceEmbedding:
                 processed_texts, padding=True, truncation=True, return_tensors="pt", max_length=512
             ).to(self.device)
             outputs = self.model(**inputs)
-            embeddings = _mean_pooling(
-                outputs.last_hidden_state, inputs["attention_mask"]
-            )
+            embeddings = _mean_pooling(outputs.last_hidden_state, inputs["attention_mask"])
 
             if normalize:
                 embeddings = torch.nn.functional.normalize(embeddings, p=2, dim=1)
@@ -328,9 +318,7 @@ class EmbeddingModel:
         all_embeddings = []
 
         batches = [texts[i : i + batch_size] for i in range(0, len(texts), batch_size)]
-        iterator = (
-            tqdm(batches, desc="Generating embeddings") if show_progress else batches
-        )
+        iterator = tqdm(batches, desc="Generating embeddings") if show_progress else batches
 
         for batch in iterator:
             embeddings = self._backend.encode(batch, text_type=text_type)

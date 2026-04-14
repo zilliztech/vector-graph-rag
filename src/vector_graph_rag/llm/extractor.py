@@ -7,14 +7,15 @@ import logging
 import re
 from typing import List, Optional
 
-logger = logging.getLogger(__name__)
 from openai import OpenAI
 from tenacity import retry, stop_after_attempt, wait_exponential
 from tqdm import tqdm
 
 from vector_graph_rag.config import Settings, get_settings
+from vector_graph_rag.llm.cache import LLMCache, get_llm_cache
 from vector_graph_rag.models import Document, Triplet
-from vector_graph_rag.llm.cache import get_llm_cache, LLMCache
+
+logger = logging.getLogger(__name__)
 
 
 def processing_phrases(phrase: str) -> str:
@@ -28,7 +29,7 @@ def processing_phrases(phrase: str) -> str:
     if not phrase:
         return ""
     # Replace all non-alphanumeric characters with space, convert to lowercase, strip
-    return re.sub(r'[^A-Za-z0-9 ]', ' ', phrase.lower()).strip()
+    return re.sub(r"[^A-Za-z0-9 ]", " ", phrase.lower()).strip()
 
 
 # System prompt for triplet extraction
@@ -119,9 +120,7 @@ class TripletExtractor:
         self.settings.validate_settings()
 
         self.model = model or self.settings.llm_model
-        self.temperature = (
-            temperature if temperature is not None else self.settings.llm_temperature
-        )
+        self.temperature = temperature if temperature is not None else self.settings.llm_temperature
 
         self.client = OpenAI(
             api_key=self.settings.openai_api_key,
@@ -222,16 +221,12 @@ class TripletExtractor:
         Returns:
             Documents with extracted triplets stored in metadata["triplets"].
         """
-        iterator = (
-            tqdm(documents, desc="Extracting triplets") if show_progress else documents
-        )
+        iterator = tqdm(documents, desc="Extracting triplets") if show_progress else documents
 
         for doc in iterator:
             triplets = self.extract(doc.page_content)
             # Store triplets as list of [subject, predicate, object] in metadata
-            doc.metadata["triplets"] = [
-                [t.subject, t.predicate, t.object] for t in triplets
-            ]
+            doc.metadata["triplets"] = [[t.subject, t.predicate, t.object] for t in triplets]
 
         return documents
 
@@ -290,8 +285,7 @@ class EntityExtractor:
             if dataset.startswith("ds_"):
                 dataset = dataset[3:]  # Remove "ds_" prefix
             cache_file = os.path.join(
-                self.settings.ner_cache_dir,
-                f"{dataset}_queries.named_entity_output.tsv"
+                self.settings.ner_cache_dir, f"{dataset}_queries.named_entity_output.tsv"
             )
             if os.path.exists(cache_file):
                 self._load_tsv_cache(cache_file)
@@ -299,17 +293,20 @@ class EntityExtractor:
     def _load_tsv_cache(self, cache_file: str) -> None:
         """Load NER results from TSV cache file (HippoRAG format)."""
         import pandas as pd
+
         try:
-            df = pd.read_csv(cache_file, sep='\t')
+            df = pd.read_csv(cache_file, sep="\t")
             # The TSV has columns: query, triples (which contains JSON with named_entities)
-            query_col = 'query' if 'query' in df.columns else 'question'
+            query_col = "query" if "query" in df.columns else "question"
             for _, row in df.iterrows():
-                query = row.get(query_col, '')
-                triples_str = row.get('triples', '{}')
+                query = row.get(query_col, "")
+                triples_str = row.get("triples", "{}")
                 try:
-                    triples_data = json.loads(triples_str) if isinstance(triples_str, str) else triples_str
-                    if isinstance(triples_data, dict) and 'named_entities' in triples_data:
-                        self.ner_tsv_cache[query] = triples_data['named_entities']
+                    triples_data = (
+                        json.loads(triples_str) if isinstance(triples_str, str) else triples_str
+                    )
+                    if isinstance(triples_data, dict) and "named_entities" in triples_data:
+                        self.ner_tsv_cache[query] = triples_data["named_entities"]
                 except (json.JSONDecodeError, KeyError, TypeError):
                     pass
             logger.info("Loaded %d NER entries from %s", len(self.ner_tsv_cache), cache_file)

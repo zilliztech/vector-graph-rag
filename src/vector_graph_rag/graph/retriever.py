@@ -3,17 +3,17 @@ Graph-based retriever using vector similarity search.
 """
 
 import logging
-from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass, field
-
-logger = logging.getLogger(__name__)
+from typing import List, Optional, Tuple
 
 from vector_graph_rag.config import Settings, get_settings
-from vector_graph_rag.storage.embeddings import EmbeddingModel
-from vector_graph_rag.storage.milvus import MilvusStore
 from vector_graph_rag.graph.builder import GraphBuilder
 from vector_graph_rag.graph.knowledge_graph import SubGraph
 from vector_graph_rag.llm.extractor import EntityExtractor
+from vector_graph_rag.storage.embeddings import EmbeddingModel
+from vector_graph_rag.storage.milvus import MilvusStore
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -93,9 +93,7 @@ class GraphRetriever:
         self.graph_builder = graph_builder
 
         self.embedding_model = embedding_model or EmbeddingModel(settings=self.settings)
-        self.entity_extractor = entity_extractor or EntityExtractor(
-            settings=self.settings
-        )
+        self.entity_extractor = entity_extractor or EntityExtractor(settings=self.settings)
 
     def _extract_query_entities(self, query: str) -> List[str]:
         """Extract named entities from the query."""
@@ -338,9 +336,7 @@ class GraphRetriever:
         )
 
         # Expand subgraph
-        subgraph = self._expand_subgraph(
-            entity_ids, relation_ids, degree=expansion_degree
-        )
+        subgraph = self._expand_subgraph(entity_ids, relation_ids, degree=expansion_degree)
 
         # Apply eviction strategy if needed
         threshold = relation_number_threshold or self.settings.relation_number_threshold

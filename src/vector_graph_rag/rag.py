@@ -5,19 +5,25 @@ Main Vector Graph RAG class with user-friendly API.
 import logging
 import uuid
 from typing import List, Optional
-from tqdm import tqdm
 
-logger = logging.getLogger(__name__)
-
-from vector_graph_rag.config import Settings, get_settings
-from vector_graph_rag.models import Document, Triplet, QueryResult, ExtractionResult, RetrievalDetail, RerankResult, EvictionResult
+from vector_graph_rag.config import Settings
+from vector_graph_rag.graph.builder import GraphBuilder
+from vector_graph_rag.graph.knowledge_graph import SubGraph
+from vector_graph_rag.graph.retriever import GraphRetriever
 from vector_graph_rag.llm.extractor import TripletExtractor
-from vector_graph_rag.llm.reranker import LLMReranker, AnswerGenerator
+from vector_graph_rag.llm.reranker import AnswerGenerator, LLMReranker
+from vector_graph_rag.models import (
+    Document,
+    EvictionResult,
+    ExtractionResult,
+    QueryResult,
+    RerankResult,
+    RetrievalDetail,
+)
 from vector_graph_rag.storage.embeddings import EmbeddingModel
 from vector_graph_rag.storage.milvus import MilvusStore
-from vector_graph_rag.graph.builder import GraphBuilder
-from vector_graph_rag.graph.retriever import GraphRetriever, RetrievalResult
-from vector_graph_rag.graph.knowledge_graph import SubGraph
+
+logger = logging.getLogger(__name__)
 
 
 class VectorGraphRAG:
@@ -171,9 +177,7 @@ class VectorGraphRAG:
         """
         return subgraph.passage_texts
 
-    def _get_passages_from_relations(
-        self, relation_ids: List[str]
-    ) -> tuple[List[str], List[str]]:
+    def _get_passages_from_relations(self, relation_ids: List[str]) -> tuple[List[str], List[str]]:
         """
         Get passages associated with given relations.
 
@@ -313,17 +317,13 @@ class VectorGraphRAG:
         )
 
         relation_embeddings = (
-            self._embedding_model.embed_batch(
-                relation_texts, show_progress=show_progress
-            )
+            self._embedding_model.embed_batch(relation_texts, show_progress=show_progress)
             if relation_texts
             else []
         )
 
         passage_embeddings = (
-            self._embedding_model.embed_batch(
-                passage_texts, show_progress=show_progress
-            )
+            self._embedding_model.embed_batch(passage_texts, show_progress=show_progress)
             if passage_texts
             else []
         )
@@ -332,10 +332,12 @@ class VectorGraphRAG:
         # Entity metadata: relation_ids (directly connected relations), passage_ids
         entity_metadatas = []
         for eid in self._graph_builder.entity_ids:
-            entity_metadatas.append({
-                "relation_ids": self._graph_builder.entity_to_relation_ids.get(eid, []),
-                "passage_ids": self._graph_builder.entity_to_passage_ids.get(eid, []),
-            })
+            entity_metadatas.append(
+                {
+                    "relation_ids": self._graph_builder.entity_to_relation_ids.get(eid, []),
+                    "passage_ids": self._graph_builder.entity_to_passage_ids.get(eid, []),
+                }
+            )
 
         # Relation metadata: entity_ids (head and tail), passage_ids, triplet fields
         relation_metadatas = []
@@ -359,10 +361,12 @@ class VectorGraphRAG:
         # Passage metadata
         passage_metadatas = []
         for pid in self._graph_builder.passage_ids:
-            passage_metadatas.append({
-                "entity_ids": self._graph_builder.passage_to_entity_ids.get(pid, []),
-                "relation_ids": self._graph_builder.passage_to_relation_ids.get(pid, []),
-            })
+            passage_metadatas.append(
+                {
+                    "entity_ids": self._graph_builder.passage_to_entity_ids.get(pid, []),
+                    "relation_ids": self._graph_builder.passage_to_relation_ids.get(pid, []),
+                }
+            )
 
         # Drop and recreate collections for fresh data
         self._store.drop_collections()
@@ -437,15 +441,15 @@ class VectorGraphRAG:
             doc_id = doc_data.get("id") or str(uuid.uuid4())
             # Store triplets in metadata as list of [subject, predicate, object]
             triplets = doc_data.get("triplets", [])
-            docs.append(Document(
-                page_content=passage,
-                metadata={"triplets": triplets},
-                id=doc_id,
-            ))
+            docs.append(
+                Document(
+                    page_content=passage,
+                    metadata={"triplets": triplets},
+                    id=doc_id,
+                )
+            )
 
-        return self.add_documents(
-            docs, extract_triplets=False, show_progress=show_progress
-        )
+        return self.add_documents(docs, extract_triplets=False, show_progress=show_progress)
 
     def query(
         self,
@@ -640,9 +644,7 @@ class VectorGraphRAG:
         passage_ids, passages = self._get_passages_from_relations(reranked_ids)
 
         if len(passages) < top_k:
-            additional_passages = retriever.retrieve_passages_naive(
-                question, top_k=top_k
-            )
+            additional_passages = retriever.retrieve_passages_naive(question, top_k=top_k)
             for passage in additional_passages:
                 if passage not in passages:
                     passages.append(passage)

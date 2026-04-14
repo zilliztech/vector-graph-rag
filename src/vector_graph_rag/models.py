@@ -2,13 +2,22 @@
 Data models for Vector Graph RAG.
 """
 
-from typing import Optional, List, Any, Dict
-from pydantic import BaseModel, Field
+from typing import Any, Dict, List, Optional
 
 # Re-export Document from langchain_core for unified API
 from langchain_core.documents import Document
+from pydantic import BaseModel, Field
 
-__all__ = ["Document", "Triplet", "Entity", "Relation", "Passage", "QueryResult", "ExtractionResult", "EvictionResult"]
+__all__ = [
+    "Document",
+    "Triplet",
+    "Entity",
+    "Relation",
+    "Passage",
+    "QueryResult",
+    "ExtractionResult",
+    "EvictionResult",
+]
 
 
 class Triplet(BaseModel):
@@ -54,9 +63,7 @@ class Entity(BaseModel):
 
     id: Optional[str] = Field(default=None, description="Entity ID")
     name: str = Field(..., description="Entity name")
-    embedding: Optional[List[float]] = Field(
-        default=None, description="Entity embedding"
-    )
+    embedding: Optional[List[float]] = Field(default=None, description="Entity embedding")
 
     def __hash__(self) -> int:
         return hash(self.name.lower())
@@ -82,12 +89,8 @@ class Relation(BaseModel):
     id: Optional[str] = Field(default=None, description="Relation ID")
     text: str = Field(..., description="Full relation text")
     triplet: Triplet = Field(..., description="Original triplet")
-    source_passage_ids: List[str] = Field(
-        default_factory=list, description="Source passage IDs"
-    )
-    embedding: Optional[List[float]] = Field(
-        default=None, description="Relation embedding"
-    )
+    source_passage_ids: List[str] = Field(default_factory=list, description="Source passage IDs")
+    embedding: Optional[List[float]] = Field(default=None, description="Relation embedding")
 
 
 class Passage(BaseModel):
@@ -106,9 +109,7 @@ class Passage(BaseModel):
     text: str = Field(..., description="Passage text content")
     entity_ids: List[str] = Field(default_factory=list, description="Entity IDs")
     relation_ids: List[str] = Field(default_factory=list, description="Relation IDs")
-    embedding: Optional[List[float]] = Field(
-        default=None, description="Passage embedding"
-    )
+    embedding: Optional[List[float]] = Field(default=None, description="Passage embedding")
 
 
 class RetrievalDetail(BaseModel):
@@ -180,31 +181,17 @@ class QueryResult(BaseModel):
 
     query: str = Field(..., description="Original query")
     answer: str = Field(..., description="Generated answer")
-    query_entities: List[str] = Field(
-        default_factory=list, description="Query entities"
-    )
-    retrieved_passages: List[str] = Field(
-        default_factory=list, description="Retrieved passages"
-    )
-    retrieved_relations: List[str] = Field(
-        default_factory=list, description="Retrieved relations"
-    )
-    expanded_relations: List[str] = Field(
-        default_factory=list, description="Expanded relations"
-    )
-    reranked_relations: List[str] = Field(
-        default_factory=list, description="Reranked relations"
-    )
-    subgraph: Optional[Any] = Field(
-        default=None, description="Expanded subgraph for visualization"
-    )
+    query_entities: List[str] = Field(default_factory=list, description="Query entities")
+    retrieved_passages: List[str] = Field(default_factory=list, description="Retrieved passages")
+    retrieved_relations: List[str] = Field(default_factory=list, description="Retrieved relations")
+    expanded_relations: List[str] = Field(default_factory=list, description="Expanded relations")
+    reranked_relations: List[str] = Field(default_factory=list, description="Reranked relations")
+    subgraph: Optional[Any] = Field(default=None, description="Expanded subgraph for visualization")
     passages: List[str] = Field(default_factory=list, description="Final passages")
     retrieval_detail: Optional[RetrievalDetail] = Field(
         default=None, description="Details of initial retrieval"
     )
-    rerank_result: Optional[RerankResult] = Field(
-        default=None, description="LLM rerank result"
-    )
+    rerank_result: Optional[RerankResult] = Field(default=None, description="LLM rerank result")
     eviction_result: Optional["EvictionResult"] = Field(
         default=None, description="Eviction result if relations exceeded threshold"
     )

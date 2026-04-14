@@ -6,8 +6,9 @@ with on-demand data fetching from Milvus storage.
 """
 
 from __future__ import annotations
-from typing import List, Dict, Set, Optional, Any, TYPE_CHECKING
+
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
 
 if TYPE_CHECKING:
     from vector_graph_rag.storage.milvus import MilvusStore
@@ -401,7 +402,15 @@ class SubGraph:
         results = self._store.client.query(
             collection_name=self._store.relation_collection,
             filter=filter_expr,
-            output_fields=["id", "text", "entity_ids", "passage_ids", "subject", "predicate", "object"],
+            output_fields=[
+                "id",
+                "text",
+                "entity_ids",
+                "passage_ids",
+                "subject",
+                "predicate",
+                "object",
+            ],
         )
 
         for r in results:
@@ -476,23 +485,17 @@ class SubGraph:
     @property
     def entities(self) -> List[GraphEntity]:
         """Get all entity objects in this subgraph."""
-        return [
-            self._entities[eid] for eid in self._entity_ids if eid in self._entities
-        ]
+        return [self._entities[eid] for eid in self._entity_ids if eid in self._entities]
 
     @property
     def relations(self) -> List[GraphRelation]:
         """Get all relation objects in this subgraph."""
-        return [
-            self._relations[rid] for rid in self._relation_ids if rid in self._relations
-        ]
+        return [self._relations[rid] for rid in self._relation_ids if rid in self._relations]
 
     @property
     def passages(self) -> List[GraphPassage]:
         """Get all passage objects in this subgraph."""
-        return [
-            self._passages[pid] for pid in self._passage_ids if pid in self._passages
-        ]
+        return [self._passages[pid] for pid in self._passage_ids if pid in self._passages]
 
     @property
     def entity_names(self) -> List[str]:

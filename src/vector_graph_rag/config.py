@@ -3,9 +3,10 @@ Configuration management for Vector Graph RAG.
 """
 
 import os
-from typing import Optional, Dict, Any
-from pydantic_settings import BaseSettings
+from typing import Any, Dict, Optional
+
 from pydantic import Field
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -21,9 +22,7 @@ class Settings(BaseSettings):
         default_factory=lambda: os.getenv("OPENAI_API_KEY"),
         description="OpenAI API key for LLM and embeddings",
     )
-    openai_base_url: Optional[str] = Field(
-        default=None, description="Custom OpenAI API base URL"
-    )
+    openai_base_url: Optional[str] = Field(default=None, description="Custom OpenAI API base URL")
 
     # Model Settings
     llm_model: str = Field(
@@ -80,12 +79,8 @@ class Settings(BaseSettings):
     )
 
     # Retrieval Settings
-    entity_top_k: int = Field(
-        default=20, description="Number of top entities to retrieve"
-    )
-    relation_top_k: int = Field(
-        default=20, description="Number of top relations to retrieve"
-    )
+    entity_top_k: int = Field(default=20, description="Number of top entities to retrieve")
+    relation_top_k: int = Field(default=20, description="Number of top relations to retrieve")
     entity_similarity_threshold: float = Field(
         default=0.9,
         description="Similarity threshold for entity retrieval (keep if score > threshold)",
@@ -101,31 +96,23 @@ class Settings(BaseSettings):
         default=1000,
         description="Maximum number of expanded relations. If exceeded, use eviction strategy to filter by similarity.",
     )
-    final_top_k: int = Field(
-        default=3, description="Number of final passages to return"
-    )
+    final_top_k: int = Field(default=3, description="Number of final passages to return")
 
     # LLM Settings
-    llm_temperature: float = Field(
-        default=0.0, description="Temperature for LLM generation"
-    )
-    llm_max_retries: int = Field(
-        default=3, description="Maximum retries for LLM API calls"
-    )
-    use_llm_cache: bool = Field(
-        default=True, description="Whether to use LLM response caching"
-    )
+    llm_temperature: float = Field(default=0.0, description="Temperature for LLM generation")
+    llm_max_retries: int = Field(default=3, description="Maximum retries for LLM API calls")
+    use_llm_cache: bool = Field(default=True, description="Whether to use LLM response caching")
 
     # Processing Settings
-    batch_size: int = Field(
-        default=32, description="Batch size for embedding and insertion"
-    )
+    batch_size: int = Field(default=32, description="Batch size for embedding and insertion")
 
     # NER Cache Settings
     ner_cache_dir: Optional[str] = Field(
         default_factory=lambda: os.path.join(
             os.path.dirname(os.path.dirname(os.path.dirname(__file__))),  # -> vector-graph-rag/
-            "evaluation", "data", "ner_cache"
+            "evaluation",
+            "data",
+            "ner_cache",
         ),
         description="Directory containing NER cache TSV files (HippoRAG format). "
         "Files should be named {dataset}_queries.named_entity_output.tsv",

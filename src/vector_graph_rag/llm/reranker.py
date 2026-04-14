@@ -4,12 +4,12 @@ LLM-based reranking for candidate relations.
 
 import json
 from typing import List, Optional, Tuple
+
 from openai import OpenAI
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from vector_graph_rag.config import Settings, get_settings
-from vector_graph_rag.llm.cache import get_llm_cache, LLMCache
-
+from vector_graph_rag.llm.cache import LLMCache, get_llm_cache
 
 RERANK_EXAMPLE_1_INPUT = """I will provide you with a set of relationship descriptions from a knowledge graph. Select exactly 5 relationships most useful for answering this multi-hop question.
 
@@ -149,9 +149,7 @@ class LLMReranker:
             lines.append(f"[{rid}] {text}")
         return "\n".join(lines)
 
-    def _build_prompt(
-        self, query: str, relation_descriptions: str
-    ) -> str:
+    def _build_prompt(self, query: str, relation_descriptions: str) -> str:
         """Build the full prompt for caching."""
         # Include all 3 few-shot examples in the cache key
         examples = (
@@ -200,7 +198,7 @@ class LLMReranker:
         # gpt-5 series doesn't support 'temperature' and 'stop' parameters
         if not self.model.startswith("gpt-5"):
             api_kwargs["temperature"] = 0
-            api_kwargs["stop"] = ['\n\n']
+            api_kwargs["stop"] = ["\n\n"]
 
         response = self.client.chat.completions.create(**api_kwargs)
         result = response.choices[0].message.content or "{}"
@@ -238,13 +236,8 @@ class LLMReranker:
                         selected_ids.append(rel_id)
                     elif rel_id not in valid_ids:
                         # Try to correct the ID by matching text
-                        corrected_id = _correct_line(
-                            line, relation_texts, relation_ids
-                        )
-                        if (
-                            corrected_id is not None
-                            and corrected_id not in selected_ids
-                        ):
+                        corrected_id = _correct_line(line, relation_texts, relation_ids)
+                        if corrected_id is not None and corrected_id not in selected_ids:
                             selected_ids.append(corrected_id)
 
             return selected_ids
@@ -256,7 +249,6 @@ class LLMReranker:
         query: str,
         relation_ids: List[str],
         relation_texts: List[str],
-        num_select: Optional[int] = None,
     ) -> Tuple[List[str], List[str]]:
         """
         Rerank candidate relations using LLM.
@@ -265,15 +257,12 @@ class LLMReranker:
             query: The query text.
             relation_ids: Candidate relation IDs (string UUIDs).
             relation_texts: Candidate relation texts.
-            num_select: Number of relations to select (default: final_top_k).
 
         Returns:
             Tuple of (selected_relation_ids, selected_relation_texts).
         """
         if not relation_ids:
             return [], []
-
-        num_select = 5
 
         # Format relations
         relation_descriptions = self._format_relations(relation_ids, relation_texts)
@@ -283,9 +272,7 @@ class LLMReranker:
 
         # Parse response
         valid_ids = set(relation_ids)
-        selected_ids = self._parse_response(
-            response, valid_ids, relation_ids, relation_texts
-        )
+        selected_ids = self._parse_response(response, valid_ids, relation_ids, relation_texts)
 
         # No fallback - return whatever LLM selected (same as current project)
 
