@@ -51,6 +51,17 @@ uv add "vector-graph-rag[loaders]"
 
 </details>
 
+<details>
+<summary><b>With local HuggingFace embedding models</b></summary>
+
+```bash
+pip install "vector-graph-rag[hf]"
+# or
+uv add "vector-graph-rag[hf]"
+```
+
+</details>
+
 ## 🚀 Quick Start
 
 ```python

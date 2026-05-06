@@ -20,6 +20,12 @@
     pip install "vector-graph-rag[loaders]"
     ```
 
+=== "With local embeddings"
+
+    ```bash
+    pip install "vector-graph-rag[hf]"
+    ```
+
 !!! note "Prerequisites"
     - Python 3.9+
     - An OpenAI API key (set `OPENAI_API_KEY` environment variable)

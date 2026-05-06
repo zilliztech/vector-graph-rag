@@ -70,7 +70,7 @@ Frequently asked questions about Vector Graph RAG — covering when to use it, c
     ```
 
 ??? note "Can I use my own embeddings?"
-    Vector Graph RAG uses OpenAI embedding models by default (`text-embedding-3-large`), but you can configure the embedding model via the `embedding_model` parameter. Any model accessible through the OpenAI-compatible API will work. If you are using a local or custom embedding endpoint, set the appropriate base URL and model name. The embedding dimensionality is detected automatically. Note that all entities, relations, and passages in a single graph must use the same embedding model — mixing models within one collection prefix is not supported.
+    Vector Graph RAG uses OpenAI embedding models by default (`text-embedding-3-large`), but you can configure the embedding model via the `embedding_model` parameter. Any model accessible through the OpenAI-compatible API will work. If you are using a local HuggingFace embedding model, install the optional dependencies with `pip install "vector-graph-rag[hf]"`. The embedding dimensionality is detected automatically. Note that all entities, relations, and passages in a single graph must use the same embedding model — mixing models within one collection prefix is not supported.
 
 ??? note "How do I deploy to production?"
     For production deployments, use a remote Milvus instance instead of Milvus Lite for better performance, scalability, and persistence. Run the FastAPI backend behind a reverse proxy (e.g., Nginx) with appropriate rate limiting and authentication. The frontend can be built as static files and served from any CDN or static file server.

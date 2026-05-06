@@ -8,7 +8,6 @@ Also supports instruction-based models like Qwen3-Embedding and BGE.
 from typing import List, Literal, Optional, Union
 
 import numpy as np
-import torch
 from tqdm import tqdm
 
 from vector_graph_rag.config import Settings, get_settings
@@ -50,7 +49,7 @@ def _get_model_family(model_name: str) -> Optional[str]:
     return None
 
 
-def _mean_pooling(token_embeddings: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
+def _mean_pooling(token_embeddings, attention_mask):
     """Mean pooling with attention mask."""
     token_embeddings = token_embeddings.masked_fill(~attention_mask[..., None].bool(), 0.0)
     sentence_embeddings = token_embeddings.sum(dim=1) / attention_mask.sum(dim=1)[..., None]
@@ -70,10 +69,18 @@ class HuggingFaceEmbedding:
         instruction: Optional[str] = None,
         instruction_template: Optional[str] = None,
     ):
-        from transformers import AutoModel, AutoTokenizer
+        try:
+            import torch
+            from transformers import AutoModel, AutoTokenizer
+        except ImportError as exc:
+            raise ImportError(
+                "HuggingFace embedding models require the optional 'hf' dependencies. "
+                "Install with: uv sync --extra hf, or pip install 'vector-graph-rag[hf]'."
+            ) from exc
 
         self.model_name = model_name
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        self._torch = torch
         self.model = AutoModel.from_pretrained(model_name, trust_remote_code=True).to(self.device)
         self.tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
         self.model.eval()
@@ -121,6 +128,7 @@ class HuggingFaceEmbedding:
 
         # Apply instruction if configured
         processed_texts = self._apply_instruction(texts, text_type)
+        torch = self._torch
 
         with torch.no_grad():
             inputs = self.tokenizer(
@@ -132,7 +140,7 @@ class HuggingFaceEmbedding:
             if normalize:
                 embeddings = torch.nn.functional.normalize(embeddings, p=2, dim=1)
 
-            return embeddings.cpu().numpy()
+            return embeddings.float().cpu().numpy()
 
 
 class OpenAIEmbedding:

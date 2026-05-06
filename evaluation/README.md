@@ -74,7 +74,7 @@ These triplets were extracted using GPT-3.5-Turbo (1106) with HippoRAG's OpenIE 
 
 1. Install dependencies:
 ```bash
-uv sync
+uv sync --extra hf
 ```
 
 2. Set environment variables:

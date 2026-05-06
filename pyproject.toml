@@ -32,8 +32,6 @@ dependencies = [
     "tqdm>=4.65.0",
     "tiktoken>=0.5.0",
     "tenacity>=8.2.0",
-    "transformers>=4.30.0",
-    "torch>=2.0.0",
     "langchain-core>=0.3.0",
     "python-multipart>=0.0.22",
     "setuptools<71",  # Required for pkg_resources used by milvus-lite
@@ -49,8 +47,12 @@ api = [
     "fastapi>=0.109.0",
     "uvicorn[standard]>=0.27.0",
 ]
+hf = [
+    "transformers>=4.30.0",
+    "torch>=2.0.0",
+]
 all = [
-    "vector-graph-rag[dev,api]",
+    "vector-graph-rag[dev,api,hf]",
 ]
 loaders = [
     "markitdown[docx,pdf]>=0.1.4",
