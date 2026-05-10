@@ -29,14 +29,9 @@ INSTRUCTION_TEMPLATES = {
 }
 
 
-def _is_openai_model(model_name: str) -> bool:
-    """Check if the model is an OpenAI embedding model."""
-    openai_models = [
-        "text-embedding-3-small",
-        "text-embedding-3-large",
-        "text-embedding-ada-002",
-    ]
-    return model_name in openai_models or model_name.startswith("text-embedding")
+def _is_huggingface_model(model_name: str) -> bool:
+    """Check if the model is a HuggingFace embedding model (contains '/')."""
+    return "/" in model_name
 
 
 def _get_model_family(model_name: str) -> Optional[str]:
@@ -257,19 +252,18 @@ class EmbeddingModel:
         self.instruction = instruction
         self.instruction_template = instruction_template
 
-        if _is_openai_model(self.model_name):
+        if _is_huggingface_model(self.model_name):
+            self._backend = HuggingFaceEmbedding(
+                model_name=self.model_name,
+                instruction=instruction,
+                instruction_template=instruction_template,
+            )
+        else:
             self.settings.validate_settings()  # Need API key for OpenAI
             self._backend = OpenAIEmbedding(
                 model_name=self.model_name,
                 api_key=self.settings.openai_api_key,
                 base_url=self.settings.openai_base_url,
-            )
-        else:
-            # HuggingFace model
-            self._backend = HuggingFaceEmbedding(
-                model_name=self.model_name,
-                instruction=instruction,
-                instruction_template=instruction_template,
             )
 
         self._dimension: Optional[int] = None
