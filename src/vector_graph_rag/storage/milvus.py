@@ -73,6 +73,12 @@ class MilvusStore:
         self.relation_collection = f"{prefix}{self.settings.relation_collection}"
         self.passage_collection = f"{prefix}{self.settings.passage_collection}"
 
+    @staticmethod
+    def _combine_filters(*filters: Optional[str]) -> str:
+        """Combine non-empty Milvus filter expressions with AND."""
+        parts = [f.strip() for f in filters if f and f.strip()]
+        return " and ".join(f"({part})" for part in parts)
+
     def _create_collection(
         self,
         collection_name: str,
@@ -410,6 +416,7 @@ class MilvusStore:
         self,
         query_embedding: List[float],
         top_k: Optional[int] = None,
+        filter: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """
         Search for similar passages (naive RAG).
@@ -417,6 +424,7 @@ class MilvusStore:
         Args:
             query_embedding: Query embedding vector.
             top_k: Number of results to return.
+            filter: Optional Milvus filter expression for passage metadata.
 
         Returns:
             List of search results with id (str) and text.
@@ -427,6 +435,7 @@ class MilvusStore:
             collection_name=self.passage_collection,
             data=[query_embedding],
             limit=top_k,
+            filter=filter,
             output_fields=["id", "text", "entity_ids", "relation_ids"],
         )
         return results[0] if results else []
@@ -497,12 +506,14 @@ class MilvusStore:
     def get_passages_by_ids(
         self,
         passage_ids: List[str],
+        filter: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """
         Get passages by their IDs.
 
         Args:
             passage_ids: List of passage IDs (strings).
+            filter: Optional Milvus filter expression for passage metadata.
 
         Returns:
             List of passage data with id, text, entity_ids, and relation_ids.
@@ -512,12 +523,33 @@ class MilvusStore:
 
         # Format IDs as quoted strings for Milvus filter
         ids_str = ", ".join(f'"{pid}"' for pid in passage_ids)
+        filter_expr = self._combine_filters(f"id in [{ids_str}]", filter)
         results = self.client.query(
             collection_name=self.passage_collection,
-            filter=f"id in [{ids_str}]",
+            filter=filter_expr,
             output_fields=["id", "text", "entity_ids", "relation_ids"],
         )
         return results
+
+    def query_passage_ids(self, filter: str) -> List[str]:
+        """
+        Query passage IDs that match a Milvus filter expression.
+
+        Args:
+            filter: Milvus filter expression for passage metadata.
+
+        Returns:
+            Matching passage IDs.
+        """
+        if not filter or not filter.strip():
+            return []
+
+        results = self.client.query(
+            collection_name=self.passage_collection,
+            filter=filter,
+            output_fields=["id"],
+        )
+        return [r["id"] for r in results]
 
     # ==================== Update Operations ====================
 

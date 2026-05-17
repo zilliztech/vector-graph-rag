@@ -64,6 +64,10 @@ class AddDocumentsRequest(BaseModel):
 
     documents: List[str] = Field(..., description="List of document texts")
     ids: Optional[List[str]] = Field(default=None, description="Optional list of document IDs")
+    metadatas: Optional[List[Dict[str, Any]]] = Field(
+        default=None,
+        description="Optional metadata for each document",
+    )
     extract_triplets: bool = Field(
         default=True, description="Whether to extract triplets using LLM"
     )
@@ -118,6 +122,10 @@ class QueryRequest(BaseModel):
         default=None, description="Number of relations to retrieve"
     )
     expansion_degree: Optional[int] = Field(default=None, description="Subgraph expansion degree")
+    filter: Optional[str] = Field(
+        default=None,
+        description="Optional Milvus filter expression for document metadata",
+    )
 
 
 class EntitySchema(BaseModel):
@@ -453,6 +461,8 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
                 }
                 if request.ids and i < len(request.ids):
                     doc_data["id"] = request.ids[i]
+                if request.metadatas and i < len(request.metadatas):
+                    doc_data["metadata"] = request.metadatas[i]
                 documents_with_triplets.append(doc_data)
 
             result = rag.add_documents_with_triplets(documents_with_triplets, show_progress=False)
@@ -460,6 +470,7 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
             result = rag.add_texts(
                 request.documents,
                 ids=request.ids,
+                metadatas=request.metadatas,
                 extract_triplets=request.extract_triplets,
                 show_progress=False,
             )
@@ -619,6 +630,7 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
             entity_top_k=request.entity_top_k,
             relation_top_k=request.relation_top_k,
             expansion_degree=request.expansion_degree,
+            filter=request.filter,
         )
 
         # Convert subgraph to schema if available

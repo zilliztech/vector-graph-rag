@@ -169,6 +169,10 @@ Adds documents to a graph. Optionally extracts knowledge graph triplets from the
     "Einstein developed the theory of relativity."
   ],
   "ids": ["doc_1", "doc_2"],
+  "metadatas": [
+    {"source": "biography", "year": 1879},
+    {"source": "physics", "year": 1915}
+  ],
   "extract_triplets": true,
   "triplets": null
 }
@@ -178,6 +182,7 @@ Adds documents to a graph. Optionally extracts knowledge graph triplets from the
 |---|---|---|---|
 | `documents` | `string[]` | Yes | List of document texts to add. |
 | `ids` | `string[]` | No | Custom IDs for the documents. Auto-generated if omitted. |
+| `metadatas` | `object[]` | No | Custom metadata per document. These fields can be used by Milvus filters during query. |
 | `extract_triplets` | `boolean` | No | Whether to extract triplets via LLM. Defaults to `true`. |
 | `triplets` | `string[][][]` | No | Pre-extracted triplets per document. Each triplet is `["subject", "predicate", "object"]`. |
 
@@ -202,6 +207,7 @@ curl -X POST "http://localhost:8000/add_documents?graph_name=my_graph" \
   -H "Content-Type: application/json" \
   -d '{
     "documents": ["Albert Einstein was born in Ulm, Germany in 1879."],
+    "metadatas": [{"source": "biography", "year": 1879}],
     "extract_triplets": true
   }'
 ```
@@ -433,7 +439,8 @@ Performs retrieval-augmented generation over the knowledge graph. The system ret
   "use_reranking": true,
   "entity_top_k": 20,
   "relation_top_k": 20,
-  "expansion_degree": 1
+  "expansion_degree": 1,
+  "filter": "source == \"physics\" and year >= 1900"
 }
 ```
 
@@ -444,6 +451,7 @@ Performs retrieval-augmented generation over the knowledge graph. The system ret
 | `entity_top_k` | `integer` | No | `20` | Number of top entities to retrieve via vector search. |
 | `relation_top_k` | `integer` | No | `20` | Number of top relations to retrieve via vector search. |
 | `expansion_degree` | `integer` | No | `1` | Number of hops for graph neighborhood expansion. |
+| `filter` | `string` | No | `null` | Optional Milvus filter expression applied to document metadata. |
 
 !!! info "Expansion Degree"
     The `expansion_degree` parameter controls how many hops outward from the initially retrieved entities the system will traverse. A value of `1` means direct neighbors are included; `2` means neighbors-of-neighbors, and so on. Higher values retrieve more context but increase latency.
@@ -552,7 +560,8 @@ curl -X POST "http://localhost:8000/query?graph_name=my_graph" \
     "use_reranking": true,
     "entity_top_k": 20,
     "relation_top_k": 20,
-    "expansion_degree": 1
+    "expansion_degree": 1,
+    "filter": "source == \"physics\""
   }'
 ```
 

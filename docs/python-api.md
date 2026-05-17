@@ -155,6 +155,9 @@ def add_texts(
 result = rag.add_texts([
     "Albert Einstein developed the theory of general relativity.",
     "Einstein was born in Ulm, Germany in 1879.",
+], metadatas=[
+    {"source": "physics", "year": 1915},
+    {"source": "biography", "year": 1879},
 ])
 
 print(f"Extracted {len(result.entities)} entities, {len(result.relations)} relations")
@@ -207,6 +210,7 @@ def add_documents_with_triplets(
 ```
 
 Each dict in `documents` should contain the document text and its pre-extracted triplets.
+Optional `metadata` is stored on the passage and can be used by query filters.
 
 **Returns:** [`ExtractionResult`](#extractionresult)
 
@@ -218,6 +222,7 @@ Each dict in `documents` should contain the document text and its pre-extracted 
             "triplets": [
                 ("Albert Einstein", "developed", "theory of general relativity"),
             ],
+            "metadata": {"source": "physics", "year": 1915},
         },
     ]
 
@@ -240,6 +245,7 @@ def query(
     entity_similarity_threshold: Optional[float] = None,
     relation_similarity_threshold: Optional[float] = None,
     expansion_degree: Optional[int] = None,
+    filter: Optional[str] = None,
 ) -> QueryResult
 ```
 
@@ -253,6 +259,7 @@ def query(
 | `entity_similarity_threshold` | Override `Settings.entity_similarity_threshold` for this query. |
 | `relation_similarity_threshold` | Override `Settings.relation_similarity_threshold` for this query. |
 | `expansion_degree` | Override `Settings.expansion_degree` for this query. |
+| `filter` | Optional Milvus filter expression applied to passage metadata. |
 
 **Returns:** [`QueryResult`](#queryresult)
 
@@ -261,6 +268,13 @@ result = rag.query("What did Einstein contribute to physics?")
 
 print(result.answer)
 print(f"Found {len(result.passages)} relevant passages")
+```
+
+```python
+result = rag.query(
+    "What did Einstein contribute to physics?",
+    filter='source == "physics" and year >= 1900',
+)
 ```
 
 !!! tip "Per-query tuning"
@@ -284,7 +298,7 @@ print(f"Found {len(result.passages)} relevant passages")
 A convenience method that returns just the answer string — no metadata, no retrieval details.
 
 ```python
-def query_simple(question: str) -> str
+def query_simple(question: str, filter: Optional[str] = None) -> str
 ```
 
 **Returns:** `str` — the generated answer.
@@ -302,7 +316,7 @@ print(answer)
 Run a **naive vector-only** retrieval (no graph expansion or reranking). Useful as a baseline for comparison.
 
 ```python
-def query_naive(question: str) -> QueryResult
+def query_naive(question: str, filter: Optional[str] = None) -> QueryResult
 ```
 
 **Returns:** [`QueryResult`](#queryresult)
@@ -326,6 +340,7 @@ def retrieve(
     question: str,
     use_reranking: bool = True,
     top_k: Optional[int] = None,
+    filter: Optional[str] = None,
 ) -> QueryResult
 ```
 
@@ -334,6 +349,7 @@ def retrieve(
 | `question` | The natural-language question. |
 | `use_reranking` | Whether to apply LLM-based reranking. |
 | `top_k` | Number of passages to return (overrides `Settings.final_top_k`). |
+| `filter` | Optional Milvus filter expression applied to passage metadata. |
 
 **Returns:** [`QueryResult`](#queryresult) (with `answer` field empty or `None`).
 

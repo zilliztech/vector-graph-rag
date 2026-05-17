@@ -1,10 +1,11 @@
 """Tests for API endpoints."""
 
+import os
+import tempfile
+from unittest.mock import MagicMock, patch
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import MagicMock, patch
-import tempfile
-import os
 
 from vector_graph_rag.api.app import create_app
 from vector_graph_rag.config import Settings
@@ -134,6 +135,7 @@ class TestAddDocumentsEndpoint:
             "/add_documents",
             json={
                 "documents": ["Test document 1", "Test document 2"],
+                "metadatas": [{"source": "test1"}, {"source": "test2"}],
                 "extract_triplets": False,
             },
         )
@@ -141,6 +143,8 @@ class TestAddDocumentsEndpoint:
         assert response.status_code == 200
         data = response.json()
         assert "num_documents" in data
+        args, _ = mock_add.call_args
+        assert args[0][0].metadata == {"source": "test1"}
 
 
 class TestQueryEndpoint:
@@ -162,10 +166,12 @@ class TestQueryEndpoint:
 
         response = client.post(
             "/query",
-            json={"question": "Test question"},
+            json={"question": "Test question", "filter": 'source == "test"'},
         )
 
         assert response.status_code == 200
         data = response.json()
-        assert data["query"] == "Test question"
+        assert data["question"] == "Test question"
         assert "answer" in data
+        _, kwargs = mock_query.call_args
+        assert kwargs["filter"] == 'source == "test"'

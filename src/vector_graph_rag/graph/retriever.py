@@ -4,7 +4,7 @@ Graph-based retriever using vector similarity search.
 
 import logging
 from dataclasses import dataclass, field
-from typing import List, Optional, Tuple
+from typing import List, Optional, Set, Tuple
 
 from vector_graph_rag.config import Settings, get_settings
 from vector_graph_rag.graph.builder import GraphBuilder
@@ -251,6 +251,9 @@ class GraphRetriever:
         """
         before_count = len(expanded_relation_ids)
 
+        if before_count == 0:
+            return [], [], False, 0
+
         if before_count <= relation_number_threshold:
             # No eviction needed, fetch all relation texts
             ids_str = ", ".join(f'"{rid}"' for rid in expanded_relation_ids)
@@ -285,6 +288,58 @@ class GraphRetriever:
 
         return filtered_ids, filtered_texts, True, before_count
 
+    def _get_allowed_passage_ids(self, filter: Optional[str]) -> Optional[Set[str]]:
+        """Return passage IDs matching a metadata filter, or None when no filter is set."""
+        if not filter:
+            return None
+        return set(self.store.query_passage_ids(filter))
+
+    def _filter_relations_by_passage_ids(
+        self,
+        relation_ids: List[str],
+        allowed_passage_ids: Optional[Set[str]],
+    ) -> List[str]:
+        """Keep relations that point to at least one allowed passage."""
+        if allowed_passage_ids is None:
+            return relation_ids
+        if not relation_ids or not allowed_passage_ids:
+            return []
+
+        relation_data = self.store._get_relations_by_ids(relation_ids)
+        allowed_relation_ids = {
+            r["id"]
+            for r in relation_data
+            if set(r.get("passage_ids", [])) & allowed_passage_ids
+        }
+        return [rid for rid in relation_ids if rid in allowed_relation_ids]
+
+    def _filter_relation_results_by_passage_ids(
+        self,
+        relation_ids: List[str],
+        relation_texts: List[str],
+        relation_scores: List[float],
+        allowed_passage_ids: Optional[Set[str]],
+    ) -> Tuple[List[str], List[str], List[float]]:
+        """Filter parallel relation result lists using allowed passage IDs."""
+        filtered_ids = self._filter_relations_by_passage_ids(
+            relation_ids,
+            allowed_passage_ids,
+        )
+        if filtered_ids is relation_ids:
+            return relation_ids, relation_texts, relation_scores
+
+        allowed = set(filtered_ids)
+        kept_ids: List[str] = []
+        kept_texts: List[str] = []
+        kept_scores: List[float] = []
+        for rid, text, score in zip(relation_ids, relation_texts, relation_scores):
+            if rid in allowed:
+                kept_ids.append(rid)
+                kept_texts.append(text)
+                kept_scores.append(score)
+
+        return kept_ids, kept_texts, kept_scores
+
     def retrieve(
         self,
         query: str,
@@ -294,6 +349,7 @@ class GraphRetriever:
         relation_similarity_threshold: Optional[float] = None,
         expansion_degree: Optional[int] = None,
         relation_number_threshold: Optional[int] = None,
+        filter: Optional[str] = None,
     ) -> RetrievalResult:
         """
         Perform graph-based retrieval for a query.
@@ -313,11 +369,14 @@ class GraphRetriever:
             relation_similarity_threshold: Override relation similarity threshold.
             expansion_degree: Override expansion degree.
             relation_number_threshold: Override relation number threshold for eviction.
+            filter: Optional Milvus filter expression for passage metadata.
 
         Returns:
             RetrievalResult with all retrieval information, including
             the SubGraph for debugging/visualization.
         """
+        allowed_passage_ids = self._get_allowed_passage_ids(filter)
+
         # Extract query entities
         query_entities = self._extract_query_entities(query)
 
@@ -334,15 +393,27 @@ class GraphRetriever:
             top_k=relation_top_k,
             similarity_threshold=relation_similarity_threshold,
         )
+        relation_ids, relation_texts, relation_scores = (
+            self._filter_relation_results_by_passage_ids(
+                relation_ids,
+                relation_texts,
+                relation_scores,
+                allowed_passage_ids,
+            )
+        )
 
         # Expand subgraph
         subgraph = self._expand_subgraph(entity_ids, relation_ids, degree=expansion_degree)
 
         # Apply eviction strategy if needed
         threshold = relation_number_threshold or self.settings.relation_number_threshold
+        filtered_expanded_relation_ids = self._filter_relations_by_passage_ids(
+            list(subgraph.relation_ids),
+            allowed_passage_ids,
+        )
         expanded_ids, expanded_texts, eviction_occurred, eviction_before = self._apply_eviction(
             query,
-            list(subgraph.relation_ids),
+            filtered_expanded_relation_ids,
             threshold,
         )
 
@@ -367,6 +438,7 @@ class GraphRetriever:
         self,
         query: str,
         top_k: Optional[int] = None,
+        filter: Optional[str] = None,
     ) -> List[str]:
         """
         Naive RAG passage retrieval for comparison.
@@ -374,11 +446,12 @@ class GraphRetriever:
         Args:
             query: The query text.
             top_k: Number of passages to return.
+            filter: Optional Milvus filter expression for passage metadata.
 
         Returns:
             List of passage texts.
         """
         top_k = top_k or self.settings.final_top_k
         query_embedding = self.embedding_model.embed(query)
-        results = self.store.search_passages(query_embedding, top_k=top_k)
+        results = self.store.search_passages(query_embedding, top_k=top_k, filter=filter)
         return [r["entity"]["text"] for r in results]

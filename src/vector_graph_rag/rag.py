@@ -4,7 +4,7 @@ Main Vector Graph RAG class with user-friendly API.
 
 import logging
 import uuid
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from vector_graph_rag.config import Settings
 from vector_graph_rag.graph.builder import GraphBuilder
@@ -177,12 +177,36 @@ class VectorGraphRAG:
         """
         return subgraph.passage_texts
 
-    def _get_passages_from_relations(self, relation_ids: List[str]) -> tuple[List[str], List[str]]:
+    @staticmethod
+    def _get_user_passage_metadata(doc: Document) -> Dict[str, Any]:
+        """Return user metadata that can be stored on passage records."""
+        metadata = dict(doc.metadata or {})
+        metadata.pop("triplets", None)
+        return metadata
+
+    @staticmethod
+    def _merge_passage_metadata(
+        user_metadata: Dict[str, Any],
+        entity_ids: List[str],
+        relation_ids: List[str],
+    ) -> Dict[str, Any]:
+        """Merge user metadata with internal graph adjacency fields."""
+        metadata = dict(user_metadata)
+        metadata["entity_ids"] = entity_ids
+        metadata["relation_ids"] = relation_ids
+        return metadata
+
+    def _get_passages_from_relations(
+        self,
+        relation_ids: List[str],
+        filter: Optional[str] = None,
+    ) -> tuple[List[str], List[str]]:
         """
         Get passages associated with given relations.
 
         Args:
             relation_ids: List of relation IDs (strings).
+            filter: Optional Milvus filter expression for passage metadata.
 
         Returns:
             Tuple of (passage_ids, passage_texts).
@@ -204,10 +228,11 @@ class VectorGraphRAG:
         if not passage_ids:
             return [], []
 
-        passage_data = self._store.get_passages_by_ids(passage_ids)
+        passage_data = self._store.get_passages_by_ids(passage_ids, filter=filter)
         id_to_text = {p["id"]: p["text"] for p in passage_data}
 
         passages = [id_to_text[pid] for pid in passage_ids if pid in id_to_text]
+        passage_ids = [pid for pid in passage_ids if pid in id_to_text]
         return passage_ids, passages
 
     def add_texts(
@@ -358,14 +383,21 @@ class VectorGraphRAG:
 
             relation_metadatas.append(metadata)
 
+        passage_user_metadatas = {
+            doc.id: self._get_user_passage_metadata(doc)
+            for doc in documents
+            if doc.id is not None
+        }
+
         # Passage metadata
         passage_metadatas = []
         for pid in self._graph_builder.passage_ids:
             passage_metadatas.append(
-                {
-                    "entity_ids": self._graph_builder.passage_to_entity_ids.get(pid, []),
-                    "relation_ids": self._graph_builder.passage_to_relation_ids.get(pid, []),
-                }
+                self._merge_passage_metadata(
+                    passage_user_metadatas.get(pid, {}),
+                    self._graph_builder.passage_to_entity_ids.get(pid, []),
+                    self._graph_builder.passage_to_relation_ids.get(pid, []),
+                )
             )
 
         # Drop and recreate collections for fresh data
@@ -437,14 +469,18 @@ class VectorGraphRAG:
         """
         docs = []
         for doc_data in documents:
-            passage = doc_data["passage"]
+            passage = doc_data.get("passage", doc_data.get("text"))
+            if passage is None:
+                raise ValueError('Each document must include "passage" or "text".')
             doc_id = doc_data.get("id") or str(uuid.uuid4())
             # Store triplets in metadata as list of [subject, predicate, object]
             triplets = doc_data.get("triplets", [])
+            metadata = dict(doc_data.get("metadata") or {})
+            metadata["triplets"] = triplets
             docs.append(
                 Document(
                     page_content=passage,
-                    metadata={"triplets": triplets},
+                    metadata=metadata,
                     id=doc_id,
                 )
             )
@@ -461,6 +497,7 @@ class VectorGraphRAG:
         entity_similarity_threshold: Optional[float] = None,
         relation_similarity_threshold: Optional[float] = None,
         expansion_degree: Optional[int] = None,
+        filter: Optional[str] = None,
     ) -> QueryResult:
         """
         Query the knowledge base.
@@ -482,6 +519,7 @@ class VectorGraphRAG:
             entity_similarity_threshold: Override entity similarity threshold.
             relation_similarity_threshold: Override relation similarity threshold.
             expansion_degree: Override expansion degree.
+            filter: Optional Milvus filter expression for passage metadata.
 
         Returns:
             QueryResult with answer, retrieval details, and subgraph for visualization.
@@ -501,6 +539,7 @@ class VectorGraphRAG:
             entity_similarity_threshold=entity_similarity_threshold,
             relation_similarity_threshold=relation_similarity_threshold,
             expansion_degree=expansion_degree,
+            filter=filter,
         )
 
         # Build retrieval detail for visualization
@@ -532,7 +571,7 @@ class VectorGraphRAG:
             reranked_texts = candidate_texts[: self.settings.final_top_k]
 
         # Get passages from reranked relations
-        passage_ids, passages = self._get_passages_from_relations(reranked_ids)
+        passage_ids, passages = self._get_passages_from_relations(reranked_ids, filter=filter)
         final_passages = passages[: self.settings.final_top_k]
 
         # Generate answer
@@ -560,12 +599,13 @@ class VectorGraphRAG:
             eviction_result=eviction_result,
         )
 
-    def query_simple(self, question: str) -> str:
+    def query_simple(self, question: str, filter: Optional[str] = None) -> str:
         """
         Simple query that returns just the answer.
 
         Args:
             question: The question to answer.
+            filter: Optional Milvus filter expression for passage metadata.
 
         Returns:
             The answer string.
@@ -574,9 +614,9 @@ class VectorGraphRAG:
             >>> answer = rag.query_simple("What did Einstein develop?")
             >>> print(answer)
         """
-        return self.query(question).answer
+        return self.query(question, filter=filter).answer
 
-    def query_naive(self, question: str) -> QueryResult:
+    def query_naive(self, question: str, filter: Optional[str] = None) -> QueryResult:
         """
         Query using naive RAG (direct passage retrieval).
 
@@ -584,12 +624,13 @@ class VectorGraphRAG:
 
         Args:
             question: The question to answer.
+            filter: Optional Milvus filter expression for passage metadata.
 
         Returns:
             QueryResult with answer and retrieved passages.
         """
         retriever = self._ensure_retriever()
-        passages = retriever.retrieve_passages_naive(question)
+        passages = retriever.retrieve_passages_naive(question, filter=filter)
         answer = self._answer_generator.generate(question, passages)
 
         return QueryResult(
@@ -606,6 +647,7 @@ class VectorGraphRAG:
         question: str,
         use_reranking: bool = True,
         top_k: Optional[int] = None,
+        filter: Optional[str] = None,
     ) -> QueryResult:
         """
         Retrieve passages using Graph RAG without generating an answer.
@@ -617,6 +659,7 @@ class VectorGraphRAG:
             question: The question to answer.
             use_reranking: Whether to use LLM reranking.
             top_k: Number of passages to retrieve. Uses settings.final_top_k if not provided.
+            filter: Optional Milvus filter expression for passage metadata.
 
         Returns:
             QueryResult with retrieved passages (answer will be empty).
@@ -625,7 +668,7 @@ class VectorGraphRAG:
         top_k = top_k or self.settings.final_top_k
 
         # Retrieve
-        retrieval_result = retriever.retrieve(question)
+        retrieval_result = retriever.retrieve(question, filter=filter)
 
         # Get candidate relations
         candidate_ids = retrieval_result.expanded_relation_ids
@@ -641,10 +684,14 @@ class VectorGraphRAG:
             reranked_texts = candidate_texts[:top_k]
 
         # Get passages from reranked relations
-        passage_ids, passages = self._get_passages_from_relations(reranked_ids)
+        passage_ids, passages = self._get_passages_from_relations(reranked_ids, filter=filter)
 
         if len(passages) < top_k:
-            additional_passages = retriever.retrieve_passages_naive(question, top_k=top_k)
+            additional_passages = retriever.retrieve_passages_naive(
+                question,
+                top_k=top_k,
+                filter=filter,
+            )
             for passage in additional_passages:
                 if passage not in passages:
                     passages.append(passage)
@@ -665,6 +712,7 @@ class VectorGraphRAG:
         self,
         question: str,
         top_k: Optional[int] = None,
+        filter: Optional[str] = None,
     ) -> QueryResult:
         """
         Retrieve passages using naive RAG without generating an answer.
@@ -675,13 +723,14 @@ class VectorGraphRAG:
         Args:
             question: The question to answer.
             top_k: Number of passages to retrieve. Uses settings.final_top_k if not provided.
+            filter: Optional Milvus filter expression for passage metadata.
 
         Returns:
             QueryResult with retrieved passages (answer will be empty).
         """
         retriever = self._ensure_retriever()
         top_k = top_k or self.settings.final_top_k
-        passages = retriever.retrieve_passages_naive(question, top_k=top_k)
+        passages = retriever.retrieve_passages_naive(question, top_k=top_k, filter=filter)
 
         return QueryResult(
             query=question,

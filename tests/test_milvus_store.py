@@ -1,9 +1,8 @@
 """Tests for MilvusStore CRUD operations."""
 
-import pytest
 import uuid
 
-from vector_graph_rag.storage.milvus import MilvusStore, generate_id
+from vector_graph_rag.storage.milvus import generate_id
 
 
 class TestGenerateId:
@@ -350,3 +349,58 @@ class TestMilvusStoreSearch:
         )
 
         assert len(results) >= 1
+
+    def test_search_passages_with_metadata_filter(self, milvus_store):
+        """Test searching passages with a Milvus metadata filter."""
+        ids = ["physics_doc", "biology_doc"]
+        milvus_store.insert_passages(
+            ["First document about physics.", "Second document about biology."],
+            ids=ids,
+            embeddings=[[0.1] * 1536, [0.1] * 1536],
+            metadatas=[
+                {"source": "physics", "tenant_id": "team_a"},
+                {"source": "biology", "tenant_id": "team_b"},
+            ],
+        )
+
+        results = milvus_store.search_passages(
+            [0.1] * 1536,
+            top_k=2,
+            filter='tenant_id == "team_a"',
+        )
+
+        assert [r["entity"]["id"] for r in results] == ["physics_doc"]
+
+    def test_get_passages_by_ids_with_metadata_filter(self, milvus_store):
+        """Test retrieving passages by IDs with an additional metadata filter."""
+        ids = ["doc_a", "doc_b"]
+        milvus_store.insert_passages(
+            ["Tenant A document.", "Tenant B document."],
+            ids=ids,
+            embeddings=[[0.1] * 1536, [0.1] * 1536],
+            metadatas=[
+                {"tenant_id": "team_a"},
+                {"tenant_id": "team_b"},
+            ],
+        )
+
+        results = milvus_store.get_passages_by_ids(ids, filter='tenant_id == "team_b"')
+
+        assert len(results) == 1
+        assert results[0]["id"] == "doc_b"
+
+    def test_query_passage_ids_with_metadata_filter(self, milvus_store):
+        """Test querying passage IDs by custom metadata."""
+        milvus_store.insert_passages(
+            ["Tenant A document.", "Tenant B document."],
+            ids=["doc_a", "doc_b"],
+            embeddings=[[0.1] * 1536, [0.1] * 1536],
+            metadatas=[
+                {"tenant_id": "team_a"},
+                {"tenant_id": "team_b"},
+            ],
+        )
+
+        ids = milvus_store.query_passage_ids('tenant_id == "team_a"')
+
+        assert ids == ["doc_a"]
