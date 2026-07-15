@@ -12,8 +12,18 @@ from vector_graph_rag.graph.knowledge_graph import SubGraph
 from vector_graph_rag.graph.retriever import GraphRetriever
 from vector_graph_rag.llm.cache import LLMCache, get_llm_cache
 from vector_graph_rag.llm.extractor import TripletExtractor
+from vector_graph_rag.llm.react import ReActPlanner
 from vector_graph_rag.llm.reranker import LLMReranker
-from vector_graph_rag.models import Document, Entity, Passage, Relation, Triplet
+from vector_graph_rag.models import (
+    Document,
+    Entity,
+    Passage,
+    ReActAction,
+    ReActResult,
+    ReActStep,
+    Relation,
+    Triplet,
+)
 from vector_graph_rag.rag import VectorGraphRAG, create_rag
 from vector_graph_rag.storage.embeddings import EmbeddingModel
 from vector_graph_rag.storage.milvus import MilvusStore
@@ -35,6 +45,10 @@ __all__ = [
     "SubGraph",
     "Graph",
     "LLMReranker",
+    "ReActPlanner",
+    "ReActAction",
+    "ReActStep",
+    "ReActResult",
     "VectorGraphRAG",
     "create_rag",
     "LLMCache",

@@ -15,6 +15,9 @@ __all__ = [
     "Relation",
     "Passage",
     "QueryResult",
+    "ReActAction",
+    "ReActStep",
+    "ReActResult",
     "ExtractionResult",
     "EvictionResult",
 ]
@@ -159,6 +162,69 @@ class EvictionResult(BaseModel):
     occurred: bool = Field(default=False, description="Whether eviction occurred")
     before_count: int = Field(default=0, description="Relations before eviction")
     after_count: int = Field(default=0, description="Relations after eviction")
+
+
+class ReActAction(BaseModel):
+    """
+    Planner action for one ReAct loop step.
+
+    Attributes:
+        thought: Short rationale for the selected action.
+        action: Either "search" or "finish".
+        query: Search query when action is "search".
+        answer: Final answer when action is "finish".
+    """
+
+    thought: str = Field(default="", description="Short rationale for the action")
+    action: str = Field(..., description='Planner action: "search" or "finish"')
+    query: Optional[str] = Field(default=None, description="Search query for search actions")
+    answer: Optional[str] = Field(default=None, description="Final answer for finish actions")
+
+
+class ReActStep(BaseModel):
+    """
+    Trace entry for one ReAct loop step.
+
+    Attributes:
+        step: 1-based loop step number.
+        thought: Short rationale emitted by the planner.
+        action: Action selected by the planner.
+        query: Search query used for search actions.
+        answer: Final answer emitted by a finish action.
+        observation: Text observation returned to the planner.
+        retrieved_passages: Passages retrieved by a search action.
+        retrieved_relations: Relations retrieved by a search action.
+    """
+
+    step: int = Field(..., description="1-based step number")
+    thought: str = Field(default="", description="Short planner rationale")
+    action: str = Field(..., description='Planner action: "search" or "finish"')
+    query: Optional[str] = Field(default=None, description="Search query used by this step")
+    answer: Optional[str] = Field(default=None, description="Answer returned by finish action")
+    observation: str = Field(default="", description="Observation returned to the planner")
+    retrieved_passages: List[str] = Field(default_factory=list)
+    retrieved_relations: List[str] = Field(default_factory=list)
+
+
+class ReActResult(BaseModel):
+    """
+    Result of a ReAct query loop.
+
+    Attributes:
+        query: The original question.
+        answer: Final answer from the planner or fallback answer generation.
+        steps: ReAct trace entries.
+        passages: Unique passages observed across search steps.
+        relations: Unique relations observed across search steps.
+        finished: Whether the planner explicitly emitted a finish action.
+    """
+
+    query: str = Field(..., description="Original query")
+    answer: str = Field(..., description="Final answer")
+    steps: List[ReActStep] = Field(default_factory=list, description="ReAct loop trace")
+    passages: List[str] = Field(default_factory=list, description="Observed passages")
+    relations: List[str] = Field(default_factory=list, description="Observed relations")
+    finished: bool = Field(default=False, description="Whether the planner finished explicitly")
 
 
 class QueryResult(BaseModel):

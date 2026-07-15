@@ -13,6 +13,7 @@ from vector_graph_rag.graph.builder import GraphBuilder
 from vector_graph_rag.graph.knowledge_graph import SubGraph
 from vector_graph_rag.graph.retriever import GraphRetriever
 from vector_graph_rag.llm.extractor import TripletExtractor
+from vector_graph_rag.llm.react import ReActPlanner
 from vector_graph_rag.llm.reranker import AnswerGenerator, LLMReranker
 from vector_graph_rag.models import (
     Document,
@@ -20,6 +21,8 @@ from vector_graph_rag.models import (
     EvictionResult,
     ExtractionResult,
     QueryResult,
+    ReActResult,
+    ReActStep,
     Relation,
     RerankResult,
     RetrievalDetail,
@@ -159,6 +162,7 @@ class VectorGraphRAG:
         self._triplet_extractor = TripletExtractor(settings=self.settings)
         self._reranker = LLMReranker(settings=self.settings)
         self._answer_generator = AnswerGenerator(settings=self.settings)
+        self._react_planner = ReActPlanner(settings=self.settings)
 
         # Retriever is initialized after documents are added
         self._retriever: Optional[GraphRetriever] = None
@@ -193,6 +197,39 @@ class VectorGraphRAG:
             List of passage texts.
         """
         return subgraph.passage_texts
+
+    @staticmethod
+    def _append_unique(values: List[str], additions: List[str]) -> None:
+        """Append unique values in-place while preserving order."""
+        seen = set(values)
+        for value in additions:
+            if value not in seen:
+                seen.add(value)
+                values.append(value)
+
+    @staticmethod
+    def _format_react_observation(
+        passages: List[str],
+        relations: List[str],
+        max_items: int = 5,
+    ) -> str:
+        """Format retrieved context as a compact ReAct observation."""
+        lines: List[str] = []
+        if passages:
+            lines.append("Passages:")
+            for index, passage in enumerate(passages[:max_items], start=1):
+                lines.append(f"{index}. {passage}")
+        else:
+            lines.append("Passages: none")
+
+        if relations:
+            lines.append("Relations:")
+            for index, relation in enumerate(relations[:max_items], start=1):
+                lines.append(f"{index}. {relation}")
+        else:
+            lines.append("Relations: none")
+
+        return "\n".join(lines)
 
     @staticmethod
     def _get_user_passage_metadata(doc: Document) -> Dict[str, Any]:
@@ -1388,6 +1425,101 @@ class VectorGraphRAG:
             retrieved_relations=[],
             expanded_relations=[],
             reranked_relations=[],
+        )
+
+    def query_react(
+        self,
+        question: str,
+        max_steps: int = 3,
+        use_reranking: bool = True,
+        top_k: Optional[int] = None,
+        filter: Optional[str] = None,
+    ) -> ReActResult:
+        """
+        Query with a basic ReAct loop over Graph RAG retrieval.
+
+        The planner can search multiple times before returning a final answer.
+        Each search action uses the existing Graph RAG retrieval path. If the
+        planner does not finish within max_steps, an answer is generated from
+        the passages observed across search steps.
+
+        Args:
+            question: The question to answer.
+            max_steps: Maximum planner steps.
+            use_reranking: Whether each search uses LLM reranking.
+            top_k: Number of passages to retrieve per search step.
+            filter: Optional Milvus filter expression for passage metadata.
+
+        Returns:
+            ReActResult with final answer and step trace.
+        """
+        if max_steps < 1:
+            raise ValueError("max_steps must be >= 1.")
+
+        steps: List[ReActStep] = []
+        observed_passages: List[str] = []
+        observed_relations: List[str] = []
+
+        for step_number in range(1, max_steps + 1):
+            action = self._react_planner.plan(
+                question=question,
+                steps=steps,
+                step_number=step_number,
+                max_steps=max_steps,
+            )
+
+            if action.action == "finish":
+                answer = action.answer or ""
+                steps.append(
+                    ReActStep(
+                        step=step_number,
+                        thought=action.thought,
+                        action="finish",
+                        answer=answer,
+                    )
+                )
+                return ReActResult(
+                    query=question,
+                    answer=answer,
+                    steps=steps,
+                    passages=observed_passages,
+                    relations=observed_relations,
+                    finished=True,
+                )
+
+            search_query = action.query or question
+            retrieval_result = self.retrieve(
+                search_query,
+                use_reranking=use_reranking,
+                top_k=top_k,
+                filter=filter,
+            )
+            passages = retrieval_result.passages or retrieval_result.retrieved_passages
+            relations = retrieval_result.reranked_relations or retrieval_result.retrieved_relations
+            self._append_unique(observed_passages, passages)
+            self._append_unique(observed_relations, relations)
+            observation = self._format_react_observation(passages, relations)
+
+            steps.append(
+                ReActStep(
+                    step=step_number,
+                    thought=action.thought,
+                    action="search",
+                    query=search_query,
+                    observation=observation,
+                    retrieved_passages=passages,
+                    retrieved_relations=relations,
+                )
+            )
+
+        answer = self._answer_generator.generate(question, observed_passages)
+        return ReActResult(
+            query=question,
+            answer=answer,
+            steps=steps,
+            passages=observed_passages,
+            relations=observed_relations,
+            finished=False,
         )
 
     def retrieve(

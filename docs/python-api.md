@@ -518,6 +518,52 @@ result = rag.query(
 
 ---
 
+#### `query_react`
+
+Run a basic ReAct loop over Graph RAG retrieval. The planner can issue multiple
+search actions before returning a final answer. Each search action reuses the
+same graph retrieval path as [`retrieve`](#retrieve).
+
+```python
+def query_react(
+    question: str,
+    max_steps: int = 3,
+    use_reranking: bool = True,
+    top_k: Optional[int] = None,
+    filter: Optional[str] = None,
+) -> ReActResult
+```
+
+| Parameter | Description |
+|---|---|
+| `question` | The natural-language question to answer. |
+| `max_steps` | Maximum number of planner steps. |
+| `use_reranking` | Whether each search step applies LLM-based reranking. |
+| `top_k` | Number of passages to retrieve per search step. |
+| `filter` | Optional Milvus filter expression applied to passage metadata. |
+
+**Returns:** [`ReActResult`](#reactresult)
+
+```python
+result = rag.query_react(
+    "Which database does Alpha own, and who maintains it?",
+    max_steps=3,
+)
+
+print(result.answer)
+
+for step in result.steps:
+    print(step.action, step.query)
+    print(step.observation)
+```
+
+!!! note "Basic loop"
+    `query_react()` is a lightweight agentic query path. It does not replace the
+    default single-pass [`query`](#query) method. Use it when a question may
+    benefit from iterative search and you want a step trace.
+
+---
+
 #### `query_simple`
 
 A convenience method that returns just the answer string — no metadata, no retrieval details.
@@ -662,6 +708,41 @@ print(f"Retrieved {len(result.retrieved_relations)} relations")
 print(f"Expanded to {len(result.expanded_relations)} relations via graph")
 print(f"Final passages: {len(result.passages)}")
 ```
+
+---
+
+## ReActResult
+
+A data class returned by `query_react()`. It contains the final answer and the
+step trace for the ReAct loop.
+
+```python
+from vector_graph_rag import ReActResult
+```
+
+### Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `query` | `str` | The original question. |
+| `answer` | `str` | The final answer. |
+| `steps` | `list[ReActStep]` | Search and finish actions taken by the planner. |
+| `passages` | `list[str]` | Unique passages observed across search steps. |
+| `relations` | `list[str]` | Unique relations observed across search steps. |
+| `finished` | `bool` | Whether the planner explicitly emitted a finish action. |
+
+### `ReActStep` Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `step` | `int` | 1-based step number. |
+| `thought` | `str` | Short planner rationale. |
+| `action` | `str` | Either `"search"` or `"finish"`. |
+| `query` | `str \| None` | Search query used by a search action. |
+| `answer` | `str \| None` | Answer returned by a finish action. |
+| `observation` | `str` | Retrieved context returned to the planner. |
+| `retrieved_passages` | `list[str]` | Passages retrieved by the search action. |
+| `retrieved_relations` | `list[str]` | Relations retrieved by the search action. |
 
 ---
 

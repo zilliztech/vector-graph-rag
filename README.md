@@ -103,6 +103,29 @@ rag.rebuild_documents_with_triplets([
 </details>
 
 <details>
+<summary>🔎 <b>ReAct query loop</b> — click to expand</summary>
+
+Use `query_react()` when a question may benefit from iterative search. Each
+search step reuses the same Graph RAG retrieval path and returns a trace.
+
+```python
+result = rag.query_react(
+    "Which theory did Einstein develop, and where did he work?",
+    max_steps=3,
+)
+
+print(result.answer)
+
+for step in result.steps:
+    print(step.action, step.query)
+    print(step.observation)
+```
+
+The default `query()` method remains the single-pass Graph RAG path.
+
+</details>
+
+<details>
 <summary>🔄 <b>Incremental document updates</b> — click to expand</summary>
 
 Use `upsert_documents_by_source()` when a source file, message, or page is
