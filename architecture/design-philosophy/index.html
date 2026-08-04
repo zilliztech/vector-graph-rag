@@ -1,0 +1,2483 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A Graph RAG implementation using pure vector search with Milvus">
+      
+      
+      
+        <link rel="canonical" href="https://zilliztech.github.io/vector-graph-rag/architecture/design-philosophy/">
+      
+      
+        <link rel="prev" href="../how-it-works/">
+      
+      
+        <link rel="next" href="../../reference/python-api/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/logo.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Design Philosophy - Vector Graph RAG</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/custom.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#design-philosophy" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Vector Graph RAG" class="md-header__button md-logo" aria-label="Vector Graph RAG" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Vector Graph RAG
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Design Philosophy
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="teal"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="teal"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/zilliztech/vector-graph-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    zilliztech/vector-graph-rag
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../getting-started/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Getting Started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../how-it-works/" class="md-tabs__link">
+          
+  
+  
+  Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/python-api/" class="md-tabs__link">
+          
+  
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../evaluation/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Evaluation
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../use-cases/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Use Cases
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../faq/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  FAQ
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Vector Graph RAG" class="md-nav__button md-logo" aria-label="Vector Graph RAG" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="logo">
+
+    </a>
+    Vector Graph RAG
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/zilliztech/vector-graph-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    zilliztech/vector-graph-rag
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/document-import/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Document Import
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/incremental-updates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Incremental Updates
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/observability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Observability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/embedding-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Embedding Providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/multi-tenancy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Tenancy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/frontend/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Visualization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how-it-works/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How It Works
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Philosophy
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Philosophy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-the-core-insight-graph-structure-as-vectors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. The Core Insight: Graph Structure as Vectors
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. The Core Insight: Graph Structure as Vectors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-traditional-approach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Traditional Approach
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-vector-graph-rag-approach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Vector Graph RAG Approach
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-why-no-graph-database" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Why No Graph Database?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Why No Graph Database?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-simplicity-argument" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Simplicity Argument
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-you-give-up" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What You Give Up
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-single-pass-vs-iterative-retrieval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Single-Pass vs. Iterative Retrieval
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Single-Pass vs. Iterative Retrieval">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-iterative-paradigm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Iterative Paradigm
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-single-pass-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Single-Pass Works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-cost-advantage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Cost Advantage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-subgraph-expansion-the-key-innovation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Subgraph Expansion: The Key Innovation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Subgraph Expansion: The Key Innovation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expansion-degree" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expansion Degree
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-comparison-with-other-approaches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Comparison with Other Approaches
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Comparison with Other Approaches">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#architecture-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#feature-by-feature-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Feature-by-Feature Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-on-multi-hop-qa-benchmarks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance on Multi-Hop QA Benchmarks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-differentiators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Differentiators
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-when-vector-graph-rag-works-best" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. When Vector Graph RAG Works Best
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. When Vector Graph RAG Works Best">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dense-factual-content" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dense Factual Content
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-hop-questions-24-hops" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-Hop Questions (2–4 Hops)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#simple-deployment-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Simple Deployment Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cost-and-latency-sensitivity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cost and Latency Sensitivity
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-when-to-consider-alternatives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. When to Consider Alternatives
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. When to Consider Alternatives">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#very-complex-multi-hop-chains-5-hops" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Very Complex Multi-Hop Chains (5+ Hops)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#graph-analytics-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Graph Analytics Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#global-summarization-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Global Summarization Queries
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documents-with-few-entity-relationships" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documents with Few Entity Relationships
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision-framework" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision Framework
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary-of-design-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary of Design Decisions
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/python-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/rest-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    REST API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../use-cases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Use Cases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-the-core-insight-graph-structure-as-vectors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. The Core Insight: Graph Structure as Vectors
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. The Core Insight: Graph Structure as Vectors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-traditional-approach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Traditional Approach
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-vector-graph-rag-approach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Vector Graph RAG Approach
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-why-no-graph-database" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Why No Graph Database?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Why No Graph Database?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-simplicity-argument" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Simplicity Argument
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#what-you-give-up" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What You Give Up
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-single-pass-vs-iterative-retrieval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Single-Pass vs. Iterative Retrieval
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Single-Pass vs. Iterative Retrieval">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-iterative-paradigm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Iterative Paradigm
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#why-single-pass-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why Single-Pass Works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-cost-advantage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Cost Advantage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-subgraph-expansion-the-key-innovation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Subgraph Expansion: The Key Innovation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Subgraph Expansion: The Key Innovation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#expansion-degree" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expansion Degree
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-comparison-with-other-approaches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Comparison with Other Approaches
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Comparison with Other Approaches">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#architecture-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#feature-by-feature-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Feature-by-Feature Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-on-multi-hop-qa-benchmarks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance on Multi-Hop QA Benchmarks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-differentiators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Differentiators
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-when-vector-graph-rag-works-best" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. When Vector Graph RAG Works Best
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. When Vector Graph RAG Works Best">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dense-factual-content" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dense Factual Content
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-hop-questions-24-hops" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-Hop Questions (2–4 Hops)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#simple-deployment-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Simple Deployment Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cost-and-latency-sensitivity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cost and Latency Sensitivity
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-when-to-consider-alternatives" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. When to Consider Alternatives
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. When to Consider Alternatives">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#very-complex-multi-hop-chains-5-hops" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Very Complex Multi-Hop Chains (5+ Hops)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#graph-analytics-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Graph Analytics Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#global-summarization-queries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Global Summarization Queries
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documents-with-few-entity-relationships" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documents with Few Entity Relationships
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision-framework" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision Framework
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary-of-design-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary of Design Decisions
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="design-philosophy">Design Philosophy<a class="headerlink" href="#design-philosophy" title="Permanent link">&para;</a></h1>
+<p>Vector Graph RAG is built on a simple but powerful observation: <strong>you do not need a graph database to do Graph RAG</strong>. By encoding entities, relations, and passages as vectors in Milvus, and replacing iterative LLM agents with a single reranking pass, we achieve competitive retrieval quality at a fraction of the operational and computational cost.</p>
+<p>This page explains the reasoning behind these choices, the trade-offs involved, and how the system compares to alternative approaches.</p>
+<hr />
+<h2 id="1-the-core-insight-graph-structure-as-vectors">1. The Core Insight: Graph Structure as Vectors<a class="headerlink" href="#1-the-core-insight-graph-structure-as-vectors" title="Permanent link">&para;</a></h2>
+<h3 id="the-traditional-approach">The Traditional Approach<a class="headerlink" href="#the-traditional-approach" title="Permanent link">&para;</a></h3>
+<p>In a conventional Graph RAG pipeline, a knowledge graph is built from documents and stored in a dedicated graph database such as Neo4j or ArangoDB. Retrieval involves writing graph traversal queries (Cypher, Gremlin) to walk edges and collect relevant subgraphs. The graph database provides native support for operations like shortest-path search, neighborhood expansion, and community detection.</p>
+<h3 id="the-vector-graph-rag-approach">The Vector Graph RAG Approach<a class="headerlink" href="#the-vector-graph-rag-approach" title="Permanent link">&para;</a></h3>
+<p>Vector Graph RAG takes a fundamentally different path. Instead of storing the knowledge graph in a graph database, we store <strong>all three components</strong> — entities, relations, and passages — as vectors in Milvus.</p>
+<p>A relation like <code>(Einstein, developed, theory of relativity)</code> is stored as a searchable text vector with metadata linking it back to the <code>Einstein</code> and <code>theory of relativity</code> entity records. Graph traversal becomes a sequence of vector queries:</p>
+<ol>
+<li><strong>Find seed nodes</strong> — vector similarity search locates entities and relations relevant to the query.</li>
+<li><strong>Expand outward</strong> — follow <code>entity_id</code> and <code>relation_id</code> metadata fields to fetch neighbors from Milvus.</li>
+<li><strong>Repeat</strong> — each expansion hop is another Milvus query on ID fields, not a Cypher traversal.</li>
+</ol>
+<pre class="mermaid"><code>flowchart LR
+    subgraph Traditional["Traditional Graph RAG"]
+        direction LR
+        A1[Documents] --&gt; B1[Triplet Extraction]
+        B1 --&gt; C1[Neo4j / ArangoDB]
+        C1 --&gt;|Cypher / Gremlin| D1[Subgraph]
+    end
+
+    subgraph Vector["Vector Graph RAG"]
+        direction LR
+        A2[Documents] --&gt; B2[Triplet Extraction]
+        B2 --&gt; C2[Milvus&lt;br/&gt;entities + relations + passages]
+        C2 --&gt;|Vector Search + ID Expansion| D2[Subgraph]
+    end</code></pre>
+<blockquote>
+<p><strong>Key takeaway:</strong> Graph-like multi-hop retrieval is achievable using only vector similarity search and metadata-based ID lookups — no graph database required.</p>
+</blockquote>
+<hr />
+<h2 id="2-why-no-graph-database">2. Why No Graph Database?<a class="headerlink" href="#2-why-no-graph-database" title="Permanent link">&para;</a></h2>
+<h3 id="the-simplicity-argument">The Simplicity Argument<a class="headerlink" href="#the-simplicity-argument" title="Permanent link">&para;</a></h3>
+<p>Every additional database in a production stack introduces operational burden: deployment, monitoring, backup, schema management, query language expertise, and version upgrades. A graph database is no exception.</p>
+<table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>With Graph DB</th>
+<th>Vector Graph RAG</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Deployment</strong></td>
+<td>Milvus + Neo4j (two services)</td>
+<td>Milvus only (one service)</td>
+</tr>
+<tr>
+<td><strong>Local development</strong></td>
+<td>Docker Compose or cloud instances</td>
+<td><code>Milvus Lite</code> — a single local file, zero setup</td>
+</tr>
+<tr>
+<td><strong>Query language</strong></td>
+<td>Cypher / Gremlin</td>
+<td>Python SDK only</td>
+</tr>
+<tr>
+<td><strong>Schema management</strong></td>
+<td>Node labels, relationship types, indexes</td>
+<td>Three flat collections with metadata</td>
+</tr>
+<tr>
+<td><strong>Scaling</strong></td>
+<td>Scale two systems independently</td>
+<td>Scale one system</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>[!TIP]
+Milvus Lite stores data as a local file (similar to SQLite). For prototyping and small-to-medium datasets, there is literally nothing to deploy — just point the <code>milvus_uri</code> to a <code>.db</code> file path.</p>
+</blockquote>
+<h3 id="what-you-give-up">What You Give Up<a class="headerlink" href="#what-you-give-up" title="Permanent link">&para;</a></h3>
+<p>This design intentionally trades away native graph algorithms:</p>
+<ul>
+<li><strong>Shortest path</strong> — not available (but rarely needed in RAG).</li>
+<li><strong>PageRank / centrality</strong> — not available (useful for summarization, less so for QA).</li>
+<li><strong>Community detection</strong> — not available (Microsoft GraphRAG relies on this for global summarization).</li>
+<li><strong>ACID transactions on graph mutations</strong> — Milvus does not support multi-collection transactions, so cascade operations (e.g., deleting an entity and all its relations) are not atomic.</li>
+</ul>
+<blockquote>
+<p>[!NOTE]
+If your use case requires graph analytics (community detection, centrality scoring, pathfinding), a dedicated graph database is the right choice. Vector Graph RAG is optimized for <strong>retrieval-augmented generation</strong>, not general-purpose graph analytics.</p>
+</blockquote>
+<hr />
+<h2 id="3-single-pass-vs-iterative-retrieval">3. Single-Pass vs. Iterative Retrieval<a class="headerlink" href="#3-single-pass-vs-iterative-retrieval" title="Permanent link">&para;</a></h2>
+<h3 id="the-iterative-paradigm">The Iterative Paradigm<a class="headerlink" href="#the-iterative-paradigm" title="Permanent link">&para;</a></h3>
+<p>Many state-of-the-art RAG systems use iterative retrieval, where the LLM participates in multiple rounds of search and reasoning:</p>
+<table>
+<thead>
+<tr>
+<th>System</th>
+<th>Strategy</th>
+<th>LLM Calls per Query</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>IRCoT</strong></td>
+<td>Alternate retrieval + chain-of-thought reasoning</td>
+<td>3–5 (retrieve → reason → retrieve → reason → ...)</td>
+</tr>
+<tr>
+<td><strong>Self-RAG</strong></td>
+<td>LLM critiques retrieved documents and re-retrieves</td>
+<td>2–4</td>
+</tr>
+<tr>
+<td><strong>Agentic RAG</strong></td>
+<td>LLM has search tools and decides when to stop</td>
+<td>3–10+ (unbounded)</td>
+</tr>
+<tr>
+<td><strong>Vector Graph RAG</strong></td>
+<td>Vector search → expand → one LLM rerank → generate</td>
+<td><strong>2</strong></td>
+</tr>
+</tbody>
+</table>
+<pre class="mermaid"><code>flowchart TD
+    subgraph Iterative["Iterative Approach (e.g., IRCoT)"]
+        direction TB
+        Q1[Query] --&gt; R1[Retrieve]
+        R1 --&gt; T1[LLM: Reason]
+        T1 --&gt;|"Need more info"| R2[Retrieve again]
+        R2 --&gt; T2[LLM: Reason]
+        T2 --&gt;|"Need more info"| R3[Retrieve again]
+        R3 --&gt; T3[LLM: Generate answer]
+    end
+
+    subgraph SinglePass["Single-Pass Approach (Vector Graph RAG)"]
+        direction TB
+        Q2[Query] --&gt; S1[Vector Search + Subgraph Expansion]
+        S1 --&gt; L1["LLM: Rerank (single pass)"]
+        L1 --&gt; G1[LLM: Generate answer]
+    end</code></pre>
+<h3 id="why-single-pass-works">Why Single-Pass Works<a class="headerlink" href="#why-single-pass-works" title="Permanent link">&para;</a></h3>
+<p>The key insight is that <strong>vector search combined with subgraph expansion already produces high-quality candidate relations</strong>. The initial retrieval is not a blind keyword search — it leverages:</p>
+<ol>
+<li><strong>Semantic similarity</strong> via dense embeddings (entities and relations are matched by meaning, not just lexical overlap).</li>
+<li><strong>Graph structure</strong> via subgraph expansion (one-hop neighbors of matched entities are automatically included).</li>
+<li><strong>Multi-way retrieval</strong> — entities and relations are searched independently, then merged.</li>
+</ol>
+<p>With these three mechanisms working together, the candidate set is already rich and relevant. A single LLM reranking pass is sufficient to select the best relations from this high-quality pool.</p>
+<h3 id="the-cost-advantage">The Cost Advantage<a class="headerlink" href="#the-cost-advantage" title="Permanent link">&para;</a></h3>
+<p>Each LLM call adds latency (typically 1–3 seconds) and cost. For a system processing thousands of queries per day, the difference between 2 and 5 LLM calls per query is substantial:</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Iterative (5 calls)</th>
+<th>Single-Pass (2 calls)</th>
+<th>Savings</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Latency</strong></td>
+<td>~5–15s</td>
+<td>~2–6s</td>
+<td>2–3x faster</td>
+</tr>
+<tr>
+<td><strong>Cost</strong> (GPT-4o-mini)</td>
+<td>~5x base</td>
+<td>~2x base</td>
+<td>60% cheaper</td>
+</tr>
+<tr>
+<td><strong>Cost</strong> (GPT-4o)</td>
+<td>~5x base</td>
+<td>~2x base</td>
+<td>60% cheaper</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>[!TIP]
+For applications where latency and cost are secondary to accuracy on extremely complex queries (5+ hop chains, ambiguous entity resolution), iterative approaches may still be worth the overhead. See <a href="#7-when-to-consider-alternatives">When to Consider Alternatives</a>.</p>
+</blockquote>
+<hr />
+<h2 id="4-subgraph-expansion-the-key-innovation">4. Subgraph Expansion: The Key Innovation<a class="headerlink" href="#4-subgraph-expansion-the-key-innovation" title="Permanent link">&para;</a></h2>
+<p>Subgraph expansion is the mechanism that enables multi-hop reasoning without a graph database. It bridges the gap between flat vector search (which finds directly relevant items) and graph traversal (which follows relational chains).</p>
+<h3 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>flowchart TD
+    Q["Query: Who influenced Einstein's work on relativity?"]
+    Q --&gt; E["Entity extraction → Einstein, relativity"]
+    E --&gt; VS["Vector search in Milvus"]
+    VS --&gt; S1["Seed entities: Einstein, theory of relativity"]
+    VS --&gt; S2["Seed relations: (Einstein, developed, theory of relativity)"]
+
+    S1 --&gt; EXP["Subgraph Expansion (degree=1)"]
+    S2 --&gt; EXP
+
+    EXP --&gt; N1["Fetch entity metadata → relation_ids"]
+    EXP --&gt; N2["Fetch relation metadata → entity_ids"]
+
+    N1 --&gt; NEW["New relations discovered:&lt;br/&gt;(Einstein, studied under, Grossmann)&lt;br/&gt;(Einstein, influenced by, Mach)&lt;br/&gt;(Einstein, worked at, Princeton)"]
+    N2 --&gt; NEW2["New entities discovered:&lt;br/&gt;Grossmann, Mach, Princeton"]
+
+    NEW --&gt; POOL["Candidate Pool: all discovered relations"]
+    NEW2 --&gt; POOL
+
+    POOL --&gt; RERANK["LLM Rerank → select most relevant"]
+    RERANK --&gt; ANS["(Einstein, influenced by, Mach) → Answer"]</code></pre>
+<p>The expansion algorithm:</p>
+<ol>
+<li><strong>Start</strong> with seed entity IDs and relation IDs from vector search.</li>
+<li><strong>For each entity</strong>, fetch its <code>relation_ids</code> from Milvus metadata → add those relations to the subgraph.</li>
+<li><strong>For each relation</strong>, fetch its <code>entity_ids</code> from Milvus metadata → add those entities to the subgraph.</li>
+<li><strong>Repeat</strong> for the configured number of hops (<code>expansion_degree</code>, default: 1).</li>
+</ol>
+<p>Each step is a metadata query on Milvus (<code>id in [...]</code>), not a graph traversal. The subgraph uses <strong>lazy loading</strong> — data is fetched from Milvus on demand, avoiding the need to load the entire knowledge graph into memory.</p>
+<h3 id="expansion-degree">Expansion Degree<a class="headerlink" href="#expansion-degree" title="Permanent link">&para;</a></h3>
+<p>The <code>expansion_degree</code> parameter controls how many hops outward from seed nodes the system explores:</p>
+<table>
+<thead>
+<tr>
+<th>Degree</th>
+<th>Behavior</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>0</strong></td>
+<td>No expansion; only directly matched entities/relations</td>
+<td>Simple factoid questions</td>
+</tr>
+<tr>
+<td><strong>1</strong> (default)</td>
+<td>One hop outward; includes immediate neighbors</td>
+<td>Most multi-hop questions (2–3 hops)</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td>Two hops outward; larger subgraph</td>
+<td>Complex reasoning chains</td>
+</tr>
+<tr>
+<td><strong>3+</strong></td>
+<td>Diminishing returns; risk of noise</td>
+<td>Rarely needed</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>[!NOTE]
+Higher expansion degrees produce larger candidate pools, which increases the load on the LLM reranker. The system includes an <strong>eviction strategy</strong> — when the expanded relation count exceeds a threshold, vector similarity search filters the pool down to the most relevant relations before reranking.</p>
+</blockquote>
+<hr />
+<h2 id="5-comparison-with-other-approaches">5. Comparison with Other Approaches<a class="headerlink" href="#5-comparison-with-other-approaches" title="Permanent link">&para;</a></h2>
+<h3 id="architecture-comparison">Architecture Comparison<a class="headerlink" href="#architecture-comparison" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>flowchart TB
+    subgraph NaiveRAG["Naive RAG"]
+        direction LR
+        NR1[Query] --&gt; NR2[Embed]
+        NR2 --&gt; NR3[Vector Search]
+        NR3 --&gt; NR4[Top-K Passages]
+        NR4 --&gt; NR5[LLM Generate]
+    end
+
+    subgraph GraphRAG["Microsoft GraphRAG"]
+        direction LR
+        MG1[Query] --&gt; MG2[Entity Extraction]
+        MG2 --&gt; MG3[Neo4j Cypher Query]
+        MG3 --&gt; MG4[Community Summaries]
+        MG4 --&gt; MG5[LLM Generate]
+    end
+
+    subgraph HippoRAG["HippoRAG"]
+        direction LR
+        HR1[Query] --&gt; HR2[Entity Extraction]
+        HR2 --&gt; HR3[ColBERTv2 Retrieval]
+        HR3 --&gt; HR4[PPR on Concept Graph]
+        HR4 --&gt; HR5[LLM Generate]
+    end
+
+    subgraph VGRAG["Vector Graph RAG"]
+        direction LR
+        VG1[Query] --&gt; VG2[Entity Extraction]
+        VG2 --&gt; VG3[Multi-way Vector Search]
+        VG3 --&gt; VG4[Subgraph Expansion]
+        VG4 --&gt; VG5[LLM Rerank]
+        VG5 --&gt; VG6[LLM Generate]
+    end</code></pre>
+<h3 id="feature-by-feature-comparison">Feature-by-Feature Comparison<a class="headerlink" href="#feature-by-feature-comparison" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Naive RAG</th>
+<th>IRCoT</th>
+<th>HippoRAG</th>
+<th>Microsoft GraphRAG</th>
+<th>LightRAG</th>
+<th><strong>Vector Graph RAG</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Graph database</strong></td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>Yes (Neo4j)</td>
+<td>Yes (Neo4j)</td>
+<td><strong>No</strong></td>
+</tr>
+<tr>
+<td><strong>Graph structure</strong></td>
+<td>None</td>
+<td>None</td>
+<td>In-memory concept graph</td>
+<td>Neo4j + community hierarchy</td>
+<td>Neo4j</td>
+<td><strong>Milvus metadata</strong></td>
+</tr>
+<tr>
+<td><strong>LLM calls/query</strong></td>
+<td>1</td>
+<td>3–5</td>
+<td>1–2</td>
+<td>2+</td>
+<td>1–2</td>
+<td><strong>2</strong></td>
+</tr>
+<tr>
+<td><strong>Iterative retrieval</strong></td>
+<td>No</td>
+<td>Yes</td>
+<td>No</td>
+<td>Partial</td>
+<td>No</td>
+<td><strong>No</strong></td>
+</tr>
+<tr>
+<td><strong>Multi-hop reasoning</strong></td>
+<td>Limited</td>
+<td>Yes (via iteration)</td>
+<td>Yes (PPR)</td>
+<td>Yes (communities)</td>
+<td>Yes</td>
+<td><strong>Yes (expansion)</strong></td>
+</tr>
+<tr>
+<td><strong>Retrieval method</strong></td>
+<td>Dense embedding</td>
+<td>Dense + sparse</td>
+<td>ColBERTv2 + PPR</td>
+<td>Cypher + summaries</td>
+<td>Keyword + vector</td>
+<td><strong>Dense multi-way + expansion</strong></td>
+</tr>
+<tr>
+<td><strong>Local-first</strong></td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Partial</td>
+<td>No</td>
+<td>No</td>
+<td><strong>Yes (Milvus Lite)</strong></td>
+</tr>
+<tr>
+<td><strong>Setup complexity</strong></td>
+<td>Minimal</td>
+<td>Moderate</td>
+<td>Moderate</td>
+<td>High</td>
+<td>High</td>
+<td><strong>Minimal</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="performance-on-multi-hop-qa-benchmarks">Performance on Multi-Hop QA Benchmarks<a class="headerlink" href="#performance-on-multi-hop-qa-benchmarks" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>MuSiQue</th>
+<th>HotpotQA</th>
+<th>2WikiMultiHopQA</th>
+<th>Average</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Naive RAG</td>
+<td>55.6%</td>
+<td>90.8%</td>
+<td>73.7%</td>
+<td>73.4%</td>
+</tr>
+<tr>
+<td>IRCoT + HippoRAG</td>
+<td>57.6%</td>
+<td>83.0%</td>
+<td>93.9%</td>
+<td>78.2%</td>
+</tr>
+<tr>
+<td>HippoRAG 2</td>
+<td><strong>74.7%</strong></td>
+<td><strong>96.3%</strong></td>
+<td>90.4%</td>
+<td>87.1%</td>
+</tr>
+<tr>
+<td><strong>Vector Graph RAG</strong></td>
+<td>73.0%</td>
+<td><strong>96.3%</strong></td>
+<td><strong>94.1%</strong></td>
+<td><strong>87.8%</strong></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>[!INFO]
+Recall@5 on standard multi-hop QA benchmarks. Vector Graph RAG achieves the highest average score while using fewer LLM calls and no graph database. See <a href="../../evaluation/">Evaluation</a> for methodology details.</p>
+</blockquote>
+<h3 id="key-differentiators">Key Differentiators<a class="headerlink" href="#key-differentiators" title="Permanent link">&para;</a></h3>
+<p><strong>vs. Microsoft GraphRAG:</strong>
+Microsoft GraphRAG uses Neo4j for storage and builds a hierarchical community structure with Leiden clustering. This enables powerful global summarization queries ("What are the main themes in this corpus?") but requires significant infrastructure. Vector Graph RAG trades community-level summarization for operational simplicity and lower latency on targeted questions.</p>
+<p><strong>vs. HippoRAG:</strong>
+HippoRAG models retrieval after the human hippocampal memory system, using ColBERTv2 for fine-grained token-level matching and Personalized PageRank (PPR) on an in-memory concept graph. This is elegant but ties the system to ColBERTv2's infrastructure and requires the entire graph to fit in memory. Vector Graph RAG uses standard dense embeddings and lazy-loaded subgraphs from Milvus, which scales to larger knowledge bases.</p>
+<p><strong>vs. IRCoT:</strong>
+IRCoT interleaves retrieval steps with chain-of-thought reasoning, allowing the LLM to adaptively decide what to retrieve next. This is more flexible for ambiguous or very complex queries, but costs 3–5x more in LLM calls. Vector Graph RAG front-loads the retrieval quality through subgraph expansion, reducing the need for iterative refinement.</p>
+<p><strong>vs. LightRAG:</strong>
+LightRAG uses a dual-level retrieval paradigm (low-level entity-specific and high-level topic-specific) and stores its graph in Neo4j. Vector Graph RAG achieves a similar multi-granularity effect through its multi-way retrieval (entity search + relation search) without requiring a graph database.</p>
+<hr />
+<h2 id="6-when-vector-graph-rag-works-best">6. When Vector Graph RAG Works Best<a class="headerlink" href="#6-when-vector-graph-rag-works-best" title="Permanent link">&para;</a></h2>
+<p>Vector Graph RAG is most effective in scenarios that combine relational complexity with a need for simplicity:</p>
+<h3 id="dense-factual-content">Dense Factual Content<a class="headerlink" href="#dense-factual-content" title="Permanent link">&para;</a></h3>
+<p>Documents with many entity relationships benefit most from graph-based retrieval. Legal codes, biomedical literature, financial filings, and technical documentation are strong candidates.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Document: &quot;Metformin is the first-line treatment for type 2 diabetes.
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>            Patients on metformin should have renal function monitored.&quot;
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>Triplets:  (Metformin, is first-line treatment for, type 2 diabetes)
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>           (Patients on metformin, should have monitored, renal function)
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>Query:     &quot;What monitoring is needed for first-line diabetes treatment?&quot;
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>Path:      diabetes → metformin → renal function monitoring
+</code></pre></div>
+<h3 id="multi-hop-questions-24-hops">Multi-Hop Questions (2–4 Hops)<a class="headerlink" href="#multi-hop-questions-24-hops" title="Permanent link">&para;</a></h3>
+<p>Questions that require connecting facts across multiple documents are where Graph RAG shines over naive RAG. The subgraph expansion mechanism naturally handles 2–4 hop chains.</p>
+<h3 id="simple-deployment-requirements">Simple Deployment Requirements<a class="headerlink" href="#simple-deployment-requirements" title="Permanent link">&para;</a></h3>
+<p>When the infrastructure budget or operational expertise does not support a separate graph database, Vector Graph RAG provides graph-like retrieval with a single-service deployment. Milvus Lite makes local development frictionless.</p>
+<h3 id="cost-and-latency-sensitivity">Cost and Latency Sensitivity<a class="headerlink" href="#cost-and-latency-sensitivity" title="Permanent link">&para;</a></h3>
+<p>Applications processing high query volumes benefit from the 2-call-per-query model. In production, this translates to:</p>
+<ul>
+<li>Lower API costs (60% fewer LLM calls vs. iterative approaches)</li>
+<li>Lower p99 latency (no multi-round LLM waiting)</li>
+<li>More predictable response times (fixed number of LLM calls)</li>
+</ul>
+<hr />
+<h2 id="7-when-to-consider-alternatives">7. When to Consider Alternatives<a class="headerlink" href="#7-when-to-consider-alternatives" title="Permanent link">&para;</a></h2>
+<p>No system is optimal for every scenario. Here are cases where other approaches may be more appropriate:</p>
+<h3 id="very-complex-multi-hop-chains-5-hops">Very Complex Multi-Hop Chains (5+ Hops)<a class="headerlink" href="#very-complex-multi-hop-chains-5-hops" title="Permanent link">&para;</a></h3>
+<p>When questions require traversing long reasoning chains, iterative approaches like IRCoT can adaptively decide when to stop searching. Vector Graph RAG's fixed expansion degree may miss distant connections.</p>
+<blockquote>
+<p>[!TIP]
+Before switching to an iterative system, try increasing the <code>expansion_degree</code> parameter. Setting it to 2 or 3 may capture longer chains at the cost of a larger candidate pool.</p>
+</blockquote>
+<h3 id="graph-analytics-requirements">Graph Analytics Requirements<a class="headerlink" href="#graph-analytics-requirements" title="Permanent link">&para;</a></h3>
+<p>If your application needs to compute centrality scores, detect communities, find shortest paths, or perform other graph algorithms, a dedicated graph database (Neo4j, ArangoDB, TigerGraph) is necessary. Vector Graph RAG does not replicate these capabilities.</p>
+<h3 id="global-summarization-queries">Global Summarization Queries<a class="headerlink" href="#global-summarization-queries" title="Permanent link">&para;</a></h3>
+<p>Questions like "What are the main themes across this corpus?" require aggregating information at a global level. Microsoft GraphRAG's community hierarchy is specifically designed for this. Vector Graph RAG is optimized for targeted, entity-focused queries.</p>
+<h3 id="documents-with-few-entity-relationships">Documents with Few Entity Relationships<a class="headerlink" href="#documents-with-few-entity-relationships" title="Permanent link">&para;</a></h3>
+<p>If the source documents are primarily opinion pieces, creative writing, or conversational transcripts with few factual entities, the knowledge graph will be sparse and Graph RAG may not improve over naive RAG.</p>
+<h3 id="decision-framework">Decision Framework<a class="headerlink" href="#decision-framework" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>flowchart TD
+    START["Do you need multi-hop reasoning?"]
+    START --&gt;|No| NAIVE["Use Naive RAG"]
+    START --&gt;|Yes| GRAPH["Do you need graph analytics&lt;br/&gt;(communities, centrality, paths)?"]
+    GRAPH --&gt;|Yes| GRAPHDB["Use a Graph Database&lt;br/&gt;(Neo4j, ArangoDB)"]
+    GRAPH --&gt;|No| COMPLEX["Are queries mostly 2-4 hops?"]
+    COMPLEX --&gt;|Yes| COST["Do cost/latency matter?"]
+    COMPLEX --&gt;|"No (5+ hops)"| ITERATIVE["Consider IRCoT or&lt;br/&gt;Agentic RAG"]
+    COST --&gt;|Yes| VGRAG["Use Vector Graph RAG"]
+    COST --&gt;|No| EITHER["Vector Graph RAG or&lt;br/&gt;Iterative approaches both work"]</code></pre>
+<hr />
+<h2 id="summary-of-design-decisions">Summary of Design Decisions<a class="headerlink" href="#summary-of-design-decisions" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Decision</th>
+<th>Choice</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Storage backend</strong></td>
+<td>Milvus only</td>
+<td>Eliminates graph DB operational overhead; Milvus Lite enables zero-config local development</td>
+</tr>
+<tr>
+<td><strong>Graph encoding</strong></td>
+<td>Vectors + metadata</td>
+<td>Relations become searchable text; entity-relation links stored as ID arrays in metadata</td>
+</tr>
+<tr>
+<td><strong>Retrieval strategy</strong></td>
+<td>Multi-way vector search</td>
+<td>Search entities and relations independently, then merge — captures more relevant candidates</td>
+</tr>
+<tr>
+<td><strong>Graph traversal</strong></td>
+<td>Subgraph expansion via ID queries</td>
+<td>Metadata-based ID lookups in Milvus replace Cypher/Gremlin traversal</td>
+</tr>
+<tr>
+<td><strong>Reranking</strong></td>
+<td>Single LLM pass</td>
+<td>High-quality candidates from vector search + expansion make iterative refinement unnecessary</td>
+</tr>
+<tr>
+<td><strong>Scalability</strong></td>
+<td>Lazy-loaded subgraphs</td>
+<td>Fetch data on demand from Milvus; no need to load the full graph into memory</td>
+</tr>
+<tr>
+<td><strong>Eviction</strong></td>
+<td>Vector similarity filtering</td>
+<td>When expansion produces too many candidates, filter by relevance before sending to LLM</td>
+</tr>
+</tbody>
+</table>
+<p>These decisions collectively produce a system that is <strong>simple to deploy</strong>, <strong>fast to query</strong>, and <strong>competitive on standard benchmarks</strong> — while being transparent about the scenarios where alternative architectures may be a better fit.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "navigation.instant", "navigation.instant.progress", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

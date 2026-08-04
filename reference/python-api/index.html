@@ -1,0 +1,3759 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A Graph RAG implementation using pure vector search with Milvus">
+      
+      
+      
+        <link rel="canonical" href="https://zilliztech.github.io/vector-graph-rag/reference/python-api/">
+      
+      
+        <link rel="prev" href="../../architecture/design-philosophy/">
+      
+      
+        <link rel="next" href="../rest-api/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/logo.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Python API - Vector Graph RAG</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/custom.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="teal">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#python-api-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Vector Graph RAG" class="md-header__button md-logo" aria-label="Vector Graph RAG" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Vector Graph RAG
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Python API
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="teal"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="teal"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/zilliztech/vector-graph-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    zilliztech/vector-graph-rag
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../getting-started/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Getting Started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/" class="md-tabs__link">
+          
+  
+  
+  Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../architecture/how-it-works/" class="md-tabs__link">
+          
+  
+  
+  Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../evaluation/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Evaluation
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../use-cases/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Use Cases
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../faq/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  FAQ
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Vector Graph RAG" class="md-nav__button md-logo" aria-label="Vector Graph RAG" data-md-component="logo">
+      
+  <img src="../../assets/logo.svg" alt="logo">
+
+    </a>
+    Vector Graph RAG
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/zilliztech/vector-graph-rag" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    zilliztech/vector-graph-rag
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/document-import/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Document Import
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/incremental-updates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Incremental Updates
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/observability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Observability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/embedding-providers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Embedding Providers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/multi-tenancy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Tenancy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/frontend/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Visualization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/how-it-works/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How It Works
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/design-philosophy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Philosophy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Settings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Settings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fields
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Fields">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#llm-embedding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LLM &amp; Embedding
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#milvus-zilliz" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Milvus / Zilliz
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retrieval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Retrieval
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Processing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-configuring-via-env" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: configuring via .env
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vectorgraphrag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VectorGraphRAG
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="VectorGraphRAG">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#constructor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Constructor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#embedding-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Embedding Providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#observability-helpers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Observability Helpers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Observability Helpers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#observability_context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        observability_context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#start_span" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        start_span
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Methods
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#add_texts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add_texts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rebuild_texts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rebuild_texts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add_documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add_documents
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rebuild_documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rebuild_documents
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add_documents_with_triplets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add_documents_with_triplets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rebuild_documents_with_triplets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rebuild_documents_with_triplets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#upsert_documents_by_source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        upsert_documents_by_source
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete_documents_by_source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        delete_documents_by_source
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#query" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        query
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#query_simple" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        query_simple
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#query_naive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        query_naive
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retrieve" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        retrieve
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get_stats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_stats
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        reset
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#queryresult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        QueryResult
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="QueryResult">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fields_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fields
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extractionresult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ExtractionResult
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ExtractionResult">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fields_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fields
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentimporter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DocumentImporter
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DocumentImporter">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#constructor_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Constructor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#supported-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supported formats
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#doclingconverter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DoclingConverter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mineruconverter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MinerUConverter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#methods_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Methods
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#import_sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        import_sources
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#import_text" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        import_text
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create_rag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        create_rag
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Complete Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#end-to-end-ingestion-and-query" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        End-to-end ingestion and query
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-dataset-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-dataset isolation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-zilliz-cloud" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using Zilliz Cloud
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retrieval-only-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Retrieval-only pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rest-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    REST API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../use-cases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Use Cases
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Settings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Settings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fields
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Fields">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#llm-embedding" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LLM &amp; Embedding
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#milvus-zilliz" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Milvus / Zilliz
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retrieval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Retrieval
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#processing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Processing
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-configuring-via-env" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: configuring via .env
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vectorgraphrag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VectorGraphRAG
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="VectorGraphRAG">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#constructor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Constructor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#embedding-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Embedding Providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#observability-helpers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Observability Helpers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Observability Helpers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#observability_context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        observability_context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#start_span" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        start_span
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Methods
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#add_texts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add_texts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rebuild_texts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rebuild_texts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add_documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add_documents
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rebuild_documents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rebuild_documents
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add_documents_with_triplets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        add_documents_with_triplets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rebuild_documents_with_triplets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rebuild_documents_with_triplets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#upsert_documents_by_source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        upsert_documents_by_source
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete_documents_by_source" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        delete_documents_by_source
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#query" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        query
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#query_simple" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        query_simple
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#query_naive" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        query_naive
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retrieve" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        retrieve
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get_stats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_stats
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        reset
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#queryresult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        QueryResult
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="QueryResult">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fields_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fields
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extractionresult" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ExtractionResult
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ExtractionResult">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fields_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fields
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentimporter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DocumentImporter
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="DocumentImporter">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#constructor_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Constructor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#supported-formats" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supported formats
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#doclingconverter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        DoclingConverter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mineruconverter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MinerUConverter
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#methods_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Methods
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#import_sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        import_sources
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#import_text" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        import_text
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create_rag" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        create_rag
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Complete Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#end-to-end-ingestion-and-query" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        End-to-end ingestion and query
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-dataset-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-dataset isolation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-zilliz-cloud" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using Zilliz Cloud
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retrieval-only-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Retrieval-only pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="python-api-reference">Python API Reference<a class="headerlink" href="#python-api-reference" title="Permanent link">&para;</a></h1>
+<p>This page provides comprehensive documentation for the Vector Graph RAG Python API. All classes and functions described here are available from the top-level <code>vector_graph_rag</code> package unless otherwise noted.</p>
+<hr />
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>The Vector Graph RAG library exposes a small, focused surface area:</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#settings"><code>Settings</code></a></td>
+<td>Global configuration via environment variables or direct assignment</td>
+</tr>
+<tr>
+<td><a href="#vectorgraphrag"><code>VectorGraphRAG</code></a></td>
+<td>Core RAG engine — ingest documents, query with graph-augmented retrieval</td>
+</tr>
+<tr>
+<td><a href="#queryresult"><code>QueryResult</code></a></td>
+<td>Structured output from queries</td>
+</tr>
+<tr>
+<td><a href="#extractionresult"><code>ExtractionResult</code></a></td>
+<td>Structured output from document ingestion</td>
+</tr>
+<tr>
+<td><a href="#documentimporter"><code>DocumentImporter</code></a></td>
+<td>Load and chunk files (PDF, DOCX, TXT, MD, HTML, URLs)</td>
+</tr>
+<tr>
+<td><a href="#observability_context"><code>observability_context()</code></a></td>
+<td>Attach request, tenant, graph, and source context to OpenTelemetry spans</td>
+</tr>
+<tr>
+<td><a href="#start_span"><code>start_span()</code></a></td>
+<td>Create custom spans that share the active Vector Graph RAG context</td>
+</tr>
+<tr>
+<td><a href="#create_rag"><code>create_rag()</code></a></td>
+<td>Convenience factory for quick setup</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="settings">Settings<a class="headerlink" href="#settings" title="Permanent link">&para;</a></h2>
+<p><code>Settings</code> is a <a href="https://docs.pydantic.dev/latest/concepts/pydantic_settings/">Pydantic BaseSettings</a> class that centralises all configuration. Values can be set via constructor arguments, environment variables (with the <code>VGRAG_</code> prefix), or a <code>.env</code> file.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">vector_graph_rag.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Settings</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">settings</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">(</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">llm_model</span><span class="o">=</span><span class="s2">&quot;gpt-4o&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">entity_top_k</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">)</span>
+</code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Environment variable mapping</p>
+<p>Every field is read from an environment variable named <code>VGRAG_&lt;FIELD_NAME&gt;</code> (upper-case).
+For example, <code>llm_model</code> maps to <code>VGRAG_LLM_MODEL</code>. The special field <code>openai_api_key</code>
+is also read from the standard <code>OPENAI_API_KEY</code> variable.</p>
+</div>
+<h3 id="fields">Fields<a class="headerlink" href="#fields" title="Permanent link">&para;</a></h3>
+<h4 id="llm-embedding">LLM &amp; Embedding<a class="headerlink" href="#llm-embedding" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>openai_api_key</code></td>
+<td><code>Optional[str]</code></td>
+<td><code>None</code></td>
+<td>OpenAI API key. Also read from <code>OPENAI_API_KEY</code> env var.</td>
+</tr>
+<tr>
+<td><code>openai_base_url</code></td>
+<td><code>Optional[str]</code></td>
+<td><code>None</code></td>
+<td>Custom OpenAI-compatible API base URL (e.g. for Azure or local proxies).</td>
+</tr>
+<tr>
+<td><code>llm_model</code></td>
+<td><code>str</code></td>
+<td><code>"gpt-4o-mini"</code></td>
+<td>Model name used for LLM calls (extraction, answering, reranking).</td>
+</tr>
+<tr>
+<td><code>embedding_provider</code></td>
+<td><code>Optional[str]</code></td>
+<td><code>None</code></td>
+<td>Embedding provider name. Use <code>openai</code>, <code>huggingface</code>, <code>google</code>/<code>gemini</code>, <code>voyage</code>, <code>jina</code>, <code>mistral</code>, <code>ollama</code>, <code>local</code>, or <code>onnx</code>.</td>
+</tr>
+<tr>
+<td><code>embedding_model</code></td>
+<td><code>str</code></td>
+<td><code>"text-embedding-3-large"</code></td>
+<td>Model name used for embedding generation.</td>
+</tr>
+<tr>
+<td><code>embedding_api_key</code></td>
+<td><code>Optional[str]</code></td>
+<td><code>None</code></td>
+<td>Optional API key override for embedding providers. Provider-specific environment variables are used when omitted.</td>
+</tr>
+<tr>
+<td><code>embedding_base_url</code></td>
+<td><code>Optional[str]</code></td>
+<td><code>None</code></td>
+<td>Optional base URL override for embedding providers that support it, such as OpenAI-compatible APIs and Ollama.</td>
+</tr>
+<tr>
+<td><code>embedding_dimension</code></td>
+<td><code>int</code></td>
+<td><code>3072</code></td>
+<td>Dimensionality of the embedding vectors.</td>
+</tr>
+<tr>
+<td><code>llm_temperature</code></td>
+<td><code>float</code></td>
+<td><code>0.0</code></td>
+<td>Temperature for LLM generation.</td>
+</tr>
+<tr>
+<td><code>use_llm_cache</code></td>
+<td><code>bool</code></td>
+<td><code>True</code></td>
+<td>Whether to cache LLM responses to avoid redundant API calls.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="milvus-zilliz">Milvus / Zilliz<a class="headerlink" href="#milvus-zilliz" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>milvus_uri</code></td>
+<td><code>str</code></td>
+<td><code>"./vector_graph_rag.db"</code></td>
+<td>Milvus connection URI. Default uses <strong>Milvus Lite</strong> (embedded, file-based).</td>
+</tr>
+<tr>
+<td><code>milvus_token</code></td>
+<td><code>Optional[str]</code></td>
+<td><code>None</code></td>
+<td>Authentication token, required for <strong>Zilliz Cloud</strong>.</td>
+</tr>
+<tr>
+<td><code>milvus_db</code></td>
+<td><code>Optional[str]</code></td>
+<td><code>None</code></td>
+<td>Database name within Milvus.</td>
+</tr>
+<tr>
+<td><code>collection_prefix</code></td>
+<td><code>Optional[str]</code></td>
+<td><code>None</code></td>
+<td>Prefix prepended to all collection names for multi-dataset isolation.</td>
+</tr>
+<tr>
+<td><code>entity_collection</code></td>
+<td><code>str</code></td>
+<td><code>"vgrag_entities"</code></td>
+<td>Name of the entity collection.</td>
+</tr>
+<tr>
+<td><code>relation_collection</code></td>
+<td><code>str</code></td>
+<td><code>"vgrag_relations"</code></td>
+<td>Name of the relation collection.</td>
+</tr>
+<tr>
+<td><code>passage_collection</code></td>
+<td><code>str</code></td>
+<td><code>"vgrag_passages"</code></td>
+<td>Name of the passage collection.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="retrieval">Retrieval<a class="headerlink" href="#retrieval" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>entity_top_k</code></td>
+<td><code>int</code></td>
+<td><code>20</code></td>
+<td>Number of top entities to retrieve during vector search.</td>
+</tr>
+<tr>
+<td><code>relation_top_k</code></td>
+<td><code>int</code></td>
+<td><code>20</code></td>
+<td>Number of top relations to retrieve during vector search.</td>
+</tr>
+<tr>
+<td><code>entity_similarity_threshold</code></td>
+<td><code>float</code></td>
+<td><code>0.9</code></td>
+<td>Minimum similarity score to keep an entity match.</td>
+</tr>
+<tr>
+<td><code>relation_similarity_threshold</code></td>
+<td><code>float</code></td>
+<td><code>-1.0</code></td>
+<td>Minimum similarity score to keep a relation match. <code>-1.0</code> effectively disables filtering.</td>
+</tr>
+<tr>
+<td><code>expansion_degree</code></td>
+<td><code>int</code></td>
+<td><code>1</code></td>
+<td>Number of hops to expand in the knowledge graph from matched entities.</td>
+</tr>
+<tr>
+<td><code>final_top_k</code></td>
+<td><code>int</code></td>
+<td><code>3</code></td>
+<td>Number of final passages returned after reranking.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="processing">Processing<a class="headerlink" href="#processing" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>batch_size</code></td>
+<td><code>int</code></td>
+<td><code>32</code></td>
+<td>Batch size for embedding and extraction operations.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="example-configuring-via-env">Example: configuring via <code>.env</code><a class="headerlink" href="#example-configuring-via-env" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a># .env
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>OPENAI_API_KEY=sk-...
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>VGRAG_LLM_MODEL=gpt-4o
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>VGRAG_EMBEDDING_PROVIDER=openai
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>VGRAG_EMBEDDING_MODEL=text-embedding-3-small
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>VGRAG_MILVUS_URI=http://localhost:19530
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>VGRAG_ENTITY_TOP_K=30
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>VGRAG_EXPANSION_DEGREE=2
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">vector_graph_rag.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Settings</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="c1"># Automatically picks up .env values</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">settings</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">()</span>
+</code></pre></div>
+<hr />
+<h2 id="vectorgraphrag">VectorGraphRAG<a class="headerlink" href="#vectorgraphrag" title="Permanent link">&para;</a></h2>
+<p>The central class that orchestrates document ingestion, knowledge-graph construction, and graph-augmented retrieval.</p>
+<h3 id="constructor">Constructor<a class="headerlink" href="#constructor" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">vector_graph_rag</span><span class="w"> </span><span class="kn">import</span> <span class="n">VectorGraphRAG</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">rag</span> <span class="o">=</span> <span class="n">VectorGraphRAG</span><span class="p">(</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>              <span class="c1"># Optional[Settings] — pre-built Settings object</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">milvus_uri</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>            <span class="c1"># Optional[str] — override milvus_uri</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">milvus_db</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>             <span class="c1"># Optional[str] — override milvus_db</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">collection_prefix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>     <span class="c1"># Optional[str] — override collection_prefix</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="n">openai_api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>        <span class="c1"># Optional[str] — override openai_api_key</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="n">llm_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>             <span class="c1"># Optional[str] — override llm_model</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    <span class="n">embedding_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>    <span class="c1"># Optional[str] — override embedding_provider</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    <span class="n">embedding_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>       <span class="c1"># Optional[str] — override embedding_model</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>    <span class="n">embedding_api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>     <span class="c1"># Optional[str] — override embedding_api_key</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>    <span class="n">embedding_base_url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>    <span class="c1"># Optional[str] — override embedding_base_url</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="p">)</span>
+</code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Parameter precedence</p>
+<p>Keyword arguments passed directly to the constructor (e.g. <code>milvus_uri</code>) take
+precedence over values in the <code>settings</code> object, which in turn take precedence
+over environment variables and <code>.env</code> file values.</p>
+</div>
+<h3 id="embedding-providers">Embedding Providers<a class="headerlink" href="#embedding-providers" title="Permanent link">&para;</a></h3>
+<p>Set <code>embedding_provider</code> explicitly for new applications. If it is omitted, Vector Graph RAG keeps a legacy compatibility path that infers the provider from <code>embedding_model</code>, but that inference is deprecated and planned for removal in v1.0.0.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">vector_graph_rag</span><span class="w"> </span><span class="kn">import</span> <span class="n">VectorGraphRAG</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="c1"># OpenAI or an OpenAI-compatible embedding endpoint</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">rag</span> <span class="o">=</span> <span class="n">VectorGraphRAG</span><span class="p">(</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">embedding_provider</span><span class="o">=</span><span class="s2">&quot;openai&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">embedding_model</span><span class="o">=</span><span class="s2">&quot;text-embedding-3-small&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="p">)</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="c1"># Local HuggingFace transformers model</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="n">rag</span> <span class="o">=</span> <span class="n">VectorGraphRAG</span><span class="p">(</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>    <span class="n">embedding_provider</span><span class="o">=</span><span class="s2">&quot;huggingface&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>    <span class="n">embedding_model</span><span class="o">=</span><span class="s2">&quot;BAAI/bge-large-en-v1.5&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="p">)</span>
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="c1"># Ollama local embedding server</span>
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="n">rag</span> <span class="o">=</span> <span class="n">VectorGraphRAG</span><span class="p">(</span>
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>    <span class="n">embedding_provider</span><span class="o">=</span><span class="s2">&quot;ollama&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>    <span class="n">embedding_model</span><span class="o">=</span><span class="s2">&quot;nomic-embed-text&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>    <span class="n">embedding_base_url</span><span class="o">=</span><span class="s2">&quot;http://localhost:11434&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a><span class="p">)</span>
+<a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>
+<a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a><span class="c1"># Jina AI</span>
+<a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a><span class="n">rag</span> <span class="o">=</span> <span class="n">VectorGraphRAG</span><span class="p">(</span>
+<a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a>    <span class="n">embedding_provider</span><span class="o">=</span><span class="s2">&quot;jina&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a>    <span class="n">embedding_model</span><span class="o">=</span><span class="s2">&quot;jina-embeddings-v4&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a>    <span class="n">embedding_api_key</span><span class="o">=</span><span class="s2">&quot;jina_...&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a><span class="p">)</span>
+</code></pre></div>
+<p>Install optional provider dependencies as needed: <code>hf</code>, <code>google</code>, <code>voyage</code>, <code>jina</code>, <code>mistral</code>, <code>ollama</code>, <code>local</code>, or <code>onnx</code>.</p>
+<h3 id="observability-helpers">Observability Helpers<a class="headerlink" href="#observability-helpers" title="Permanent link">&para;</a></h3>
+<p>Install <code>vector-graph-rag[observability]</code> to emit OpenTelemetry spans. The library uses the OpenTelemetry API only; configure the SDK and exporter in your application.</p>
+<h4 id="observability_context"><code>observability_context</code><a class="headerlink" href="#observability_context" title="Permanent link">&para;</a></h4>
+<p>Attach low-sensitivity context attributes to all spans created inside the block.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">vector_graph_rag</span><span class="w"> </span><span class="kn">import</span> <span class="n">VectorGraphRAG</span><span class="p">,</span> <span class="n">observability_context</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">rag</span> <span class="o">=</span> <span class="n">VectorGraphRAG</span><span class="p">(</span><span class="n">collection_prefix</span><span class="o">=</span><span class="s2">&quot;finance&quot;</span><span class="p">)</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="k">with</span> <span class="n">observability_context</span><span class="p">(</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="n">request_id</span><span class="o">=</span><span class="s2">&quot;req-123&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    <span class="n">tenant_id</span><span class="o">=</span><span class="s2">&quot;tenant-a&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    <span class="n">graph_name</span><span class="o">=</span><span class="s2">&quot;finance&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>    <span class="n">source</span><span class="o">=</span><span class="s2">&quot;file-123&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>    <span class="n">attributes</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;app.import_job_id&quot;</span><span class="p">:</span> <span class="s2">&quot;job-456&quot;</span><span class="p">},</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="p">):</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>    <span class="n">rag</span><span class="o">.</span><span class="n">upsert_documents_by_source</span><span class="p">(</span><span class="n">chunks</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;file-123&quot;</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">observability_context</span><span class="p">(</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="n">request_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">tenant_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">graph_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">source</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="n">attributes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="kc">None</span><span class="p">]</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>request_id</code></td>
+<td>Request or correlation ID from the host application.</td>
+</tr>
+<tr>
+<td><code>tenant_id</code></td>
+<td>Tenant or workspace identifier.</td>
+</tr>
+<tr>
+<td><code>graph_name</code></td>
+<td>Knowledge base, graph, or collection-prefix identifier.</td>
+</tr>
+<tr>
+<td><code>source</code></td>
+<td>External source identifier for source-level imports, updates, or deletes.</td>
+</tr>
+<tr>
+<td><code>attributes</code></td>
+<td>Optional application-specific low-sensitivity span attributes.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="start_span"><code>start_span</code><a class="headerlink" href="#start_span" title="Permanent link">&para;</a></h4>
+<p>Create a custom span that automatically includes the active observability context.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">vector_graph_rag</span><span class="w"> </span><span class="kn">import</span> <span class="n">start_span</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="k">with</span> <span class="n">start_span</span><span class="p">(</span><span class="s2">&quot;app.custom_step&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;app.record_count&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">}):</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="n">run_custom_step</span><span class="p">()</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">start_span</span><span class="p">(</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="n">attributes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
+</code></pre></div>
+<p>If OpenTelemetry is not installed, <code>start_span()</code> yields <code>None</code> and performs no tracing work.</p>
+<p>Vector Graph RAG does not record document text, prompt text, query text, generated answers, filters, or full URLs as span attributes by default. See <a href="../../guides/observability/">Observability</a> for setup and span coverage.</p>
+<h3 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">&para;</a></h3>
+<h4 id="add_texts"><code>add_texts</code><a class="headerlink" href="#add_texts" title="Permanent link">&para;</a></h4>
+<p>Legacy compatibility wrapper for rebuilding the graph from plain text strings.</p>
+<div class="admonition warning">
+<p class="admonition-title">Full rebuild</p>
+<p>This method delegates to <code>rebuild_texts()</code> and rebuilds the full knowledge base.
+This legacy convenience API is planned for removal in v1.0.0. Use <a href="#rebuild_texts"><code>rebuild_texts</code></a> for full refreshes, or <a href="#upsert_documents_by_source"><code>upsert_documents_by_source</code></a> for source-level incremental updates.</p>
+</div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">add_texts</span><span class="p">(</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>    <span class="n">texts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>    <span class="n">ids</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>    <span class="n">metadatas</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>    <span class="n">extract_triplets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>    <span class="n">show_progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ExtractionResult</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>texts</code></td>
+<td>List of text strings to ingest.</td>
+</tr>
+<tr>
+<td><code>ids</code></td>
+<td>Optional list of unique IDs (one per text). Auto-generated if omitted.</td>
+</tr>
+<tr>
+<td><code>metadatas</code></td>
+<td>Optional list of metadata dicts attached to each text.</td>
+</tr>
+<tr>
+<td><code>extract_triplets</code></td>
+<td>If <code>True</code>, the LLM extracts entity–relation–entity triplets from each text.</td>
+</tr>
+<tr>
+<td><code>show_progress</code></td>
+<td>Show a progress bar during processing.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <a href="#extractionresult"><code>ExtractionResult</code></a></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">result</span> <span class="o">=</span> <span class="n">rag</span><span class="o">.</span><span class="n">add_texts</span><span class="p">([</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>    <span class="s2">&quot;Albert Einstein developed the theory of general relativity.&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>    <span class="s2">&quot;Einstein was born in Ulm, Germany in 1879.&quot;</span><span class="p">,</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="p">],</span> <span class="n">metadatas</span><span class="o">=</span><span class="p">[</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>    <span class="p">{</span><span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;physics&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">:</span> <span class="mi">1915</span><span class="p">},</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>    <span class="p">{</span><span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;biography&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">:</span> <span class="mi">1879</span><span class="p">},</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="p">])</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Extracted </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">entities</span><span class="p">)</span><span class="si">}</span><span class="s2"> entities, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">relations</span><span class="p">)</span><span class="si">}</span><span class="s2"> relations&quot;</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h4 id="rebuild_texts"><code>rebuild_texts</code><a class="headerlink" href="#rebuild_texts" title="Permanent link">&para;</a></h4>
+<p>Explicitly rebuild the full knowledge base from plain text strings. Each string is stored as one passage.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">rebuild_texts</span><span class="p">(</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>    <span class="n">texts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>    <span class="n">ids</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>    <span class="n">metadatas</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>    <span class="n">extract_triplets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>    <span class="n">show_progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ExtractionResult</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>texts</code></td>
+<td>Text strings that replace the current graph contents.</td>
+</tr>
+<tr>
+<td><code>ids</code></td>
+<td>Optional list of unique passage IDs. Auto-generated if omitted.</td>
+</tr>
+<tr>
+<td><code>metadatas</code></td>
+<td>Optional list of metadata dicts attached to each text.</td>
+</tr>
+<tr>
+<td><code>extract_triplets</code></td>
+<td>If <code>True</code>, the LLM extracts entity-relation-entity triplets from each text.</td>
+</tr>
+<tr>
+<td><code>show_progress</code></td>
+<td>Show a progress bar during processing.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <a href="#extractionresult"><code>ExtractionResult</code></a></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">result</span> <span class="o">=</span> <span class="n">rag</span><span class="o">.</span><span class="n">rebuild_texts</span><span class="p">([</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>    <span class="s2">&quot;Albert Einstein developed the theory of general relativity.&quot;</span><span class="p">,</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>    <span class="s2">&quot;Einstein was born in Ulm, Germany in 1879.&quot;</span><span class="p">,</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="p">])</span>
+</code></pre></div>
+<hr />
+<h4 id="add_documents"><code>add_documents</code><a class="headerlink" href="#add_documents" title="Permanent link">&para;</a></h4>
+<p>Legacy compatibility wrapper for rebuilding the graph from <a href="https://python.langchain.com/docs/modules/data_connection/document_loaders/">LangChain <code>Document</code></a> objects.</p>
+<div class="admonition warning">
+<p class="admonition-title">Full rebuild</p>
+<p><code>add_documents()</code> keeps its original behavior for backward compatibility: it drops and recreates the Milvus collections for this graph before indexing the provided documents. This legacy API is planned for removal in v1.0.0. Use <a href="#rebuild_documents"><code>rebuild_documents</code></a> when you want this behavior explicitly, or <a href="#upsert_documents_by_source"><code>upsert_documents_by_source</code></a> for source-level incremental create/update.</p>
+</div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">add_documents</span><span class="p">(</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>    <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Document</span><span class="p">],</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>    <span class="n">extract_triplets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>    <span class="n">show_progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ExtractionResult</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>documents</code></td>
+<td>List of LangChain <code>Document</code> objects (each has <code>.page_content</code> and <code>.metadata</code>).</td>
+</tr>
+<tr>
+<td><code>extract_triplets</code></td>
+<td>If <code>True</code>, extract knowledge-graph triplets from each document.</td>
+</tr>
+<tr>
+<td><code>show_progress</code></td>
+<td>Show a progress bar.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <a href="#extractionresult"><code>ExtractionResult</code></a></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">langchain_core.documents</span><span class="w"> </span><span class="kn">import</span> <span class="n">Document</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="n">docs</span> <span class="o">=</span> <span class="p">[</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>    <span class="n">Document</span><span class="p">(</span><span class="n">page_content</span><span class="o">=</span><span class="s2">&quot;Marie Curie discovered radium.&quot;</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;wiki&quot;</span><span class="p">}),</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>    <span class="n">Document</span><span class="p">(</span><span class="n">page_content</span><span class="o">=</span><span class="s2">&quot;She was awarded two Nobel Prizes.&quot;</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;wiki&quot;</span><span class="p">}),</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="p">]</span>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="n">result</span> <span class="o">=</span> <span class="n">rag</span><span class="o">.</span><span class="n">add_documents</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h4 id="rebuild_documents"><code>rebuild_documents</code><a class="headerlink" href="#rebuild_documents" title="Permanent link">&para;</a></h4>
+<p>Explicitly rebuild the full knowledge base from a list of LangChain <code>Document</code> objects.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">rebuild_documents</span><span class="p">(</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>    <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Document</span><span class="p">],</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>    <span class="n">extract_triplets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>    <span class="n">show_progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ExtractionResult</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>documents</code></td>
+<td>Documents that replace the current graph contents.</td>
+</tr>
+<tr>
+<td><code>extract_triplets</code></td>
+<td>If <code>True</code>, extract knowledge-graph triplets from each document.</td>
+</tr>
+<tr>
+<td><code>show_progress</code></td>
+<td>Show a progress bar.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <a href="#extractionresult"><code>ExtractionResult</code></a></p>
+<p>Use this for initial bulk indexing, benchmark rebuilds, or when you intentionally want a full refresh.</p>
+<hr />
+<h4 id="add_documents_with_triplets"><code>add_documents_with_triplets</code><a class="headerlink" href="#add_documents_with_triplets" title="Permanent link">&para;</a></h4>
+<p>Legacy compatibility wrapper for rebuilding the graph from documents where triplets have already been extracted externally.</p>
+<div class="admonition warning">
+<p class="admonition-title">Full rebuild</p>
+<p>This method delegates to <code>rebuild_documents_with_triplets()</code> and rebuilds the full knowledge base. This legacy convenience API is planned for removal in v1.0.0. For pre-extracted triplets in an incremental update, put the triplets in each chunk's <code>metadata["triplets"]</code> and call <a href="#upsert_documents_by_source"><code>upsert_documents_by_source</code></a> with <code>extract_triplets=False</code>.</p>
+</div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">add_documents_with_triplets</span><span class="p">(</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>    <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>    <span class="n">show_progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ExtractionResult</span>
+</code></pre></div>
+<p>Each dict in <code>documents</code> should contain the document text and its pre-extracted triplets.
+Optional <code>metadata</code> is stored on the passage and can be used by query filters.</p>
+<p><strong>Returns:</strong> <a href="#extractionresult"><code>ExtractionResult</code></a></p>
+<div class="admonition example">
+<p class="admonition-title">Pre-extracted triplets</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="n">docs_with_triplets</span> <span class="o">=</span> <span class="p">[</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>    <span class="p">{</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>        <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Albert Einstein developed the theory of general relativity.&quot;</span><span class="p">,</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>        <span class="s2">&quot;triplets&quot;</span><span class="p">:</span> <span class="p">[</span>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>            <span class="p">(</span><span class="s2">&quot;Albert Einstein&quot;</span><span class="p">,</span> <span class="s2">&quot;developed&quot;</span><span class="p">,</span> <span class="s2">&quot;theory of general relativity&quot;</span><span class="p">),</span>
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>        <span class="p">],</span>
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>        <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;physics&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">:</span> <span class="mi">1915</span><span class="p">},</span>
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>    <span class="p">},</span>
+<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="p">]</span>
+<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>
+<a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a><span class="n">result</span> <span class="o">=</span> <span class="n">rag</span><span class="o">.</span><span class="n">add_documents_with_triplets</span><span class="p">(</span><span class="n">docs_with_triplets</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<hr />
+<h4 id="rebuild_documents_with_triplets"><code>rebuild_documents_with_triplets</code><a class="headerlink" href="#rebuild_documents_with_triplets" title="Permanent link">&para;</a></h4>
+<p>Explicitly rebuild the full knowledge base from documents that already include extracted triplets.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">rebuild_documents_with_triplets</span><span class="p">(</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>    <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>    <span class="n">show_progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ExtractionResult</span>
+</code></pre></div>
+<p>Each dict in <code>documents</code> should contain the document text and its pre-extracted triplets.
+Optional <code>metadata</code> is stored on the passage and can be used by query filters.</p>
+<p><strong>Returns:</strong> <a href="#extractionresult"><code>ExtractionResult</code></a></p>
+<div class="admonition example">
+<p class="admonition-title">Pre-extracted triplets</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="n">docs_with_triplets</span> <span class="o">=</span> <span class="p">[</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>    <span class="p">{</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>        <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;Albert Einstein developed the theory of general relativity.&quot;</span><span class="p">,</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a>        <span class="s2">&quot;triplets&quot;</span><span class="p">:</span> <span class="p">[</span>
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a>            <span class="p">(</span><span class="s2">&quot;Albert Einstein&quot;</span><span class="p">,</span> <span class="s2">&quot;developed&quot;</span><span class="p">,</span> <span class="s2">&quot;theory of general relativity&quot;</span><span class="p">),</span>
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>        <span class="p">],</span>
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>        <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;physics&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">:</span> <span class="mi">1915</span><span class="p">},</span>
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a>    <span class="p">},</span>
+<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="p">]</span>
+<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a>
+<a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a><span class="n">result</span> <span class="o">=</span> <span class="n">rag</span><span class="o">.</span><span class="n">rebuild_documents_with_triplets</span><span class="p">(</span><span class="n">docs_with_triplets</span><span class="p">)</span>
+</code></pre></div>
+</div>
+<hr />
+<h4 id="upsert_documents_by_source"><code>upsert_documents_by_source</code><a class="headerlink" href="#upsert_documents_by_source" title="Permanent link">&para;</a></h4>
+<p>Incrementally create or replace all chunks that belong to one source. A source can be a file, page, message, database row, business record, or any other stable external object. In Vector Graph RAG, a LangChain <code>Document</code> is a passage/chunk; source ownership is represented by <code>metadata["source"]</code> by default.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">upsert_documents_by_source</span><span class="p">(</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>    <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Document</span><span class="p">],</span>
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>    <span class="n">source</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>    <span class="n">source_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;source&quot;</span><span class="p">,</span>
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>    <span class="n">metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>    <span class="n">extract_triplets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>    <span class="n">show_progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ExtractionResult</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>documents</code></td>
+<td>Parsed chunks/passages for one source. If a chunk has <code>Document.id</code>, it is used as the passage ID; otherwise a deterministic passage ID is generated from <code>source</code> and chunk index.</td>
+</tr>
+<tr>
+<td><code>source</code></td>
+<td>Optional stable source value. If omitted, all documents must include the same <code>Document.metadata[source_field]</code> value.</td>
+</tr>
+<tr>
+<td><code>source_field</code></td>
+<td>Metadata field used to group chunks by source. Defaults to <code>"source"</code>.</td>
+</tr>
+<tr>
+<td><code>metadata</code></td>
+<td>Source-level metadata merged into every chunk. It must not conflict with <code>source</code> or the chunks' <code>source_field</code> values.</td>
+</tr>
+<tr>
+<td><code>extract_triplets</code></td>
+<td>If <code>True</code>, extract triplets from each chunk. If triplets are already in <code>metadata["triplets"]</code>, set this to <code>False</code>.</td>
+</tr>
+<tr>
+<td><code>show_progress</code></td>
+<td>Show a progress bar.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <a href="#extractionresult"><code>ExtractionResult</code></a></p>
+<p>If the source does not exist, the method inserts a new source. If it already exists, the method deletes the previous chunks for that source, updates graph references, and inserts the new chunks without rebuilding unrelated sources.</p>
+<p>Source-level writes are not transactionally atomic. If an upsert fails during the multi-step cascade, rerun the same <code>upsert_documents_by_source()</code> call for the same source to converge the source back to the requested state. Queries may observe intermediate state until the retry succeeds.</p>
+<p>The method accepts exactly one source per call. If <code>source</code> is not provided and the documents contain multiple <code>metadata[source_field]</code> values, it raises <code>ValueError</code>.</p>
+<p>For end-to-end parser and loader examples, see
+<a href="../../guides/incremental-updates/">Incremental Updates</a>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">langchain_core.documents</span><span class="w"> </span><span class="kn">import</span> <span class="n">Document</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="n">chunks</span> <span class="o">=</span> <span class="p">[</span>
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>    <span class="n">Document</span><span class="p">(</span>
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>        <span class="n">page_content</span><span class="o">=</span><span class="s2">&quot;Alpha owns the blue database.&quot;</span><span class="p">,</span>
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>        <span class="n">metadata</span><span class="o">=</span><span class="p">{</span>
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>            <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;file:file-123&quot;</span><span class="p">,</span>
+<a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>            <span class="s2">&quot;triplets&quot;</span><span class="p">:</span> <span class="p">[[</span><span class="s2">&quot;Alpha&quot;</span><span class="p">,</span> <span class="s2">&quot;owns&quot;</span><span class="p">,</span> <span class="s2">&quot;blue database&quot;</span><span class="p">]],</span>
+<a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a>        <span class="p">},</span>
+<a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a>    <span class="p">)</span>
+<a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a><span class="p">]</span>
+<a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a>
+<a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a><span class="n">rag</span><span class="o">.</span><span class="n">upsert_documents_by_source</span><span class="p">(</span>
+<a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a>    <span class="n">documents</span><span class="o">=</span><span class="n">chunks</span><span class="p">,</span>
+<a id="__codelineno-21-15" name="__codelineno-21-15" href="#__codelineno-21-15"></a>    <span class="n">metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;tenant_id&quot;</span><span class="p">:</span> <span class="s2">&quot;team_a&quot;</span><span class="p">},</span>
+<a id="__codelineno-21-16" name="__codelineno-21-16" href="#__codelineno-21-16"></a>    <span class="n">extract_triplets</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-21-17" name="__codelineno-21-17" href="#__codelineno-21-17"></a><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h4 id="delete_documents_by_source"><code>delete_documents_by_source</code><a class="headerlink" href="#delete_documents_by_source" title="Permanent link">&para;</a></h4>
+<p>Incrementally delete all chunks that belong to one source and remove graph references that only belonged to that source.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">delete_documents_by_source</span><span class="p">(</span>
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>    <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>    <span class="n">source_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;source&quot;</span><span class="p">,</span>
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>source</code></td>
+<td>Stable source value previously used with <code>upsert_documents_by_source()</code>.</td>
+</tr>
+<tr>
+<td><code>source_field</code></td>
+<td>Metadata field used to group chunks by source. Defaults to <code>"source"</code>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <code>True</code> if at least one passage was deleted; otherwise <code>False</code>.</p>
+<p>Shared entities and relations are preserved when other sources still reference them. Orphaned relations and entities are removed.</p>
+<p>Source-level deletes are retryable. If a delete fails after partially cleaning graph records, rerun <code>delete_documents_by_source()</code> with the same <code>source</code> and <code>source_field</code> to finish the cascade.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="n">deleted</span> <span class="o">=</span> <span class="n">rag</span><span class="o">.</span><span class="n">delete_documents_by_source</span><span class="p">(</span><span class="s2">&quot;file:file-123&quot;</span><span class="p">)</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">v0.2.0 migration</p>
+<p><code>upsert_documents(document_id=...)</code> and <code>delete_documents(document_id)</code> were removed because <code>Document</code> means passage/chunk in this project. These methods now raise <code>RuntimeError</code> with migration guidance. Use <code>upsert_documents_by_source()</code> and <code>delete_documents_by_source()</code> with a stable <code>metadata["source"]</code> value.</p>
+</div>
+<hr />
+<h4 id="query"><code>query</code><a class="headerlink" href="#query" title="Permanent link">&para;</a></h4>
+<p>Full-featured query with graph-augmented retrieval, optional reranking, and optional naive-RAG comparison.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">query</span><span class="p">(</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>    <span class="n">question</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>    <span class="n">use_reranking</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>    <span class="n">compare_naive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a>    <span class="n">entity_top_k</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a>    <span class="n">relation_top_k</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a>    <span class="n">entity_similarity_threshold</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a>    <span class="n">relation_similarity_threshold</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a>    <span class="n">expansion_degree</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a>    <span class="nb">filter</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-24-11" name="__codelineno-24-11" href="#__codelineno-24-11"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QueryResult</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>question</code></td>
+<td>The natural-language question to answer.</td>
+</tr>
+<tr>
+<td><code>use_reranking</code></td>
+<td>Whether to apply LLM-based reranking on retrieved passages.</td>
+</tr>
+<tr>
+<td><code>compare_naive</code></td>
+<td>If <code>True</code>, also run a naive vector-only retrieval for comparison.</td>
+</tr>
+<tr>
+<td><code>entity_top_k</code></td>
+<td>Override <code>Settings.entity_top_k</code> for this query.</td>
+</tr>
+<tr>
+<td><code>relation_top_k</code></td>
+<td>Override <code>Settings.relation_top_k</code> for this query.</td>
+</tr>
+<tr>
+<td><code>entity_similarity_threshold</code></td>
+<td>Override <code>Settings.entity_similarity_threshold</code> for this query.</td>
+</tr>
+<tr>
+<td><code>relation_similarity_threshold</code></td>
+<td>Override <code>Settings.relation_similarity_threshold</code> for this query.</td>
+</tr>
+<tr>
+<td><code>expansion_degree</code></td>
+<td>Override <code>Settings.expansion_degree</code> for this query.</td>
+</tr>
+<tr>
+<td><code>filter</code></td>
+<td>Optional Milvus filter expression applied to passage metadata.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <a href="#queryresult"><code>QueryResult</code></a></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="n">result</span> <span class="o">=</span> <span class="n">rag</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;What did Einstein contribute to physics?&quot;</span><span class="p">)</span>
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">answer</span><span class="p">)</span>
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">passages</span><span class="p">)</span><span class="si">}</span><span class="s2"> relevant passages&quot;</span><span class="p">)</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="n">result</span> <span class="o">=</span> <span class="n">rag</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>    <span class="s2">&quot;What did Einstein contribute to physics?&quot;</span><span class="p">,</span>
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>    <span class="nb">filter</span><span class="o">=</span><span class="s1">&#39;source == &quot;physics&quot; and year &gt;= 1900&#39;</span><span class="p">,</span>
+<a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a><span class="p">)</span>
+</code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Per-query tuning</p>
+<p>You can override retrieval parameters on a per-query basis without modifying global
+settings. This is useful for experimentation or for queries that need different
+sensitivity levels.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a><span class="c1"># Broader search with more hops</span>
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a><span class="n">result</span> <span class="o">=</span> <span class="n">rag</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
+<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a>    <span class="s2">&quot;How are quantum mechanics and relativity connected?&quot;</span><span class="p">,</span>
+<a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a>    <span class="n">entity_top_k</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
+<a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a>    <span class="n">expansion_degree</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+<a id="__codelineno-27-6" name="__codelineno-27-6" href="#__codelineno-27-6"></a><span class="p">)</span>
+</code></pre></div>
+</div>
+<hr />
+<h4 id="query_simple"><code>query_simple</code><a class="headerlink" href="#query_simple" title="Permanent link">&para;</a></h4>
+<p>A convenience method that returns just the answer string — no metadata, no retrieval details.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">query_simple</span><span class="p">(</span><span class="n">question</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">filter</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</code></pre></div>
+<p><strong>Returns:</strong> <code>str</code> — the generated answer.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a><span class="n">answer</span> <span class="o">=</span> <span class="n">rag</span><span class="o">.</span><span class="n">query_simple</span><span class="p">(</span><span class="s2">&quot;When was Einstein born?&quot;</span><span class="p">)</span>
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">answer</span><span class="p">)</span>
+<a id="__codelineno-29-3" name="__codelineno-29-3" href="#__codelineno-29-3"></a><span class="c1"># &quot;Albert Einstein was born on March 14, 1879, in Ulm, Germany.&quot;</span>
+</code></pre></div>
+<hr />
+<h4 id="query_naive"><code>query_naive</code><a class="headerlink" href="#query_naive" title="Permanent link">&para;</a></h4>
+<p>Run a <strong>naive vector-only</strong> retrieval (no graph expansion or reranking). Useful as a baseline for comparison.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">query_naive</span><span class="p">(</span><span class="n">question</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">filter</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QueryResult</span>
+</code></pre></div>
+<p><strong>Returns:</strong> <a href="#queryresult"><code>QueryResult</code></a></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="n">naive_result</span> <span class="o">=</span> <span class="n">rag</span><span class="o">.</span><span class="n">query_naive</span><span class="p">(</span><span class="s2">&quot;What did Einstein contribute to physics?&quot;</span><span class="p">)</span>
+<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a><span class="n">graph_result</span> <span class="o">=</span> <span class="n">rag</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;What did Einstein contribute to physics?&quot;</span><span class="p">)</span>
+<a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a>
+<a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Naive:&quot;</span><span class="p">,</span> <span class="n">naive_result</span><span class="o">.</span><span class="n">answer</span><span class="p">)</span>
+<a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Graph:&quot;</span><span class="p">,</span> <span class="n">graph_result</span><span class="o">.</span><span class="n">answer</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h4 id="retrieve"><code>retrieve</code><a class="headerlink" href="#retrieve" title="Permanent link">&para;</a></h4>
+<p>Retrieve relevant passages <strong>without</strong> generating an answer. Useful when you want to feed the passages into your own downstream pipeline.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">retrieve</span><span class="p">(</span>
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>    <span class="n">question</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a>    <span class="n">use_reranking</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a>    <span class="n">top_k</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a>    <span class="nb">filter</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QueryResult</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>question</code></td>
+<td>The natural-language question.</td>
+</tr>
+<tr>
+<td><code>use_reranking</code></td>
+<td>Whether to apply LLM-based reranking.</td>
+</tr>
+<tr>
+<td><code>top_k</code></td>
+<td>Number of passages to return (overrides <code>Settings.final_top_k</code>).</td>
+</tr>
+<tr>
+<td><code>filter</code></td>
+<td>Optional Milvus filter expression applied to passage metadata.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <a href="#queryresult"><code>QueryResult</code></a> (with <code>answer</code> field empty or <code>None</code>).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a><span class="n">result</span> <span class="o">=</span> <span class="n">rag</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="s2">&quot;Tell me about general relativity&quot;</span><span class="p">,</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a>
+<a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a><span class="k">for</span> <span class="n">passage</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">passages</span><span class="p">:</span>
+<a id="__codelineno-33-4" name="__codelineno-33-4" href="#__codelineno-33-4"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">passage</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h4 id="get_stats"><code>get_stats</code><a class="headerlink" href="#get_stats" title="Permanent link">&para;</a></h4>
+<p>Return collection statistics.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">get_stats</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span>
+</code></pre></div>
+<p><strong>Returns:</strong> A dictionary with entity, relation, and passage counts.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a><span class="n">stats</span> <span class="o">=</span> <span class="n">rag</span><span class="o">.</span><span class="n">get_stats</span><span class="p">()</span>
+<a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">stats</span><span class="p">)</span>
+<a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a><span class="c1"># {&quot;entities&quot;: 142, &quot;relations&quot;: 87, &quot;passages&quot;: 50}</span>
+</code></pre></div>
+<hr />
+<h4 id="reset"><code>reset</code><a class="headerlink" href="#reset" title="Permanent link">&para;</a></h4>
+<p>Delete all data from all collections (entities, relations, passages). <strong>This is destructive and irreversible.</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Destructive operation</p>
+<p><code>reset()</code> drops all ingested data. There is no confirmation prompt. Use with caution
+in production environments.</p>
+</div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-37-1" name="__codelineno-37-1" href="#__codelineno-37-1"></a><span class="n">rag</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+<a id="__codelineno-37-2" name="__codelineno-37-2" href="#__codelineno-37-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">rag</span><span class="o">.</span><span class="n">get_stats</span><span class="p">())</span>
+<a id="__codelineno-37-3" name="__codelineno-37-3" href="#__codelineno-37-3"></a><span class="c1"># {&quot;entities&quot;: 0, &quot;relations&quot;: 0, &quot;passages&quot;: 0}</span>
+</code></pre></div>
+<hr />
+<h2 id="queryresult">QueryResult<a class="headerlink" href="#queryresult" title="Permanent link">&para;</a></h2>
+<p>A data class returned by <code>query()</code>, <code>query_naive()</code>, and <code>retrieve()</code>. It contains the generated answer along with full retrieval diagnostics.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-38-1" name="__codelineno-38-1" href="#__codelineno-38-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">vector_graph_rag</span><span class="w"> </span><span class="kn">import</span> <span class="n">QueryResult</span>
+</code></pre></div>
+<h3 id="fields_1">Fields<a class="headerlink" href="#fields_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>query</code></td>
+<td><code>str</code></td>
+<td>The original question.</td>
+</tr>
+<tr>
+<td><code>answer</code></td>
+<td><code>str</code></td>
+<td>The generated answer (empty for <code>retrieve()</code>).</td>
+</tr>
+<tr>
+<td><code>query_entities</code></td>
+<td><code>list</code></td>
+<td>Entities extracted from the query.</td>
+</tr>
+<tr>
+<td><code>passages</code></td>
+<td><code>list</code></td>
+<td>Final list of passages used for answer generation.</td>
+</tr>
+<tr>
+<td><code>retrieved_passages</code></td>
+<td><code>list</code></td>
+<td>Passages retrieved via initial vector search.</td>
+</tr>
+<tr>
+<td><code>retrieved_relations</code></td>
+<td><code>list</code></td>
+<td>Relations retrieved via vector search.</td>
+</tr>
+<tr>
+<td><code>expanded_relations</code></td>
+<td><code>list</code></td>
+<td>Relations discovered through graph expansion.</td>
+</tr>
+<tr>
+<td><code>reranked_relations</code></td>
+<td><code>list</code></td>
+<td>Relations after LLM-based reranking.</td>
+</tr>
+<tr>
+<td><code>subgraph</code></td>
+<td><code>dict</code></td>
+<td>The local subgraph explored during retrieval.</td>
+</tr>
+<tr>
+<td><code>retrieval_detail</code></td>
+<td><code>dict</code></td>
+<td>Detailed retrieval metrics and intermediate results.</td>
+</tr>
+<tr>
+<td><code>rerank_result</code></td>
+<td><code>object</code></td>
+<td>Raw reranking output.</td>
+</tr>
+<tr>
+<td><code>eviction_result</code></td>
+<td><code>object</code></td>
+<td>Details of any evicted (filtered-out) passages.</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-39-1" name="__codelineno-39-1" href="#__codelineno-39-1"></a><span class="n">result</span> <span class="o">=</span> <span class="n">rag</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;What is general relativity?&quot;</span><span class="p">)</span>
+<a id="__codelineno-39-2" name="__codelineno-39-2" href="#__codelineno-39-2"></a>
+<a id="__codelineno-39-3" name="__codelineno-39-3" href="#__codelineno-39-3"></a><span class="c1"># Access the answer</span>
+<a id="__codelineno-39-4" name="__codelineno-39-4" href="#__codelineno-39-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">answer</span><span class="p">)</span>
+<a id="__codelineno-39-5" name="__codelineno-39-5" href="#__codelineno-39-5"></a>
+<a id="__codelineno-39-6" name="__codelineno-39-6" href="#__codelineno-39-6"></a><span class="c1"># Inspect retrieval diagnostics</span>
+<a id="__codelineno-39-7" name="__codelineno-39-7" href="#__codelineno-39-7"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Query entities: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">query_entities</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-39-8" name="__codelineno-39-8" href="#__codelineno-39-8"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Retrieved </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">retrieved_relations</span><span class="p">)</span><span class="si">}</span><span class="s2"> relations&quot;</span><span class="p">)</span>
+<a id="__codelineno-39-9" name="__codelineno-39-9" href="#__codelineno-39-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expanded to </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">expanded_relations</span><span class="p">)</span><span class="si">}</span><span class="s2"> relations via graph&quot;</span><span class="p">)</span>
+<a id="__codelineno-39-10" name="__codelineno-39-10" href="#__codelineno-39-10"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Final passages: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">passages</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="extractionresult">ExtractionResult<a class="headerlink" href="#extractionresult" title="Permanent link">&para;</a></h2>
+<p>A data class returned by document ingestion methods, including legacy <code>add_*</code>, <code>rebuild_*</code>, and <code>upsert_documents_by_source()</code>. It summarises what was ingested and extracted.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-40-1" name="__codelineno-40-1" href="#__codelineno-40-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">vector_graph_rag</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExtractionResult</span>
+</code></pre></div>
+<h3 id="fields_2">Fields<a class="headerlink" href="#fields_2" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>documents</code></td>
+<td><code>list</code></td>
+<td>The ingested documents.</td>
+</tr>
+<tr>
+<td><code>entities</code></td>
+<td><code>list</code></td>
+<td>All extracted entities.</td>
+</tr>
+<tr>
+<td><code>relations</code></td>
+<td><code>list</code></td>
+<td>All extracted relations (triplets).</td>
+</tr>
+<tr>
+<td><code>entity_to_relation_ids</code></td>
+<td><code>dict</code></td>
+<td>Mapping from entity IDs to their related relation IDs.</td>
+</tr>
+<tr>
+<td><code>relation_to_passage_ids</code></td>
+<td><code>dict</code></td>
+<td>Mapping from relation IDs to source passage IDs.</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-41-1" name="__codelineno-41-1" href="#__codelineno-41-1"></a><span class="n">result</span> <span class="o">=</span> <span class="n">rag</span><span class="o">.</span><span class="n">rebuild_texts</span><span class="p">([</span><span class="s2">&quot;Marie Curie discovered radium and polonium.&quot;</span><span class="p">])</span>
+<a id="__codelineno-41-2" name="__codelineno-41-2" href="#__codelineno-41-2"></a>
+<a id="__codelineno-41-3" name="__codelineno-41-3" href="#__codelineno-41-3"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Documents: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">documents</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-41-4" name="__codelineno-41-4" href="#__codelineno-41-4"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Entities:  </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">entities</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-41-5" name="__codelineno-41-5" href="#__codelineno-41-5"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Relations: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">relations</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-41-6" name="__codelineno-41-6" href="#__codelineno-41-6"></a>
+<a id="__codelineno-41-7" name="__codelineno-41-7" href="#__codelineno-41-7"></a><span class="c1"># Explore the knowledge graph mappings</span>
+<a id="__codelineno-41-8" name="__codelineno-41-8" href="#__codelineno-41-8"></a><span class="k">for</span> <span class="n">entity_id</span><span class="p">,</span> <span class="n">relation_ids</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">entity_to_relation_ids</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<a id="__codelineno-41-9" name="__codelineno-41-9" href="#__codelineno-41-9"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Entity </span><span class="si">{</span><span class="n">entity_id</span><span class="si">}</span><span class="s2"> -&gt; Relations </span><span class="si">{</span><span class="n">relation_ids</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="documentimporter">DocumentImporter<a class="headerlink" href="#documentimporter" title="Permanent link">&para;</a></h2>
+<p>A utility class for loading and chunking documents from various file formats and URLs.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-42-1" name="__codelineno-42-1" href="#__codelineno-42-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">vector_graph_rag.loaders</span><span class="w"> </span><span class="kn">import</span> <span class="n">DocumentImporter</span>
+</code></pre></div>
+<h3 id="constructor_1">Constructor<a class="headerlink" href="#constructor_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-43-1" name="__codelineno-43-1" href="#__codelineno-43-1"></a><span class="n">importer</span> <span class="o">=</span> <span class="n">DocumentImporter</span><span class="p">(</span>
+<a id="__codelineno-43-2" name="__codelineno-43-2" href="#__codelineno-43-2"></a>    <span class="n">chunk_documents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>    <span class="c1"># Whether to split documents into chunks</span>
+<a id="__codelineno-43-3" name="__codelineno-43-3" href="#__codelineno-43-3"></a>    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>         <span class="c1"># Maximum characters per chunk</span>
+<a id="__codelineno-43-4" name="__codelineno-43-4" href="#__codelineno-43-4"></a>    <span class="n">chunk_overlap</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>       <span class="c1"># Character overlap between consecutive chunks</span>
+<a id="__codelineno-43-5" name="__codelineno-43-5" href="#__codelineno-43-5"></a>    <span class="n">converter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>          <span class="c1"># Optional custom local-file converter</span>
+<a id="__codelineno-43-6" name="__codelineno-43-6" href="#__codelineno-43-6"></a><span class="p">)</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>chunk_documents</code></td>
+<td><code>bool</code></td>
+<td><code>True</code></td>
+<td>If <code>True</code>, loaded documents are split into chunks.</td>
+</tr>
+<tr>
+<td><code>chunk_size</code></td>
+<td><code>int</code></td>
+<td><code>1000</code></td>
+<td>Maximum number of characters per chunk.</td>
+</tr>
+<tr>
+<td><code>chunk_overlap</code></td>
+<td><code>int</code></td>
+<td><code>200</code></td>
+<td>Number of overlapping characters between adjacent chunks.</td>
+</tr>
+<tr>
+<td><code>converter</code></td>
+<td><code>Optional[DocumentConverterProtocol]</code></td>
+<td><code>None</code></td>
+<td>Local-file converter. Defaults to MarkItDown through <code>DocumentConverter</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="supported-formats">Supported formats<a class="headerlink" href="#supported-formats" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Format</th>
+<th>Extensions / Patterns</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PDF</td>
+<td><code>.pdf</code></td>
+</tr>
+<tr>
+<td>Word</td>
+<td><code>.docx</code></td>
+</tr>
+<tr>
+<td>Plain text</td>
+<td><code>.txt</code></td>
+</tr>
+<tr>
+<td>Markdown</td>
+<td><code>.md</code></td>
+</tr>
+<tr>
+<td>HTML</td>
+<td><code>.html</code>, <code>.htm</code></td>
+</tr>
+<tr>
+<td>URLs</td>
+<td><code>http://...</code>, <code>https://...</code></td>
+</tr>
+</tbody>
+</table>
+<p>Additional local formats can be enabled by passing a converter with a
+<code>supported_extensions</code> set and a <code>convert(source)</code> method.</p>
+<h3 id="doclingconverter">DoclingConverter<a class="headerlink" href="#doclingconverter" title="Permanent link">&para;</a></h3>
+<p><code>DoclingConverter</code> adapts Docling's Python API as a local-file converter. It
+exports Docling's parsed document to Markdown and returns standard LangChain
+<code>Document</code> objects.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-44-1" name="__codelineno-44-1" href="#__codelineno-44-1"></a>uv<span class="w"> </span>add<span class="w"> </span><span class="s2">&quot;vector-graph-rag[docling]&quot;</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-45-1" name="__codelineno-45-1" href="#__codelineno-45-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">vector_graph_rag.loaders</span><span class="w"> </span><span class="kn">import</span> <span class="n">DoclingConverter</span><span class="p">,</span> <span class="n">DocumentImporter</span>
+<a id="__codelineno-45-2" name="__codelineno-45-2" href="#__codelineno-45-2"></a>
+<a id="__codelineno-45-3" name="__codelineno-45-3" href="#__codelineno-45-3"></a><span class="n">importer</span> <span class="o">=</span> <span class="n">DocumentImporter</span><span class="p">(</span>
+<a id="__codelineno-45-4" name="__codelineno-45-4" href="#__codelineno-45-4"></a>    <span class="n">converter</span><span class="o">=</span><span class="n">DoclingConverter</span><span class="p">(),</span>
+<a id="__codelineno-45-5" name="__codelineno-45-5" href="#__codelineno-45-5"></a>    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+<a id="__codelineno-45-6" name="__codelineno-45-6" href="#__codelineno-45-6"></a>    <span class="n">chunk_overlap</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+<a id="__codelineno-45-7" name="__codelineno-45-7" href="#__codelineno-45-7"></a><span class="p">)</span>
+<a id="__codelineno-45-8" name="__codelineno-45-8" href="#__codelineno-45-8"></a>
+<a id="__codelineno-45-9" name="__codelineno-45-9" href="#__codelineno-45-9"></a><span class="n">result</span> <span class="o">=</span> <span class="n">importer</span><span class="o">.</span><span class="n">import_sources</span><span class="p">([</span><span class="s2">&quot;/path/to/report.pdf&quot;</span><span class="p">])</span>
+</code></pre></div>
+<p>Docling's PDF pipeline may download parser models on first use. In offline or
+restricted environments, pre-download Docling's models and pass a preconfigured
+Docling <code>DocumentConverter</code> or <code>converter_kwargs</code> with Docling <code>format_options</code>.</p>
+<h3 id="mineruconverter">MinerUConverter<a class="headerlink" href="#mineruconverter" title="Permanent link">&para;</a></h3>
+<p><code>MinerUConverter</code> adapts the MinerU CLI as a local-file converter. It reads the
+Markdown output produced by MinerU and returns standard LangChain <code>Document</code>
+objects, so the rest of the ingestion flow stays the same.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-46-1" name="__codelineno-46-1" href="#__codelineno-46-1"></a>uv<span class="w"> </span>add<span class="w"> </span><span class="s2">&quot;vector-graph-rag[mineru]&quot;</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-47-1" name="__codelineno-47-1" href="#__codelineno-47-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">vector_graph_rag.loaders</span><span class="w"> </span><span class="kn">import</span> <span class="n">DocumentImporter</span><span class="p">,</span> <span class="n">MinerUConverter</span>
+<a id="__codelineno-47-2" name="__codelineno-47-2" href="#__codelineno-47-2"></a>
+<a id="__codelineno-47-3" name="__codelineno-47-3" href="#__codelineno-47-3"></a><span class="n">importer</span> <span class="o">=</span> <span class="n">DocumentImporter</span><span class="p">(</span>
+<a id="__codelineno-47-4" name="__codelineno-47-4" href="#__codelineno-47-4"></a>    <span class="n">converter</span><span class="o">=</span><span class="n">MinerUConverter</span><span class="p">(</span>
+<a id="__codelineno-47-5" name="__codelineno-47-5" href="#__codelineno-47-5"></a>        <span class="n">timeout</span><span class="o">=</span><span class="mi">900</span><span class="p">,</span>
+<a id="__codelineno-47-6" name="__codelineno-47-6" href="#__codelineno-47-6"></a>        <span class="n">extra_args</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;--backend&quot;</span><span class="p">,</span> <span class="s2">&quot;pipeline&quot;</span><span class="p">],</span>
+<a id="__codelineno-47-7" name="__codelineno-47-7" href="#__codelineno-47-7"></a>    <span class="p">),</span>
+<a id="__codelineno-47-8" name="__codelineno-47-8" href="#__codelineno-47-8"></a>    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+<a id="__codelineno-47-9" name="__codelineno-47-9" href="#__codelineno-47-9"></a>    <span class="n">chunk_overlap</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+<a id="__codelineno-47-10" name="__codelineno-47-10" href="#__codelineno-47-10"></a><span class="p">)</span>
+<a id="__codelineno-47-11" name="__codelineno-47-11" href="#__codelineno-47-11"></a>
+<a id="__codelineno-47-12" name="__codelineno-47-12" href="#__codelineno-47-12"></a><span class="n">result</span> <span class="o">=</span> <span class="n">importer</span><span class="o">.</span><span class="n">import_sources</span><span class="p">([</span><span class="s2">&quot;/path/to/report.pdf&quot;</span><span class="p">])</span>
+</code></pre></div>
+<p>Follow MinerU's setup guide for any parser models or runtime backends required
+by your environment. The first PDF parse may download backend models; for
+production or CI environments, pre-download the models or configure a longer
+converter timeout.</p>
+<p>When used with incremental ingestion, keep one stable source value per parsed
+file or record:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-48-1" name="__codelineno-48-1" href="#__codelineno-48-1"></a><span class="n">rag</span><span class="o">.</span><span class="n">upsert_documents_by_source</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">documents</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="methods_1">Methods<a class="headerlink" href="#methods_1" title="Permanent link">&para;</a></h3>
+<h4 id="import_sources"><code>import_sources</code><a class="headerlink" href="#import_sources" title="Permanent link">&para;</a></h4>
+<p>Load documents from a list of file paths and/or URLs.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-49-1" name="__codelineno-49-1" href="#__codelineno-49-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">import_sources</span><span class="p">(</span><span class="n">sources</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">LoaderResult</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-50-1" name="__codelineno-50-1" href="#__codelineno-50-1"></a><span class="n">importer</span> <span class="o">=</span> <span class="n">DocumentImporter</span><span class="p">(</span><span class="n">chunk_size</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">chunk_overlap</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<a id="__codelineno-50-2" name="__codelineno-50-2" href="#__codelineno-50-2"></a>
+<a id="__codelineno-50-3" name="__codelineno-50-3" href="#__codelineno-50-3"></a><span class="n">result</span> <span class="o">=</span> <span class="n">importer</span><span class="o">.</span><span class="n">import_sources</span><span class="p">([</span>
+<a id="__codelineno-50-4" name="__codelineno-50-4" href="#__codelineno-50-4"></a>    <span class="s2">&quot;/path/to/report.pdf&quot;</span><span class="p">,</span>
+<a id="__codelineno-50-5" name="__codelineno-50-5" href="#__codelineno-50-5"></a>    <span class="s2">&quot;/path/to/notes.md&quot;</span><span class="p">,</span>
+<a id="__codelineno-50-6" name="__codelineno-50-6" href="#__codelineno-50-6"></a>    <span class="s2">&quot;https://example.com/article&quot;</span><span class="p">,</span>
+<a id="__codelineno-50-7" name="__codelineno-50-7" href="#__codelineno-50-7"></a><span class="p">])</span>
+<a id="__codelineno-50-8" name="__codelineno-50-8" href="#__codelineno-50-8"></a>
+<a id="__codelineno-50-9" name="__codelineno-50-9" href="#__codelineno-50-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loaded </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">documents</span><span class="p">)</span><span class="si">}</span><span class="s2"> chunks&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h4 id="import_text"><code>import_text</code><a class="headerlink" href="#import_text" title="Permanent link">&para;</a></h4>
+<p>Load a raw text string as a document.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-51-1" name="__codelineno-51-1" href="#__codelineno-51-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">import_text</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;text_input&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LoaderResult</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>text</code></td>
+<td>The raw text content.</td>
+</tr>
+<tr>
+<td><code>source</code></td>
+<td>A label for the source (used in metadata).</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-52-1" name="__codelineno-52-1" href="#__codelineno-52-1"></a><span class="n">result</span> <span class="o">=</span> <span class="n">importer</span><span class="o">.</span><span class="n">import_text</span><span class="p">(</span>
+<a id="__codelineno-52-2" name="__codelineno-52-2" href="#__codelineno-52-2"></a>    <span class="s2">&quot;Einstein published four groundbreaking papers in 1905...&quot;</span><span class="p">,</span>
+<a id="__codelineno-52-3" name="__codelineno-52-3" href="#__codelineno-52-3"></a>    <span class="n">source</span><span class="o">=</span><span class="s2">&quot;annus_mirabilis&quot;</span><span class="p">,</span>
+<a id="__codelineno-52-4" name="__codelineno-52-4" href="#__codelineno-52-4"></a><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="create_rag"><code>create_rag</code><a class="headerlink" href="#create_rag" title="Permanent link">&para;</a></h2>
+<p>A convenience factory function for quickly creating a <code>VectorGraphRAG</code> instance with common defaults.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-53-1" name="__codelineno-53-1" href="#__codelineno-53-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">vector_graph_rag</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_rag</span>
+<a id="__codelineno-53-2" name="__codelineno-53-2" href="#__codelineno-53-2"></a>
+<a id="__codelineno-53-3" name="__codelineno-53-3" href="#__codelineno-53-3"></a><span class="n">rag</span> <span class="o">=</span> <span class="n">create_rag</span><span class="p">(</span>
+<a id="__codelineno-53-4" name="__codelineno-53-4" href="#__codelineno-53-4"></a>    <span class="n">milvus_uri</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>                        <span class="c1"># Optional[str]</span>
+<a id="__codelineno-53-5" name="__codelineno-53-5" href="#__codelineno-53-5"></a>    <span class="n">milvus_db</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>                         <span class="c1"># Optional[str]</span>
+<a id="__codelineno-53-6" name="__codelineno-53-6" href="#__codelineno-53-6"></a>    <span class="n">collection_prefix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>                 <span class="c1"># Optional[str]</span>
+<a id="__codelineno-53-7" name="__codelineno-53-7" href="#__codelineno-53-7"></a>    <span class="n">openai_api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>                    <span class="c1"># Optional[str]</span>
+<a id="__codelineno-53-8" name="__codelineno-53-8" href="#__codelineno-53-8"></a>    <span class="n">llm_model</span><span class="o">=</span><span class="s2">&quot;gpt-4o-mini&quot;</span><span class="p">,</span>               <span class="c1"># str</span>
+<a id="__codelineno-53-9" name="__codelineno-53-9" href="#__codelineno-53-9"></a>    <span class="n">embedding_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>                <span class="c1"># Optional[str]</span>
+<a id="__codelineno-53-10" name="__codelineno-53-10" href="#__codelineno-53-10"></a>    <span class="n">embedding_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>                   <span class="c1"># Optional[str]</span>
+<a id="__codelineno-53-11" name="__codelineno-53-11" href="#__codelineno-53-11"></a>    <span class="n">embedding_api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>                 <span class="c1"># Optional[str]</span>
+<a id="__codelineno-53-12" name="__codelineno-53-12" href="#__codelineno-53-12"></a>    <span class="n">embedding_base_url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>                <span class="c1"># Optional[str]</span>
+<a id="__codelineno-53-13" name="__codelineno-53-13" href="#__codelineno-53-13"></a><span class="p">)</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>milvus_uri</code></td>
+<td><code>Optional[str]</code></td>
+<td><code>None</code></td>
+<td>Milvus connection URI. Falls back to <code>Settings</code> default.</td>
+</tr>
+<tr>
+<td><code>milvus_db</code></td>
+<td><code>Optional[str]</code></td>
+<td><code>None</code></td>
+<td>Milvus database name.</td>
+</tr>
+<tr>
+<td><code>collection_prefix</code></td>
+<td><code>Optional[str]</code></td>
+<td><code>None</code></td>
+<td>Prefix for collection names (multi-dataset isolation).</td>
+</tr>
+<tr>
+<td><code>openai_api_key</code></td>
+<td><code>Optional[str]</code></td>
+<td><code>None</code></td>
+<td>OpenAI API key. Falls back to environment variable.</td>
+</tr>
+<tr>
+<td><code>llm_model</code></td>
+<td><code>str</code></td>
+<td><code>"gpt-4o-mini"</code></td>
+<td>LLM model to use.</td>
+</tr>
+<tr>
+<td><code>embedding_provider</code></td>
+<td><code>Optional[str]</code></td>
+<td><code>None</code></td>
+<td>Embedding provider name.</td>
+</tr>
+<tr>
+<td><code>embedding_model</code></td>
+<td><code>Optional[str]</code></td>
+<td><code>None</code></td>
+<td>Embedding model to use. If omitted with no provider, <code>create_rag()</code> uses <code>text-embedding-3-small</code>. If omitted with a provider, the provider default is used.</td>
+</tr>
+<tr>
+<td><code>embedding_api_key</code></td>
+<td><code>Optional[str]</code></td>
+<td><code>None</code></td>
+<td>Optional API key override for embedding providers.</td>
+</tr>
+<tr>
+<td><code>embedding_base_url</code></td>
+<td><code>Optional[str]</code></td>
+<td><code>None</code></td>
+<td>Optional base URL override for embedding providers.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong> <a href="#vectorgraphrag"><code>VectorGraphRAG</code></a></p>
+<div class="admonition note">
+<p class="admonition-title">Default embedding model</p>
+<p><code>create_rag()</code> defaults to <code>text-embedding-3-small</code> (not <code>text-embedding-3-large</code>
+as in <code>Settings</code>) when <code>embedding_provider</code> is not specified. This is a deliberate
+choice for quick-start scenarios where lower cost and faster embedding are preferred.
+When <code>embedding_provider</code> is specified and <code>embedding_model</code> is omitted, the provider's
+recommended default model is used.</p>
+</div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-54-1" name="__codelineno-54-1" href="#__codelineno-54-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">vector_graph_rag</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_rag</span>
+<a id="__codelineno-54-2" name="__codelineno-54-2" href="#__codelineno-54-2"></a>
+<a id="__codelineno-54-3" name="__codelineno-54-3" href="#__codelineno-54-3"></a><span class="c1"># Minimal setup — just needs OPENAI_API_KEY in the environment</span>
+<a id="__codelineno-54-4" name="__codelineno-54-4" href="#__codelineno-54-4"></a><span class="n">rag</span> <span class="o">=</span> <span class="n">create_rag</span><span class="p">()</span>
+<a id="__codelineno-54-5" name="__codelineno-54-5" href="#__codelineno-54-5"></a>
+<a id="__codelineno-54-6" name="__codelineno-54-6" href="#__codelineno-54-6"></a><span class="n">rag</span><span class="o">.</span><span class="n">rebuild_texts</span><span class="p">([</span><span class="s2">&quot;The mitochondria is the powerhouse of the cell.&quot;</span><span class="p">])</span>
+<a id="__codelineno-54-7" name="__codelineno-54-7" href="#__codelineno-54-7"></a><span class="n">answer</span> <span class="o">=</span> <span class="n">rag</span><span class="o">.</span><span class="n">query_simple</span><span class="p">(</span><span class="s2">&quot;What is the powerhouse of the cell?&quot;</span><span class="p">)</span>
+<a id="__codelineno-54-8" name="__codelineno-54-8" href="#__codelineno-54-8"></a><span class="nb">print</span><span class="p">(</span><span class="n">answer</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="complete-examples">Complete Examples<a class="headerlink" href="#complete-examples" title="Permanent link">&para;</a></h2>
+<h3 id="end-to-end-ingestion-and-query">End-to-end ingestion and query<a class="headerlink" href="#end-to-end-ingestion-and-query" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-55-1" name="__codelineno-55-1" href="#__codelineno-55-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">vector_graph_rag</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_rag</span>
+<a id="__codelineno-55-2" name="__codelineno-55-2" href="#__codelineno-55-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">vector_graph_rag.loaders</span><span class="w"> </span><span class="kn">import</span> <span class="n">DocumentImporter</span>
+<a id="__codelineno-55-3" name="__codelineno-55-3" href="#__codelineno-55-3"></a>
+<a id="__codelineno-55-4" name="__codelineno-55-4" href="#__codelineno-55-4"></a><span class="c1"># 1. Create the RAG instance</span>
+<a id="__codelineno-55-5" name="__codelineno-55-5" href="#__codelineno-55-5"></a><span class="n">rag</span> <span class="o">=</span> <span class="n">create_rag</span><span class="p">(</span>
+<a id="__codelineno-55-6" name="__codelineno-55-6" href="#__codelineno-55-6"></a>    <span class="n">collection_prefix</span><span class="o">=</span><span class="s2">&quot;my_project&quot;</span><span class="p">,</span>
+<a id="__codelineno-55-7" name="__codelineno-55-7" href="#__codelineno-55-7"></a>    <span class="n">llm_model</span><span class="o">=</span><span class="s2">&quot;gpt-4o&quot;</span><span class="p">,</span>
+<a id="__codelineno-55-8" name="__codelineno-55-8" href="#__codelineno-55-8"></a><span class="p">)</span>
+<a id="__codelineno-55-9" name="__codelineno-55-9" href="#__codelineno-55-9"></a>
+<a id="__codelineno-55-10" name="__codelineno-55-10" href="#__codelineno-55-10"></a><span class="c1"># 2. Load and chunk documents</span>
+<a id="__codelineno-55-11" name="__codelineno-55-11" href="#__codelineno-55-11"></a><span class="n">importer</span> <span class="o">=</span> <span class="n">DocumentImporter</span><span class="p">(</span><span class="n">chunk_size</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">chunk_overlap</span><span class="o">=</span><span class="mi">150</span><span class="p">)</span>
+<a id="__codelineno-55-12" name="__codelineno-55-12" href="#__codelineno-55-12"></a><span class="n">loader_result</span> <span class="o">=</span> <span class="n">importer</span><span class="o">.</span><span class="n">import_sources</span><span class="p">([</span>
+<a id="__codelineno-55-13" name="__codelineno-55-13" href="#__codelineno-55-13"></a>    <span class="s2">&quot;research_paper.pdf&quot;</span><span class="p">,</span>
+<a id="__codelineno-55-14" name="__codelineno-55-14" href="#__codelineno-55-14"></a>    <span class="s2">&quot;https://en.wikipedia.org/wiki/General_relativity&quot;</span><span class="p">,</span>
+<a id="__codelineno-55-15" name="__codelineno-55-15" href="#__codelineno-55-15"></a><span class="p">])</span>
+<a id="__codelineno-55-16" name="__codelineno-55-16" href="#__codelineno-55-16"></a>
+<a id="__codelineno-55-17" name="__codelineno-55-17" href="#__codelineno-55-17"></a><span class="c1"># 3. Ingest into the vector graph</span>
+<a id="__codelineno-55-18" name="__codelineno-55-18" href="#__codelineno-55-18"></a><span class="n">extraction</span> <span class="o">=</span> <span class="n">rag</span><span class="o">.</span><span class="n">rebuild_documents</span><span class="p">(</span><span class="n">loader_result</span><span class="o">.</span><span class="n">documents</span><span class="p">)</span>
+<a id="__codelineno-55-19" name="__codelineno-55-19" href="#__codelineno-55-19"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Ingested </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">extraction</span><span class="o">.</span><span class="n">entities</span><span class="p">)</span><span class="si">}</span><span class="s2"> entities and </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">extraction</span><span class="o">.</span><span class="n">relations</span><span class="p">)</span><span class="si">}</span><span class="s2"> relations&quot;</span><span class="p">)</span>
+<a id="__codelineno-55-20" name="__codelineno-55-20" href="#__codelineno-55-20"></a>
+<a id="__codelineno-55-21" name="__codelineno-55-21" href="#__codelineno-55-21"></a><span class="c1"># 4. Query</span>
+<a id="__codelineno-55-22" name="__codelineno-55-22" href="#__codelineno-55-22"></a><span class="n">result</span> <span class="o">=</span> <span class="n">rag</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;What experimental evidence supports general relativity?&quot;</span><span class="p">)</span>
+<a id="__codelineno-55-23" name="__codelineno-55-23" href="#__codelineno-55-23"></a><span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">answer</span><span class="p">)</span>
+<a id="__codelineno-55-24" name="__codelineno-55-24" href="#__codelineno-55-24"></a>
+<a id="__codelineno-55-25" name="__codelineno-55-25" href="#__codelineno-55-25"></a><span class="c1"># 5. Check stats</span>
+<a id="__codelineno-55-26" name="__codelineno-55-26" href="#__codelineno-55-26"></a><span class="nb">print</span><span class="p">(</span><span class="n">rag</span><span class="o">.</span><span class="n">get_stats</span><span class="p">())</span>
+</code></pre></div>
+<h3 id="multi-dataset-isolation">Multi-dataset isolation<a class="headerlink" href="#multi-dataset-isolation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-56-1" name="__codelineno-56-1" href="#__codelineno-56-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">vector_graph_rag</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_rag</span>
+<a id="__codelineno-56-2" name="__codelineno-56-2" href="#__codelineno-56-2"></a>
+<a id="__codelineno-56-3" name="__codelineno-56-3" href="#__codelineno-56-3"></a><span class="c1"># Two separate knowledge bases sharing the same Milvus instance</span>
+<a id="__codelineno-56-4" name="__codelineno-56-4" href="#__codelineno-56-4"></a><span class="n">physics_rag</span> <span class="o">=</span> <span class="n">create_rag</span><span class="p">(</span><span class="n">collection_prefix</span><span class="o">=</span><span class="s2">&quot;physics&quot;</span><span class="p">)</span>
+<a id="__codelineno-56-5" name="__codelineno-56-5" href="#__codelineno-56-5"></a><span class="n">biology_rag</span> <span class="o">=</span> <span class="n">create_rag</span><span class="p">(</span><span class="n">collection_prefix</span><span class="o">=</span><span class="s2">&quot;biology&quot;</span><span class="p">)</span>
+<a id="__codelineno-56-6" name="__codelineno-56-6" href="#__codelineno-56-6"></a>
+<a id="__codelineno-56-7" name="__codelineno-56-7" href="#__codelineno-56-7"></a><span class="n">physics_rag</span><span class="o">.</span><span class="n">rebuild_texts</span><span class="p">([</span><span class="s2">&quot;E=mc² is the mass-energy equivalence formula.&quot;</span><span class="p">])</span>
+<a id="__codelineno-56-8" name="__codelineno-56-8" href="#__codelineno-56-8"></a><span class="n">biology_rag</span><span class="o">.</span><span class="n">rebuild_texts</span><span class="p">([</span><span class="s2">&quot;DNA carries genetic information in living organisms.&quot;</span><span class="p">])</span>
+<a id="__codelineno-56-9" name="__codelineno-56-9" href="#__codelineno-56-9"></a>
+<a id="__codelineno-56-10" name="__codelineno-56-10" href="#__codelineno-56-10"></a><span class="c1"># Each RAG instance only searches its own collections</span>
+<a id="__codelineno-56-11" name="__codelineno-56-11" href="#__codelineno-56-11"></a><span class="nb">print</span><span class="p">(</span><span class="n">physics_rag</span><span class="o">.</span><span class="n">query_simple</span><span class="p">(</span><span class="s2">&quot;What is E=mc²?&quot;</span><span class="p">))</span>
+<a id="__codelineno-56-12" name="__codelineno-56-12" href="#__codelineno-56-12"></a><span class="nb">print</span><span class="p">(</span><span class="n">biology_rag</span><span class="o">.</span><span class="n">query_simple</span><span class="p">(</span><span class="s2">&quot;What carries genetic information?&quot;</span><span class="p">))</span>
+</code></pre></div>
+<h3 id="using-zilliz-cloud">Using Zilliz Cloud<a class="headerlink" href="#using-zilliz-cloud" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-57-1" name="__codelineno-57-1" href="#__codelineno-57-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">vector_graph_rag</span><span class="w"> </span><span class="kn">import</span> <span class="n">VectorGraphRAG</span>
+<a id="__codelineno-57-2" name="__codelineno-57-2" href="#__codelineno-57-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">vector_graph_rag.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Settings</span>
+<a id="__codelineno-57-3" name="__codelineno-57-3" href="#__codelineno-57-3"></a>
+<a id="__codelineno-57-4" name="__codelineno-57-4" href="#__codelineno-57-4"></a><span class="n">settings</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">(</span>
+<a id="__codelineno-57-5" name="__codelineno-57-5" href="#__codelineno-57-5"></a>    <span class="n">milvus_uri</span><span class="o">=</span><span class="s2">&quot;https://your-instance.zillizcloud.com&quot;</span><span class="p">,</span>
+<a id="__codelineno-57-6" name="__codelineno-57-6" href="#__codelineno-57-6"></a>    <span class="n">milvus_token</span><span class="o">=</span><span class="s2">&quot;your-api-key&quot;</span><span class="p">,</span>
+<a id="__codelineno-57-7" name="__codelineno-57-7" href="#__codelineno-57-7"></a>    <span class="n">milvus_db</span><span class="o">=</span><span class="s2">&quot;my_database&quot;</span><span class="p">,</span>
+<a id="__codelineno-57-8" name="__codelineno-57-8" href="#__codelineno-57-8"></a><span class="p">)</span>
+<a id="__codelineno-57-9" name="__codelineno-57-9" href="#__codelineno-57-9"></a>
+<a id="__codelineno-57-10" name="__codelineno-57-10" href="#__codelineno-57-10"></a><span class="n">rag</span> <span class="o">=</span> <span class="n">VectorGraphRAG</span><span class="p">(</span><span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="retrieval-only-pipeline">Retrieval-only pipeline<a class="headerlink" href="#retrieval-only-pipeline" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-58-1" name="__codelineno-58-1" href="#__codelineno-58-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">vector_graph_rag</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_rag</span>
+<a id="__codelineno-58-2" name="__codelineno-58-2" href="#__codelineno-58-2"></a>
+<a id="__codelineno-58-3" name="__codelineno-58-3" href="#__codelineno-58-3"></a><span class="n">rag</span> <span class="o">=</span> <span class="n">create_rag</span><span class="p">()</span>
+<a id="__codelineno-58-4" name="__codelineno-58-4" href="#__codelineno-58-4"></a>
+<a id="__codelineno-58-5" name="__codelineno-58-5" href="#__codelineno-58-5"></a><span class="c1"># Retrieve passages without generating an answer</span>
+<a id="__codelineno-58-6" name="__codelineno-58-6" href="#__codelineno-58-6"></a><span class="n">result</span> <span class="o">=</span> <span class="n">rag</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="s2">&quot;What causes earthquakes?&quot;</span><span class="p">,</span> <span class="n">top_k</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<a id="__codelineno-58-7" name="__codelineno-58-7" href="#__codelineno-58-7"></a>
+<a id="__codelineno-58-8" name="__codelineno-58-8" href="#__codelineno-58-8"></a><span class="c1"># Feed into your own generation pipeline</span>
+<a id="__codelineno-58-9" name="__codelineno-58-9" href="#__codelineno-58-9"></a><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">passage</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">passages</span><span class="p">):</span>
+<a id="__codelineno-58-10" name="__codelineno-58-10" href="#__codelineno-58-10"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">passage</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "navigation.instant", "navigation.instant.progress", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
