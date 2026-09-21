@@ -1,5 +1,7 @@
 # Evaluation
 
+For the optional Jev reranker, the frozen 500-row comparisons, reproducible summaries and API cost/latency scenarios, see [Jev evaluation](jev/README.md). Its results use corrected relation-to-passage order and do not replace the historical tables below.
+
 This directory contains the evaluation framework for Vector Graph RAG, comparing it against Naive RAG baseline on multi-hop question answering datasets.
 
 ## Background

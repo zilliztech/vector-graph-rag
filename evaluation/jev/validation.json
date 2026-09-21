@@ -1,0 +1,14 @@
+{
+  "queries_checked": 1000,
+  "payloads_checked": 2507,
+  "all_payloads_equal_to_evaluated_recipe": true,
+  "all_selected_relations_equal_to_recorded_results": true,
+  "all_4000_evidence_metrics_recomputed": true,
+  "source_sha256": {
+    "evaluation.json": "4fe1569c30fd2b058b9c1207162232a5e04c514be673444554f6e0301776402b",
+    "manifest.json": "4e1b045a174b76170925c718310b11773d3dc446bd347c0e2856b925ad11dda0",
+    "scores.json": "402166dff6708b268f5d380436bb67a29283eb09e076316a85621bca9f1081c8",
+    "musique-samples.json": "3f4ac97956d11bfc89270d78bead455ab4e7a48962a8b15bee066d0f0c0b0cba",
+    "hotpotqa-contriever-samples.json": "266122fe0a8a38e9d62cc8489c0f3b75eafdf8e77f85c2dbae8ffc4061a969e9"
+  }
+}

@@ -159,7 +159,12 @@ class VectorGraphRAG:
         )
         self._graph_builder = GraphBuilder(settings=self.settings)
         self._triplet_extractor = TripletExtractor(settings=self.settings)
-        self._reranker = LLMReranker(settings=self.settings)
+        if self.settings.reranker_provider == "jev":
+            from vector_graph_rag.llm.jev import JevReranker
+
+            self._reranker = JevReranker(settings=self.settings)
+        else:
+            self._reranker = LLMReranker(settings=self.settings)
         self._answer_generator = AnswerGenerator(settings=self.settings)
 
         # Retriever is initialized after documents are added
@@ -1457,6 +1462,16 @@ class VectorGraphRAG:
 
             # Get passages from reranked relations
             passage_ids, passages = self._get_passages_from_relations(reranked_ids, filter=filter)
+            if self.settings.reranker_provider == "jev" and use_reranking:
+                # Match retrieve(): retain graph passages first, then fill with vector hits.
+                if len(passages) < self.settings.final_top_k:
+                    for passage in retriever.retrieve_passages_naive(
+                        question, top_k=self.settings.final_top_k, filter=filter
+                    ):
+                        if passage not in passages:
+                            passages.append(passage)
+                        if len(passages) >= self.settings.final_top_k:
+                            break
             final_passages = passages[: self.settings.final_top_k]
 
             # Generate answer

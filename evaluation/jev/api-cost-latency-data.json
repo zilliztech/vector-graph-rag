@@ -1,0 +1,77 @@
+{
+  "rows": [
+    {
+      "label": "HippoRAG 2\n+ Llama-3.3-70B",
+      "cost": [
+        0.264,
+        2.288
+      ],
+      "latency": [
+        1.5,
+        15
+      ],
+      "color": "#7b8798",
+      "price_note": "Provider-dependent",
+      "cost_label": "$0.26\u20132.29"
+    },
+    {
+      "label": "HippoRAG 2\n+ GPT-4o-mini (API option)",
+      "cost": [
+        0.42,
+        0.42
+      ],
+      "latency": [
+        2,
+        5
+      ],
+      "color": "#9b92ac",
+      "price_note": "Short filtering prompt",
+      "cost_label": "$0.42"
+    },
+    {
+      "label": "Vector Graph RAG\n+ GPT-4o-mini",
+      "cost": [
+        3.3,
+        3.3
+      ],
+      "latency": [
+        4,
+        10
+      ],
+      "color": "#718bb6",
+      "price_note": "20k input + 500 output",
+      "cost_label": "$3.30"
+    },
+    {
+      "label": "Vector Graph RAG\n+ GPT-5-mini",
+      "cost": [
+        6,
+        9
+      ],
+      "latency": [
+        10,
+        30
+      ],
+      "color": "#365ba9",
+      "price_note": "Output / reasoning-dependent",
+      "cost_label": "$6\u20139"
+    },
+    {
+      "label": "Vector Graph RAG\n+ Jev",
+      "cost": [
+        3.150893277777778,
+        3.150893277777778
+      ],
+      "latency": [
+        1.2,
+        4
+      ],
+      "color": "#008775",
+      "price_note": "Based on recorded token usage",
+      "cost_label": "$3.15"
+    }
+  ],
+  "scope": "API filtering/reranking only",
+  "latency_basis": "Illustrative planning scenarios, not observed ranges or confidence intervals",
+  "cache": "No cross-request input caching assumed"
+}

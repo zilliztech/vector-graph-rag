@@ -45,6 +45,7 @@ nav:
     - Incremental Updates: guides/incremental-updates.md
     - Observability: guides/observability.md
     - Embedding Providers: guides/embedding-providers.md
+    - Relation Reranking: guides/reranking.md
     - Multi-Tenancy: guides/multi-tenancy.md
     - Frontend Visualization: guides/frontend.md
   - Architecture:

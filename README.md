@@ -23,6 +23,10 @@
   <img src="https://github.com/user-attachments/assets/1185b651-ed72-4408-9dcd-25a74b12835b" alt="Vector Graph RAG Demo" width="800">
 </p>
 
+## What’s New
+
+- **Optional Jev reranker** — Score and filter graph relations with shared multi-hop context. See the [setup guide](docs/guides/reranking.md), [500-query evaluation](evaluation/jev/README.md), and [API cost/latency assumptions](evaluation/jev/api-cost-latency.md).
+
 ## ✨ Features
 
 - **No Graph Database Required** — Pure vector search with Milvus, no Neo4j or other graph databases needed
@@ -30,7 +34,7 @@
 - **Knowledge-Intensive Friendly** — Optimized for domains with dense factual content: legal, finance, medical, literature, etc.
 - **Zero Configuration** — Uses Milvus Lite by default, works out of the box with a single file
 - **Multi-hop Reasoning** — Subgraph expansion enables complex multi-hop question answering
-- **State-of-the-Art Performance** — 87.8% avg Recall@5 on multi-hop QA benchmarks, outperforming HippoRAG
+- **State-of-the-Art Performance** — 87.8% avg Recall@5 in the [historical multi-hop evaluation](docs/evaluation.md#historical-results), outperforming HippoRAG
 
 ## 📦 Installation
 

@@ -1,0 +1,226 @@
+[
+  {
+    "dataset": "musique",
+    "method": "naive",
+    "category": "all",
+    "n": 500,
+    "recall_at_5": 58.050000000000004,
+    "recall_at_10": 67.60000000000001
+  },
+  {
+    "dataset": "musique",
+    "method": "naive",
+    "category": "2",
+    "n": 259,
+    "recall_at_5": 67.95366795366795,
+    "recall_at_10": 76.83397683397683
+  },
+  {
+    "dataset": "musique",
+    "method": "naive",
+    "category": "3",
+    "n": 158,
+    "recall_at_5": 55.696202531645554,
+    "recall_at_10": 67.08860759493672
+  },
+  {
+    "dataset": "musique",
+    "method": "naive",
+    "category": "4",
+    "n": 83,
+    "recall_at_5": 31.626506024096386,
+    "recall_at_10": 39.75903614457831
+  },
+  {
+    "dataset": "musique",
+    "method": "gpt-4o-mini",
+    "category": "all",
+    "n": 500,
+    "recall_at_5": 64.08333333333333,
+    "recall_at_10": 74.0
+  },
+  {
+    "dataset": "musique",
+    "method": "gpt-4o-mini",
+    "category": "2",
+    "n": 259,
+    "recall_at_5": 75.86872586872587,
+    "recall_at_10": 84.55598455598455
+  },
+  {
+    "dataset": "musique",
+    "method": "gpt-4o-mini",
+    "category": "3",
+    "n": 158,
+    "recall_at_5": 59.28270042194092,
+    "recall_at_10": 71.51898734177216
+  },
+  {
+    "dataset": "musique",
+    "method": "gpt-4o-mini",
+    "category": "4",
+    "n": 83,
+    "recall_at_5": 36.44578313253012,
+    "recall_at_10": 45.78313253012048
+  },
+  {
+    "dataset": "musique",
+    "method": "gpt-5-mini",
+    "category": "all",
+    "n": 500,
+    "recall_at_5": 73.0,
+    "recall_at_10": 79.0
+  },
+  {
+    "dataset": "musique",
+    "method": "gpt-5-mini",
+    "category": "2",
+    "n": 259,
+    "recall_at_5": 82.23938223938224,
+    "recall_at_10": 87.25868725868726
+  },
+  {
+    "dataset": "musique",
+    "method": "gpt-5-mini",
+    "category": "3",
+    "n": 158,
+    "recall_at_5": 72.15189873417721,
+    "recall_at_10": 79.11392405063292
+  },
+  {
+    "dataset": "musique",
+    "method": "gpt-5-mini",
+    "category": "4",
+    "n": 83,
+    "recall_at_5": 45.78313253012048,
+    "recall_at_10": 53.01204819277109
+  },
+  {
+    "dataset": "musique",
+    "method": "jev/threshold_0.5",
+    "category": "all",
+    "n": 500,
+    "recall_at_5": 68.86666666666667,
+    "recall_at_10": 76.43333333333334
+  },
+  {
+    "dataset": "musique",
+    "method": "jev/threshold_0.5",
+    "category": "2",
+    "n": 259,
+    "recall_at_5": 79.15057915057915,
+    "recall_at_10": 85.32818532818533
+  },
+  {
+    "dataset": "musique",
+    "method": "jev/threshold_0.5",
+    "category": "3",
+    "n": 158,
+    "recall_at_5": 66.66666666666666,
+    "recall_at_10": 75.73839662447259
+  },
+  {
+    "dataset": "musique",
+    "method": "jev/threshold_0.5",
+    "category": "4",
+    "n": 83,
+    "recall_at_5": 40.963855421686745,
+    "recall_at_10": 50.0
+  },
+  {
+    "dataset": "hotpotqa",
+    "method": "naive",
+    "category": "all",
+    "n": 500,
+    "recall_at_5": 88.6,
+    "recall_at_10": 93.2
+  },
+  {
+    "dataset": "hotpotqa",
+    "method": "naive",
+    "category": "bridge",
+    "n": 398,
+    "recall_at_5": 85.80402010050251,
+    "recall_at_10": 91.4572864321608
+  },
+  {
+    "dataset": "hotpotqa",
+    "method": "naive",
+    "category": "comparison",
+    "n": 102,
+    "recall_at_5": 99.50980392156863,
+    "recall_at_10": 100.0
+  },
+  {
+    "dataset": "hotpotqa",
+    "method": "gpt-4o-mini",
+    "category": "all",
+    "n": 500,
+    "recall_at_5": 90.9,
+    "recall_at_10": 96.3
+  },
+  {
+    "dataset": "hotpotqa",
+    "method": "gpt-4o-mini",
+    "category": "bridge",
+    "n": 398,
+    "recall_at_5": 89.19597989949749,
+    "recall_at_10": 95.35175879396985
+  },
+  {
+    "dataset": "hotpotqa",
+    "method": "gpt-4o-mini",
+    "category": "comparison",
+    "n": 102,
+    "recall_at_5": 97.54901960784314,
+    "recall_at_10": 100.0
+  },
+  {
+    "dataset": "hotpotqa",
+    "method": "gpt-5-mini",
+    "category": "all",
+    "n": 500,
+    "recall_at_5": 94.5,
+    "recall_at_10": 97.3
+  },
+  {
+    "dataset": "hotpotqa",
+    "method": "gpt-5-mini",
+    "category": "bridge",
+    "n": 398,
+    "recall_at_5": 93.09045226130654,
+    "recall_at_10": 96.60804020100502
+  },
+  {
+    "dataset": "hotpotqa",
+    "method": "gpt-5-mini",
+    "category": "comparison",
+    "n": 102,
+    "recall_at_5": 100.0,
+    "recall_at_10": 100.0
+  },
+  {
+    "dataset": "hotpotqa",
+    "method": "jev/threshold_0.5",
+    "category": "all",
+    "n": 500,
+    "recall_at_5": 93.5,
+    "recall_at_10": 97.2
+  },
+  {
+    "dataset": "hotpotqa",
+    "method": "jev/threshold_0.5",
+    "category": "bridge",
+    "n": 398,
+    "recall_at_5": 92.33668341708542,
+    "recall_at_10": 96.4824120603015
+  },
+  {
+    "dataset": "hotpotqa",
+    "method": "jev/threshold_0.5",
+    "category": "comparison",
+    "n": 102,
+    "recall_at_5": 98.0392156862745,
+    "recall_at_10": 100.0
+  }
+]

@@ -6,6 +6,8 @@
 
 **Graph RAG with pure vector search** — no graph database needed, single-pass LLM reranking, optimized for knowledge-intensive domains.
 
+Use the default model or enable the optional [Jev relation reranker](guides/reranking.md). The [evaluation](evaluation.md#jev-reranker-evaluation) includes same-row retrieval comparisons and documented API cost/latency scenarios.
+
 ## Why Vector Graph RAG?
 
 Most Graph RAG systems require a dedicated graph database (Neo4j, etc.) and complex multi-step retrieval with iterative LLM calls. Vector Graph RAG takes a fundamentally different approach:

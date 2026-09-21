@@ -1,0 +1,126 @@
+{
+  "musique": {
+    "naive": {
+      "mean": 58.05,
+      "ci95": [
+        55.60000000000001,
+        60.5
+      ],
+      "rows": 500,
+      "unique_queries": 500
+    },
+    "gpt-4o-mini": {
+      "mean": 64.08333333333333,
+      "ci95": [
+        61.4,
+        66.71666666666665
+      ],
+      "rows": 500,
+      "unique_queries": 500
+    },
+    "gpt-5-mini": {
+      "mean": 73.0,
+      "ci95": [
+        70.5,
+        75.44999999999999
+      ],
+      "rows": 500,
+      "unique_queries": 500
+    },
+    "jev/threshold_0.5": {
+      "mean": 68.86666666666667,
+      "ci95": [
+        66.28333333333333,
+        71.36666666666667
+      ],
+      "rows": 500,
+      "unique_queries": 500
+    },
+    "naive_colbert": {
+      "mean": 49.2,
+      "ci95": null,
+      "basis": "Published 1,000-question aggregate",
+      "source": "https://arxiv.org/html/2405.14831v2"
+    },
+    "hippo": {
+      "mean": 51.9,
+      "ci95": null,
+      "basis": "Published 1,000-question aggregate",
+      "source": "https://arxiv.org/html/2405.14831v2"
+    },
+    "ircot": {
+      "mean": 57.6,
+      "ci95": null,
+      "basis": "Published 1,000-question aggregate",
+      "source": "https://arxiv.org/html/2405.14831v2"
+    },
+    "hippo2": {
+      "mean": 74.7,
+      "ci95": null,
+      "basis": "Published 1,000-question aggregate",
+      "source": "https://arxiv.org/html/2502.14802v1"
+    }
+  },
+  "hotpotqa": {
+    "naive": {
+      "mean": 88.6,
+      "ci95": [
+        86.54618473895582,
+        90.5
+      ],
+      "rows": 500,
+      "unique_queries": 490
+    },
+    "gpt-4o-mini": {
+      "mean": 90.9,
+      "ci95": [
+        89.02195608782435,
+        92.68537074148297
+      ],
+      "rows": 500,
+      "unique_queries": 490
+    },
+    "gpt-5-mini": {
+      "mean": 94.5,
+      "ci95": [
+        93.07228915662651,
+        95.8671186783066
+      ],
+      "rows": 500,
+      "unique_queries": 490
+    },
+    "jev/threshold_0.5": {
+      "mean": 93.5,
+      "ci95": [
+        91.98396793587175,
+        94.94047619047619
+      ],
+      "rows": 500,
+      "unique_queries": 490
+    },
+    "naive_colbert": {
+      "mean": 79.3,
+      "ci95": null,
+      "basis": "Published 1,000-question aggregate",
+      "source": "https://arxiv.org/html/2405.14831v2"
+    },
+    "hippo": {
+      "mean": 77.7,
+      "ci95": null,
+      "basis": "Published 1,000-question aggregate",
+      "source": "https://arxiv.org/html/2405.14831v2"
+    },
+    "ircot": {
+      "mean": 83.0,
+      "ci95": null,
+      "basis": "Published 1,000-question aggregate",
+      "source": "https://arxiv.org/html/2405.14831v2"
+    },
+    "hippo2": {
+      "mean": 96.3,
+      "ci95": null,
+      "basis": "Published 1,000-question aggregate",
+      "source": "https://arxiv.org/html/2502.14802v1"
+    }
+  }
+}
