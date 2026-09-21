@@ -754,6 +754,9 @@ class VectorGraphRAG:
         ):
             # Query Milvus for relation data (using private method)
             relation_data = self._store._get_relations_by_ids(relation_ids)
+            # Milvus membership queries do not preserve the requested ranking.
+            relations_by_id = {rel["id"]: rel for rel in relation_data}
+            relation_data = [relations_by_id[rid] for rid in relation_ids if rid in relations_by_id]
 
             passage_ids: List[str] = []
             seen_ids: set = set()
