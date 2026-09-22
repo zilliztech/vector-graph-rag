@@ -3,9 +3,9 @@ Configuration management for Vector Graph RAG.
 """
 
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Literal, Optional
 
-from pydantic import Field
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings
 
 
@@ -118,6 +118,16 @@ class Settings(BaseSettings):
     llm_temperature: float = Field(default=0.0, description="Temperature for LLM generation")
     llm_max_retries: int = Field(default=3, description="Maximum retries for LLM API calls")
     use_llm_cache: bool = Field(default=True, description="Whether to use LLM response caching")
+
+    # Optional Jev relation reranker; extraction and answer generation still use OpenAI.
+    reranker_provider: Literal["llm", "jev"] = "llm"
+    jev_api_key: Optional[SecretStr] = Field(
+        default_factory=lambda: os.getenv("TYPESAFE_API_KEY"), repr=False
+    )
+    jev_model: str = "jev-1.13.0"
+    jev_threshold: float = Field(default=0.5, ge=0, le=1)
+    jev_timeout: float = Field(default=60.0, gt=0)
+    jev_max_concurrency: int = Field(default=3, ge=1, le=16)
 
     # Processing Settings
     batch_size: int = Field(default=32, description="Batch size for embedding and insertion")

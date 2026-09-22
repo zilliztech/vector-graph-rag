@@ -12,3 +12,7 @@ These guides cover production-oriented workflows that go beyond the first quick 
 | [Frontend Visualization](frontend.md) | Run and customize the React graph visualization UI. |
 
 For exact constructor arguments, return types, and method signatures, see the [Python API Reference](../reference/python-api.md).
+
+## Relation reranking
+
+Use the default model or opt into [Jev relation scoring](reranking.md), including threshold selection and passage fallback.

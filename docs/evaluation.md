@@ -15,7 +15,9 @@ Vector Graph RAG is evaluated on three standard multi-hop QA benchmarks used in 
 
 ---
 
-## Results
+## Historical Results
+
+These previously published tables are retained as historical results, before the relation-to-passage ordering correction. The new Jev replay uses corrected ordering and a separately documented sample/retrieval basis; its scores do not overwrite these tables.
 
 ### Recall@5 vs. Naive RAG
 
@@ -89,3 +91,28 @@ cat evaluation/README.md
 ```
 
 See [`evaluation/README.md`](https://github.com/zilliztech/vector-graph-rag/blob/main/evaluation/README.md) for detailed instructions.
+
+## Jev Reranker Evaluation
+
+The optional [Jev reranker](guides/reranking.md) was evaluated against cached model selections on the same 500 rows per dataset, with corrected relation-to-passage ordering and shared passage fallback.
+
+| Method | MuSiQue R@5 / R@10 | HotpotQA R@5 / R@10 |
+|---|---:|---:|
+| Naive RAG · BGE-large-en-v1.5 | 58.05 / 67.60 | 88.60 / 93.20 |
+| Vector Graph RAG + GPT-4o-mini | 64.08 / 74.00 | 90.90 / 96.30 |
+| Vector Graph RAG + GPT-5-mini | 73.00 / 79.00 | 94.50 / 97.30 |
+| Vector Graph RAG + Jev | 68.87 / 76.43 | 93.50 / 97.20 |
+
+![Retrieval comparison](assets/evaluation/retrieval-comparison.png)
+
+Circles show the same-row replay with 95% query-ID cluster bootstrap intervals. Diamonds are published 1,000-question aggregates with different samples/configurations, so those comparisons are descriptive. HotpotQA's 500 rows include 490 unique IDs. MuSiQue includes prompt-exploration queries; this is not an untouched holdout.
+
+The evaluation freezes historical Contriever relation candidates and uses a shared BGE passage index for fallback. It isolates the reranking stage within that replay; it is not a newly rebuilt single-embedding end-to-end benchmark. See the [full protocol, category breakdown and reproducibility scripts](https://github.com/zilliztech/vector-graph-rag/tree/main/evaluation/jev).
+
+### API cost and latency scenarios
+
+![API cost and latency scenarios](assets/evaluation/api-cost-latency.png)
+
+These API-only estimates exclude indexing, embeddings, graph/database work and final answer generation. Jev's cost uses recorded token usage; other costs use hypothetical token counts and public prices. Latency ranges are planning scenarios, not a same-workload benchmark or confidence intervals. They do not establish a universal speed or cost advantage over HippoRAG 2.
+
+The [assumptions and source links](https://github.com/zilliztech/vector-graph-rag/blob/main/evaluation/jev/api-cost-latency.md) specify token counts, provider prices, cache treatment and latency references. The raw scoring records and figure generators accompany the [evaluation artifacts](https://github.com/zilliztech/vector-graph-rag/tree/main/evaluation/jev).

@@ -38,6 +38,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+jev = ["httpx>=0.27"]
+evaluation = ["matplotlib>=3.9"]
 dev = [
     "opentelemetry-sdk>=1.0",
     "pytest>=7.0.0",
@@ -82,7 +84,7 @@ observability = [
     "opentelemetry-api>=1.0",
 ]
 all = [
-    "vector-graph-rag[dev,api,hf,google,voyage,jina,mistral,ollama,local,onnx,observability]",
+    "vector-graph-rag[dev,api,hf,google,voyage,jina,jev,mistral,ollama,local,onnx,observability]",
 ]
 loaders = [
     "markitdown[docx,pdf]>=0.1.4",
