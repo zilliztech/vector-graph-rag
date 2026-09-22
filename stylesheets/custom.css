@@ -1,0 +1,181 @@
+/* ── Vector Graph RAG — graph-tech theme ── */
+/* Color palette: deep indigo + electric teal on clean backgrounds */
+
+:root {
+  --vg-indigo: #3949ab;
+  --vg-indigo-dark: #283593;
+  --vg-teal: #00bcd4;
+  --vg-teal-dim: #0097a7;
+  --vg-teal-glow: #4dd0e1;
+  --vg-amber: #ffb300;
+  --vg-green: #43a047;
+  --vg-surface: #f5f7fa;
+  --vg-border: #e0e4ea;
+}
+
+/* ── Hero heading with graph accent ── */
+.md-typeset h1 {
+  font-weight: 700;
+  border-bottom: 3px solid var(--vg-teal);
+  padding-bottom: 0.3em;
+  margin-bottom: 0.8em;
+}
+.md-typeset h2 {
+  font-weight: 600;
+  color: var(--vg-indigo);
+  border-left: 4px solid var(--vg-teal);
+  padding-left: 0.6em;
+}
+
+[data-md-color-scheme="slate"] .md-typeset h2 {
+  color: var(--vg-teal-glow);
+}
+
+/* ── Code blocks: clean with teal accent ── */
+.md-typeset code {
+  border-radius: 4px;
+  font-size: 0.82em;
+}
+.md-typeset pre {
+  border-radius: 8px;
+  border: 1px solid var(--vg-border);
+}
+[data-md-color-scheme="slate"] .md-typeset pre {
+  border-color: #3a3f55;
+}
+
+/* ── Tables: striped with teal header accent ── */
+.md-typeset table:not([class]) th {
+  background: linear-gradient(135deg, var(--vg-indigo), var(--vg-indigo-dark));
+  color: white;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+}
+[data-md-color-scheme="slate"] .md-typeset table:not([class]) th {
+  background: linear-gradient(135deg, #2a3a5c, #1e2d4d);
+  color: var(--vg-teal-glow);
+}
+.md-typeset table:not([class]) tr:nth-child(even) td {
+  background: rgba(0, 188, 212, 0.04);
+}
+.md-typeset table:not([class]) tr:hover td {
+  background: rgba(0, 188, 212, 0.08);
+}
+
+/* ── Admonition enhancements ── */
+.md-typeset .admonition,
+.md-typeset details {
+  border-radius: 8px;
+  border-width: 1px;
+  border-left-width: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+/* ── Tabs styling ── */
+.md-typeset .tabbed-labels > label {
+  font-weight: 500;
+}
+
+/* ── Mermaid diagram polish ── */
+.md-typeset .mermaid {
+  margin: 1.2em 0;
+}
+
+/* ── Navigation tab bar refinement ── */
+.md-tabs__link--active {
+  font-weight: 600;
+}
+
+/* ── Feature cards (for home page grid) ── */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+.feature-card {
+  background: var(--vg-surface);
+  border: 1px solid var(--vg-border);
+  border-radius: 10px;
+  padding: 1.2rem 1.4rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.feature-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 188, 212, 0.12);
+}
+.feature-card h3 {
+  margin-top: 0 !important;
+  font-size: 1rem;
+  border-left: none !important;
+  padding-left: 0 !important;
+  color: var(--vg-indigo) !important;
+}
+.feature-card p {
+  margin-bottom: 0;
+  font-size: 0.88rem;
+  color: #555;
+}
+[data-md-color-scheme="slate"] .feature-card {
+  background: #2a2e42;
+  border-color: #3a3f55;
+}
+[data-md-color-scheme="slate"] .feature-card h3 {
+  color: var(--vg-teal-glow) !important;
+}
+[data-md-color-scheme="slate"] .feature-card p {
+  color: #aab2c0;
+}
+
+/* ── Pipeline step badges ── */
+.step-badge {
+  display: inline-block;
+  background: var(--vg-indigo);
+  color: white;
+  border-radius: 50%;
+  width: 1.6em;
+  height: 1.6em;
+  line-height: 1.6em;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-right: 0.4em;
+  vertical-align: middle;
+}
+
+/* ── API method badges ── */
+.api-method {
+  display: inline-block;
+  padding: 0.15em 0.5em;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin-right: 0.4em;
+  vertical-align: middle;
+}
+.api-get { background: #e3f2fd; color: #1565c0; }
+.api-post { background: #e8f5e9; color: #2e7d32; }
+.api-put { background: #fff3e0; color: #e65100; }
+.api-delete { background: #fce4ec; color: #c62828; }
+[data-md-color-scheme="slate"] .api-get { background: #1a3a5c; color: #64b5f6; }
+[data-md-color-scheme="slate"] .api-post { background: #1a3c2a; color: #81c784; }
+[data-md-color-scheme="slate"] .api-put { background: #3c2a0a; color: #ffb74d; }
+[data-md-color-scheme="slate"] .api-delete { background: #3c1a1a; color: #e57373; }
+
+/* ── Color legend swatches (for frontend page) ── */
+.color-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  margin-right: 0.3em;
+  vertical-align: middle;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+.swatch-seed { background: #f59e0b; }
+.swatch-expanded { background: #3b82f6; }
+.swatch-selected { background: #10b981; }
+.swatch-filtered { background: #94a3b8; }
