@@ -263,7 +263,7 @@ Question → Entity Extraction → Vector Search → Subgraph Expansion → LLM 
 4. **Single-pass LLM reranking** selects the most relevant passages
 5. Generate answer from selected passages
 
-> 📖 Detailed pipeline walkthrough with diagrams → [How It Works](https://zilliztech.github.io/vector-graph-rag/how-it-works/) · [Design Philosophy](https://zilliztech.github.io/vector-graph-rag/design-philosophy/)
+> 📖 Detailed pipeline walkthrough with diagrams → [How It Works](https://zilliztech.github.io/vector-graph-rag/architecture/how-it-works/) · [Design Philosophy](https://zilliztech.github.io/vector-graph-rag/architecture/design-philosophy/)
 
 ## 📊 Evaluation Results
 
@@ -352,13 +352,13 @@ cd frontend && npm install && npm run dev
 
 See API docs at `http://localhost:8000/docs` after starting the server.
 
-> 📖 Full endpoint reference → [REST API docs](https://zilliztech.github.io/vector-graph-rag/rest-api/) · [Frontend guide](https://zilliztech.github.io/vector-graph-rag/frontend/)
+> 📖 Full endpoint reference → [REST API docs](https://zilliztech.github.io/vector-graph-rag/reference/rest-api/) · [Frontend guide](https://zilliztech.github.io/vector-graph-rag/guides/frontend/)
 
 ## 📚 Links
 
 - [Documentation](https://zilliztech.github.io/vector-graph-rag/) — full guides, API reference, and architecture details
-- [How It Works](https://zilliztech.github.io/vector-graph-rag/how-it-works/) — pipeline walkthrough with diagrams
-- [Design Philosophy](https://zilliztech.github.io/vector-graph-rag/design-philosophy/) — why pure vector search, no graph DB
+- [How It Works](https://zilliztech.github.io/vector-graph-rag/architecture/how-it-works/) — pipeline walkthrough with diagrams
+- [Design Philosophy](https://zilliztech.github.io/vector-graph-rag/architecture/design-philosophy/) — why pure vector search, no graph DB
 - [Milvus](https://milvus.io/) — the vector database powering Vector Graph RAG
 - [FAQ](https://zilliztech.github.io/vector-graph-rag/faq/) — common questions and troubleshooting
 
