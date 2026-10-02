@@ -3,6 +3,7 @@ Main Vector Graph RAG class with user-friendly API.
 """
 
 import hashlib
+import json
 import logging
 import uuid
 import warnings
@@ -252,6 +253,61 @@ class VectorGraphRAG:
                 merged.append(item)
         return merged
 
+    def _limit_dynamic_field_metadata(
+        self,
+        metadata: Dict[str, Any],
+        adjacency_fields: List[str],
+        record_kind: str,
+    ) -> Dict[str, Any]:
+        """Trim oldest adjacency IDs until serialized metadata fits Milvus's limit."""
+        max_bytes = self.settings.max_dynamic_field_bytes
+
+        def serialized_size(value: Dict[str, Any]) -> int:
+            return len(json.dumps(value, ensure_ascii=True).encode("utf-8"))
+
+        if serialized_size(metadata) <= max_bytes:
+            return metadata
+
+        def retain_fraction(fraction: float) -> Dict[str, Any]:
+            candidate = dict(metadata)
+            for field in adjacency_fields:
+                values = metadata.get(field)
+                if isinstance(values, list):
+                    keep_count = int(len(values) * fraction)
+                    candidate[field] = values[-keep_count:] if keep_count else []
+            return candidate
+
+        smallest = retain_fraction(0.0)
+        if serialized_size(smallest) > max_bytes:
+            raise ValueError(
+                f"{record_kind.capitalize()} metadata exceeds "
+                f"max_dynamic_field_bytes={max_bytes} even after graph links are removed."
+            )
+
+        best = smallest
+        low, high = 0.0, 1.0
+        for _ in range(32):
+            fraction = (low + high) / 2
+            candidate = retain_fraction(fraction)
+            if serialized_size(candidate) <= max_bytes:
+                best = candidate
+                low = fraction
+            else:
+                high = fraction
+
+        trimmed_count = sum(
+            len(metadata.get(field, [])) - len(best.get(field, []))
+            for field in adjacency_fields
+            if isinstance(metadata.get(field), list)
+        )
+        logger.warning(
+            "Trimmed %d oldest adjacency IDs from %s metadata to stay within %d bytes.",
+            trimmed_count,
+            record_kind,
+            max_bytes,
+        )
+        return best
+
     @staticmethod
     def _remove_many(values: List[str], removed: set[str]) -> List[str]:
         """Remove a set of values from a list while preserving order."""
@@ -476,10 +532,14 @@ class VectorGraphRAG:
             entity_metadatas = []
             for eid in builder.entity_ids:
                 entity_metadatas.append(
-                    {
-                        "relation_ids": builder.entity_to_relation_ids.get(eid, []),
-                        "passage_ids": builder.entity_to_passage_ids.get(eid, []),
-                    }
+                    self._limit_dynamic_field_metadata(
+                        {
+                            "relation_ids": builder.entity_to_relation_ids.get(eid, []),
+                            "passage_ids": builder.entity_to_passage_ids.get(eid, []),
+                        },
+                        ["relation_ids", "passage_ids"],
+                        "entity",
+                    )
                 )
 
             relation_metadatas = []
@@ -493,15 +553,25 @@ class VectorGraphRAG:
                     metadata["subject"] = triplet.subject
                     metadata["predicate"] = triplet.predicate
                     metadata["object"] = triplet.object
-                relation_metadatas.append(metadata)
+                relation_metadatas.append(
+                    self._limit_dynamic_field_metadata(
+                        metadata,
+                        ["passage_ids"],
+                        "relation",
+                    )
+                )
 
             passage_metadatas = []
             for pid in builder.passage_ids:
                 passage_metadatas.append(
-                    self._merge_passage_metadata(
-                        passage_user_metadatas.get(pid, {}),
-                        builder.passage_to_entity_ids.get(pid, []),
-                        builder.passage_to_relation_ids.get(pid, []),
+                    self._limit_dynamic_field_metadata(
+                        self._merge_passage_metadata(
+                            passage_user_metadatas.get(pid, {}),
+                            builder.passage_to_entity_ids.get(pid, []),
+                            builder.passage_to_relation_ids.get(pid, []),
+                        ),
+                        ["entity_ids", "relation_ids"],
+                        "passage",
                     )
                 )
 
@@ -614,11 +684,8 @@ class VectorGraphRAG:
                         if relation_id in known_relation_ids
                         or relation_id in live_suspect_relation_ids
                     ]
-                entity_update_records.append(
+                update_metadata = self._limit_dynamic_field_metadata(
                     {
-                        "id": stored_id,
-                        "text": entity_text_by_id[eid],
-                        "vector": entity_embeddings[index],
                         "relation_ids": self._merge_unique(
                             existing_relation_ids,
                             relation_ids,
@@ -627,9 +694,24 @@ class VectorGraphRAG:
                             existing.get("passage_ids", []),
                             passage_ids,
                         ),
+                    },
+                    ["relation_ids", "passage_ids"],
+                    "entity",
+                )
+                entity_update_records.append(
+                    {
+                        "id": stored_id,
+                        "text": entity_text_by_id[eid],
+                        "vector": entity_embeddings[index],
+                        **update_metadata,
                     }
                 )
             else:
+                metadata = self._limit_dynamic_field_metadata(
+                    metadata,
+                    ["relation_ids", "passage_ids"],
+                    "entity",
+                )
                 entity_insert_ids.append(stored_id)
                 entity_insert_texts.append(entity_text_by_id[eid])
                 entity_insert_embeddings.append(entity_embeddings[index])
@@ -672,23 +754,34 @@ class VectorGraphRAG:
 
             existing = existing_relations.get(relation_text_by_id[rid])
             if existing:
-                update_record = {
-                    "id": stored_id,
-                    "text": relation_text_by_id[rid],
-                    "vector": relation_embeddings[index],
-                    "entity_ids": entity_ids,
+                update_metadata = {
+                    **metadata,
                     "passage_ids": self._merge_unique(
                         existing.get("passage_ids", []),
                         passage_ids,
                     ),
                 }
                 for field in ["subject", "predicate", "object"]:
-                    if metadata.get(field) is not None:
-                        update_record[field] = metadata[field]
-                    elif field in existing:
-                        update_record[field] = existing[field]
+                    if update_metadata.get(field) is None and field in existing:
+                        update_metadata[field] = existing[field]
+                update_metadata = self._limit_dynamic_field_metadata(
+                    update_metadata,
+                    ["passage_ids"],
+                    "relation",
+                )
+                update_record = {
+                    "id": stored_id,
+                    "text": relation_text_by_id[rid],
+                    "vector": relation_embeddings[index],
+                    **update_metadata,
+                }
                 relation_update_records.append(update_record)
             else:
+                metadata = self._limit_dynamic_field_metadata(
+                    metadata,
+                    ["passage_ids"],
+                    "relation",
+                )
                 relation_insert_ids.append(stored_id)
                 relation_insert_texts.append(relation_text_by_id[rid])
                 relation_insert_embeddings.append(relation_embeddings[index])
@@ -709,16 +802,20 @@ class VectorGraphRAG:
         passage_metadatas = []
         for pid in builder.passage_ids:
             passage_metadatas.append(
-                self._merge_passage_metadata(
-                    passage_user_metadatas.get(pid, {}),
-                    [
-                        entity_id_map[entity_id]
-                        for entity_id in builder.passage_to_entity_ids.get(pid, [])
-                    ],
-                    [
-                        relation_id_map[relation_id]
-                        for relation_id in builder.passage_to_relation_ids.get(pid, [])
-                    ],
+                self._limit_dynamic_field_metadata(
+                    self._merge_passage_metadata(
+                        passage_user_metadatas.get(pid, {}),
+                        [
+                            entity_id_map[entity_id]
+                            for entity_id in builder.passage_to_entity_ids.get(pid, [])
+                        ],
+                        [
+                            relation_id_map[relation_id]
+                            for relation_id in builder.passage_to_relation_ids.get(pid, [])
+                        ],
+                    ),
+                    ["entity_ids", "relation_ids"],
+                    "passage",
                 )
             )
 
