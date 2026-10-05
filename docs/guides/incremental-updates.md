@@ -132,6 +132,17 @@ When a source already exists, `upsert_documents_by_source()` removes the old
 chunks and graph references for that source, then inserts the new chunks. Other
 sources under the same collection prefix are preserved.
 
+## Large Graph Metadata
+
+Milvus limits each dynamic metadata field to 65,536 bytes. Vector Graph RAG
+keeps serialized graph metadata below a 60,000-byte budget by default. When a
+record exceeds the budget, it trims the oldest adjacency IDs and keeps the
+newest IDs in insertion order. This can make older graph links unavailable for
+retrieval. Configure a lower budget with `VGRAG_MAX_DYNAMIC_FIELD_BYTES` or
+`Settings(max_dynamic_field_bytes=...)`; the maximum supported value is 60,000.
+If the non-adjacency metadata alone exceeds the configured budget, the write
+raises `ValueError` instead of silently dropping user metadata.
+
 For multi-source updates, call the API once per source:
 
 ```python

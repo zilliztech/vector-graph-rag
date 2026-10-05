@@ -94,6 +94,17 @@ class Settings(BaseSettings):
         default="vgrag_passages", description="Collection name for passages"
     )
 
+    # Graph metadata
+    max_dynamic_field_bytes: int = Field(
+        default=60_000,
+        gt=0,
+        le=60_000,
+        description=(
+            "Maximum JSON-encoded graph metadata size in bytes. Older adjacency IDs are "
+            "trimmed to stay below Milvus's 65,536-byte dynamic-field limit."
+        ),
+    )
+
     # Retrieval Settings
     entity_top_k: int = Field(default=20, description="Number of top entities to retrieve")
     relation_top_k: int = Field(default=20, description="Number of top relations to retrieve")
