@@ -1,6 +1,6 @@
 [project]
 name = "vector-graph-rag"
-version = "0.3.0"
+version = "0.3.1"
 description = "A Graph RAG implementation using pure vector search with Milvus"
 readme = "README.md"
 license = { text = "MIT" }
@@ -23,7 +23,7 @@ classifiers = [
 
 dependencies = [
     "pymilvus>=2.4.0,<2.6.10",
-    "milvus-lite>=2.4.0",
+    "milvus-lite>=2.4.0,<3",
     "numpy>=1.24.0",
     "scipy>=1.10.0",
     "openai>=1.0.0",

@@ -6599,7 +6599,7 @@ wheels = [
 
 [[package]]
 name = "vector-graph-rag"
-version = "0.3.0"
+version = "0.3.1"
 source = { editable = "." }
 dependencies = [
     { name = "httpx" },
@@ -6740,7 +6740,7 @@ requires-dist = [
     { name = "markitdown", extras = ["docx", "pdf"], marker = "extra == 'loaders'", specifier = ">=0.1.4" },
     { name = "markitdown", extras = ["docx", "pdf"], marker = "extra == 'mineru'", specifier = ">=0.1.4" },
     { name = "matplotlib", marker = "extra == 'evaluation'", specifier = ">=3.9" },
-    { name = "milvus-lite", specifier = ">=2.4.0" },
+    { name = "milvus-lite", specifier = ">=2.4.0,<3" },
     { name = "mineru", extras = ["pipeline"], marker = "extra == 'mineru'", specifier = ">=3.0.0" },
     { name = "mistralai", marker = "extra == 'mistral'", specifier = ">=1.0" },
     { name = "mkdocs-material", marker = "extra == 'docs'", specifier = ">=9.0.0" },

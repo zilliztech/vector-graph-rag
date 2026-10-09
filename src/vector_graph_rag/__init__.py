@@ -19,7 +19,7 @@ from vector_graph_rag.rag import VectorGraphRAG, create_rag
 from vector_graph_rag.storage.embeddings import EmbeddingModel
 from vector_graph_rag.storage.milvus import MilvusStore
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 __all__ = [
     "Settings",
