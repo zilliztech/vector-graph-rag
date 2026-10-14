@@ -1,8 +1,8 @@
-> For the current two-stage Jev results and frozen-score reproduction, see [Jev evaluation](jev/README.md). The earlier three-dataset tables below remain historical; HippoRAG 2 uses a resampled HotpotQA set.
+> For the Jev, GPT-6 Luna and DeepSeek V4.1 Flash comparison, see [evaluation results](jev/two-stage/README.md). The earlier three-dataset tables below remain historical; HippoRAG 2 uses a resampled HotpotQA set.
 
 # Evaluation
 
-For the optional Jev reranker, the frozen 500-row comparisons, reproducible summaries and API cost/latency scenarios, see [Jev evaluation](jev/README.md). Its results use corrected relation-to-passage order and do not replace the historical tables below.
+For Jev and the Luna/Flash comparison, see [Jev evaluation](jev/README.md). Its 1,000-question-per-dataset results and reproduction instructions are separate from the historical tables below.
 
 This directory contains the evaluation framework for Vector Graph RAG, comparing it against Naive RAG baseline on multi-hop question answering datasets.
 
@@ -102,6 +102,8 @@ evaluation/data/
 
 #### Graph RAG Evaluation
 
+Set `VGRAG_LLM_MODEL` to a model ID supported by your configured provider (Responses for GPT-6, Chat Completions for other models) before running these commands. The published Luna/Flash retrieval results used separate frozen-request evaluation runners; these commands do not reproduce their interface or reasoning settings.
+
 ```bash
 # MuSiQue
 uv run python evaluation/evaluate.py \
@@ -113,7 +115,7 @@ uv run python evaluation/evaluate.py \
     --force-reindex \
     --entity-top-k 20 \
     --relation-top-k 20 \
-    --llm-model gpt-5-mini \
+    --llm-model "$VGRAG_LLM_MODEL" \
     --embedding-model BAAI/bge-large-en-v1.5 \
     --no-llm-cache
 
@@ -127,7 +129,7 @@ uv run python evaluation/evaluate.py \
     --force-reindex \
     --entity-top-k 20 \
     --relation-top-k 20 \
-    --llm-model gpt-5-mini \
+    --llm-model "$VGRAG_LLM_MODEL" \
     --embedding-model BAAI/bge-large-en-v1.5 \
     --no-llm-cache
 
@@ -141,7 +143,7 @@ uv run python evaluation/evaluate.py \
     --force-reindex \
     --entity-top-k 20 \
     --relation-top-k 20 \
-    --llm-model gpt-5-mini \
+    --llm-model "$VGRAG_LLM_MODEL" \
     --embedding-model BAAI/bge-large-en-v1.5 \
     --no-llm-cache
 ```
@@ -157,7 +159,7 @@ uv run python evaluation/evaluate.py \
     --milvus-uri ./eval_musique_naive.db \
     --max-samples 300 \
     --force-reindex \
-    --llm-model gpt-5-mini \
+    --llm-model "$VGRAG_LLM_MODEL" \
     --embedding-model BAAI/bge-large-en-v1.5 \
     --no-llm-cache
 
@@ -169,7 +171,7 @@ uv run python evaluation/evaluate.py \
     --milvus-uri ./eval_hotpotqa_naive.db \
     --max-samples 300 \
     --force-reindex \
-    --llm-model gpt-5-mini \
+    --llm-model "$VGRAG_LLM_MODEL" \
     --embedding-model BAAI/bge-large-en-v1.5 \
     --no-llm-cache
 
@@ -181,7 +183,7 @@ uv run python evaluation/evaluate.py \
     --milvus-uri ./eval_2wikimultihopqa_naive.db \
     --max-samples 300 \
     --force-reindex \
-    --llm-model gpt-5-mini \
+    --llm-model "$VGRAG_LLM_MODEL" \
     --embedding-model BAAI/bge-large-en-v1.5 \
     --no-llm-cache
 ```
@@ -196,7 +198,7 @@ uv run python evaluation/evaluate.py \
 | `--entity-top-k` | Top-K entities to retrieve | 20 |
 | `--relation-top-k` | Top-K relations to retrieve | 20 |
 | `--embedding-model` | Embedding model for vector search | BAAI/bge-large-en-v1.5 |
-| `--llm-model` | LLM for reranking | gpt-5-mini |
+| `--llm-model` | Generative model (set explicitly for your provider) | `gpt-6-luna` |
 | `--force-reindex` | Rebuild index from scratch | False |
 | `--milvus-uri` | Milvus database URI (use .db for local) | Required |
 

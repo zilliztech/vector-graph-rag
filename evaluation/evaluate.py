@@ -276,7 +276,7 @@ class VectorGraphRAGEvaluator:
             entity_similarity_threshold: Similarity threshold for entity retrieval (default: 0.9)
             relation_similarity_threshold: Similarity threshold for relation retrieval (default: -1)
             relation_number_threshold: Max expanded relations, eviction if exceeded (default: 1000)
-            llm_model: LLM model for reranking (default: gpt-4o-mini)
+            llm_model: LLM model for reranking (default: gpt-6-luna)
             use_llm_cache: Whether to use LLM response caching (default: True)
             embedding_model: Embedding model to use (e.g., facebook/contriever, text-embedding-3-large)
             embedding_instruction: Instruction for embedding model (for BGE/Qwen3 style models)
@@ -698,8 +698,8 @@ def main():
     parser.add_argument(
         "--llm-model",
         type=str,
-        default="gpt-4o-mini",
-        help="LLM model for reranking (default: gpt-4o-mini)",
+        default="gpt-6-luna",
+        help="LLM model for reranking (default: gpt-6-luna)",
     )
     parser.add_argument(
         "--no-llm-cache",
@@ -727,7 +727,7 @@ def main():
     )
 
     parser.add_argument("--reranker-provider", choices=["llm", "jev"], default=None)
-    parser.add_argument("--reranker-model", help="Model name, e.g. jev-1.13.0 or gpt-5-mini")
+    parser.add_argument("--reranker-model", help="Model name supported by your provider, or jev-1.13.0")
     parser.add_argument("--jev-model", default=None, help="Legacy Jev model override")
     parser.add_argument("--jev-threshold", type=float, default=0.5)
     parser.add_argument("--sample-manifest", help="JSON manifest with dataset row indices, IDs and questions")

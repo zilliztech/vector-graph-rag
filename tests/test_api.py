@@ -46,7 +46,7 @@ def test_settings():
     yield Settings(
         milvus_uri=temp_uri,
         openai_api_key="test-api-key",
-        llm_model="gpt-4o-mini",
+        llm_model="gpt-6-luna",
         embedding_provider="openai",
         embedding_model="text-embedding-3-small",
         collection_prefix="api_test",

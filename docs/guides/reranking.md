@@ -1,12 +1,12 @@
 # Models and reranking
 
-Choose models by task. Existing `llm_model` configurations continue to work: it supplies the default for extraction, reranking and answer generation. A task-specific value overrides only that task.
+Choose models by task. The default is `gpt-6-luna` for extraction, generative reranking and answer generation; task-specific values override only that task. GPT-6 models use the Responses API with `medium` reasoning by default. Explicit non-GPT-6 model configurations retain the Chat Completions path.
 
 ```python
 from vector_graph_rag import VectorGraphRAG
 
 rag = VectorGraphRAG(
-    llm_model="gpt-4o-mini",
+    llm_model="gpt-6-luna",
     reranker_model="jev",
 )
 ```
@@ -23,20 +23,20 @@ export OPENAI_API_KEY=your-generation-key
 
 ```python
 rag = VectorGraphRAG(
-    extractor_model="gpt-5-mini",
+    extractor_model="gpt-6-luna",
     reranker_model="jev-1.13.0",
-    answer_model="gpt-4o-mini",
+    answer_model="gpt-6-luna",
 )
 ```
 
 | Parameter | Role | When omitted |
 |---|---|---|
-| `llm_model` | Shared default generative model | `gpt-4o-mini` |
+| `llm_model` | Shared default generative model | `gpt-6-luna` |
 | `extractor_model` | Document triplets and query entities | Inherits `llm_model` |
 | `reranker_model` | Relation reranking, plus passage reranking for Jev | Inherits `llm_model` |
 | `answer_model` | Final answer generation | Inherits `llm_model` |
 
-`reranker_model="gpt-5-mini"` selects generative relation reranking. `jev` and `jev-*` names select the Jev two-stage pipeline; there is no strategy switch. The `jev` alias currently resolves to `jev-1.13.0` (a project recommendation, not an official latest-model alias). Pin the full name for reproducible runs. To follow the official stable release, use `reranker_model="jev-latest"`; `jev-preview` is also accepted. These are the [official aliases](https://docs.typesafe.ai/models), not the bare string `latest`. Moving aliases bypass the local response cache so a previous release cannot silently supply the result. Jev extraction and answer generation are not supported and are rejected during configuration.
+A non-Jev `reranker_model` selects generative relation reranking. `jev` and `jev-*` names select the Jev two-stage pipeline; there is no strategy switch. The `jev` alias currently resolves to `jev-1.13.0` (a project recommendation, not an official latest-model alias). Pin the full name for reproducible runs. To follow the official stable release, use `reranker_model="jev-latest"`; `jev-preview` is also accepted. These are the [official aliases](https://docs.typesafe.ai/models), not the bare string `latest`. Moving aliases bypass the local response cache so a previous release cannot silently supply the result. Jev extraction and answer generation are not supported and are rejected during configuration.
 
 `retrieve()` skips answer generation; `query()` generates an answer from the same selected passages. Both still perform query entity extraction. The facade constructs all task clients, so their credentials must be configured even when only retrieval is requested.
 
@@ -56,7 +56,7 @@ rag = VectorGraphRAG(
     ),
     reranker_model="jev",
     answer_model=ModelConfig(
-        model="your-answer-model",
+        model="gpt-6-luna",
         base_url="https://your-answer-service.example/v1",
         api_key=os.environ["ANSWER_API_KEY"],
     ),
@@ -72,10 +72,10 @@ Embedding configuration remains independent (`embedding_provider`, `embedding_mo
 The same fields work through `Settings` and `VGRAG_` environment variables:
 
 ```bash
-export VGRAG_LLM_MODEL=gpt-4o-mini
+export VGRAG_LLM_MODEL=gpt-6-luna
 export VGRAG_RERANKER_MODEL=jev
-export VGRAG_EXTRACTOR_MODEL=gpt-5-mini
-export VGRAG_ANSWER_MODEL=gpt-4o-mini
+export VGRAG_EXTRACTOR_MODEL=gpt-6-luna
+export VGRAG_ANSWER_MODEL=gpt-6-luna
 ```
 
 Task environment values can also be JSON objects with `model`, `base_url` and `api_key`. Avoid putting real credentials in shell history. `ModelConfig.api_key` is redacted in representations and serialization. The legacy OpenAI key field retains its existing behavior.
@@ -104,4 +104,10 @@ Relation questions use the existing token-budgeted batching; each batch repeats 
 
 ## Evaluation
 
-The [full evaluation](https://github.com/zilliztech/vector-graph-rag/blob/main/evaluation/jev/two-stage/README.md) covers MuSiQue and 2Wiki, 1,000 questions each. It includes cached baseline comparisons, method details and the timing assumptions. Frozen evaluation candidates use historical Contriever graph retrieval plus BGE dense retrieval; a fresh index with a different configuration need not reproduce the exact scores.
+The [full evaluation](https://github.com/zilliztech/vector-graph-rag/blob/main/evaluation/jev/two-stage/README.md) covers MuSiQue and 2Wiki, 1,000 questions each. It includes model comparisons, method details and the timing scope. Frozen evaluation candidates use historical Contriever graph retrieval plus BGE dense retrieval; a fresh index with a different configuration need not reproduce the exact scores.
+
+## Runtime API settings
+
+Set `VGRAG_LLM_REASONING_EFFORT` (or `Settings.llm_reasoning_effort`) to change the GPT-6 Responses effort; the default is `medium`. This setting applies to GPT-6 tasks, and is included with the API route in response-cache identities. GPT-6 requests omit `temperature` and `stop`, read only final message text, and reject incomplete, refused or empty responses before caching. Existing task error handling still applies. Non-GPT-6 providers retain their Chat Completions behavior and must accept that API's request format.
+
+Custom GPT-6 endpoints must support `/responses`; no silent fallback to Chat Completions is performed. See the [official Luna model documentation](https://developers.openai.com/api/docs/models/gpt-6-luna). These runtime settings do not retroactively change the frozen evaluation recipe or its published scores.

@@ -71,9 +71,12 @@ class FakeEmbeddingBackend:
         return np.array([[0.1] * self.dimension for _ in texts])
 
 
-def _fake_chat_response(content: str) -> MagicMock:
+def _fake_response(content: str) -> MagicMock:
     response = MagicMock()
-    response.choices = [MagicMock(message=MagicMock(content=content))]
+    response.status = "completed"
+    response.output = [
+        MagicMock(type="message", content=[MagicMock(type="output_text", text=content)])
+    ]
     return response
 
 
@@ -95,8 +98,8 @@ def _create_test_rag(collection_prefix: str) -> tuple[VectorGraphRAG, str]:
         return_value=FakeEmbeddingBackend(),
     ):
         rag = VectorGraphRAG(settings=settings)
-    rag._answer_generator.client.chat.completions.create = MagicMock(
-        return_value=_fake_chat_response("Alpha owns Beta.")
+    rag._answer_generator.client.responses.create = MagicMock(
+        return_value=_fake_response("Alpha owns Beta.")
     )
     return rag, temp_file.name
 

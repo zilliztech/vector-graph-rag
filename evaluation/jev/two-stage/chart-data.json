@@ -1,27 +1,11 @@
 {
-  "existing_points": {
+  "points": {
     "hippo2": {
       "quality": 82.55000000000001,
       "latency": 8.25,
       "range": [
         1.5,
         15
-      ]
-    },
-    "gpt-4o-mini": {
-      "quality": 77.87916666666666,
-      "latency": 7.0,
-      "range": [
-        4,
-        10
-      ]
-    },
-    "gpt-5-mini": {
-      "quality": 83.55833333333334,
-      "latency": 20.0,
-      "range": [
-        10,
-        30
       ]
     },
     "jev_single": {
@@ -39,6 +23,14 @@
         3.1327848465049435,
         3.1327848465049435
       ]
+    },
+    "gpt-6-luna": {
+      "quality": 82.70416666666667,
+      "latency": 5.351172424641438
+    },
+    "flash": {
+      "quality": 83.33749999999999,
+      "latency": 10.970034438348375
     }
   },
   "naive_points": [
@@ -58,5 +50,21 @@
       "extra_decision_latency": 0
     }
   ],
-  "notes": "Zero denotes no additional decision/reranking call, not zero retrieval latency. Naive NV-Embed-v2 scores 69.7 and 76.5 from REPORT.md. LLM times are reference estimates, not empirical means. All other scores reused unchanged."
+  "pareto_frontier": [
+    [
+      "NV-Embed-v2",
+      0,
+      73.1
+    ],
+    [
+      "jev_single",
+      2.2843104925691664,
+      80.0375
+    ],
+    [
+      "jev_two",
+      3.1327848465049435,
+      86.06666666666666
+    ]
+  ]
 }

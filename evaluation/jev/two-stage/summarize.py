@@ -29,7 +29,11 @@ def summarize():
             "n": len(selected),
             **{f"recall_at_{k}": 100 * mean(r[f"r{k}"] for r in selected) for k in (5, 10)},
         }
-    assert len(groups) == 10
+    assert set(groups) == {
+        (dataset, method)
+        for dataset in ("musique", "2wikimultihopqa")
+        for method in ("naive", "jev_single", "jev_two")
+    }
     (ROOT / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
     return summary
 

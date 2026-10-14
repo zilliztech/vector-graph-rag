@@ -20,10 +20,10 @@ class LLMCache:
 
     Example:
         >>> cache = LLMCache()
-        >>> cache.get("gpt-4o-mini", "What is 2+2?", temperature=0)
+        >>> cache.get("example-model", "What is 2+2?", temperature=0)
         None  # Cache miss
-        >>> cache.set("gpt-4o-mini", "What is 2+2?", "4", temperature=0)
-        >>> cache.get("gpt-4o-mini", "What is 2+2?", temperature=0)
+        >>> cache.set("example-model", "What is 2+2?", "4", temperature=0)
+        >>> cache.get("example-model", "What is 2+2?", temperature=0)
         "4"  # Cache hit
     """
 

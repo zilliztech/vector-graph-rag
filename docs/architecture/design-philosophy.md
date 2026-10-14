@@ -119,15 +119,11 @@ The key insight is that **vector search combined with subgraph expansion already
 
 With these three mechanisms working together, the candidate set is already rich and relevant. A single LLM reranking pass is sufficient to select the best relations from this high-quality pool.
 
-### The Cost Advantage
+### Model Calls and Cost
 
-Each LLM call adds latency (typically 1–3 seconds) and cost. For a system processing thousands of queries per day, the difference between 2 and 5 LLM calls per query is substantial:
+Avoiding an iterative retrieval loop reduces the number of dependent model calls. Actual latency and cost also depend on prompt size, output length, reasoning settings, provider queueing and request concurrency; call counts alone do not establish a speedup or cost reduction.
 
-| Metric | Iterative (5 calls) | Single-Pass (2 calls) | Savings |
-|--------|---------------------|----------------------|---------|
-| **Latency** | ~5–15s | ~2–6s | 2–3x faster |
-| **Cost** (GPT-4o-mini) | ~5x base | ~2x base | 60% cheaper |
-| **Cost** (GPT-4o) | ~5x base | ~2x base | 60% cheaper |
+See the [retrieval evaluation](../evaluation.md#jev-reranker-evaluation) for measured Jev, GPT-6 Luna and DeepSeek V4.1 Flash quality and model-call latency. Those retrieval measurements do not benchmark extraction or answer generation.
 
 > [!TIP]
 > For applications where latency and cost are secondary to accuracy on extremely complex queries (5+ hop chains, ambiguous entity resolution), iterative approaches may still be worth the overhead. See [When to Consider Alternatives](#7-when-to-consider-alternatives).

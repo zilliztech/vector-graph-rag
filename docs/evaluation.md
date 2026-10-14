@@ -91,31 +91,29 @@ We began evaluating Jev in September 2026, following its availability, and expan
 
 ### Reaching the quality–latency Pareto frontier
 
-**Two-stage Jev achieves the highest Recall@5 among the compared methods on both datasets**, averaging **86.07%** across **MuSiQue and 2Wiki, 1,000 questions each**. Under the reference latency estimates, it reaches the quality–latency Pareto frontier with **3.13 seconds of additional model-call time**.
+**Two-stage Jev achieves the highest Recall@5 among the compared methods on both datasets**, averaging **86.07%** across **MuSiQue and 2Wiki, 1,000 questions each**. Using the displayed timings, it reaches the quality–latency Pareto frontier with **3.13 seconds of additional model-call time**.
 
 The pipeline first selects relations, then reranks their source passages together with direct vector-search candidates. The second stage judges full passages, so the final ordering can use evidence beyond the relation text. It is a separate recipe and dataset scope from the historical three-dataset average above.
 
-| Method | MuSiQue | 2Wiki | Average |
-|---|---:|---:|---:|
-| Naive RAG · BGE-large-en-v1.5 | 58.03 | 72.73 | 65.38 |
-| Naive RAG · ColBERTv2 | 49.20 | 68.20 | 58.70 |
-| Naive RAG · NV-Embed-v2 | 69.70 | 76.50 | 73.10 |
-| HippoRAG · ColBERTv2 | 51.90 | 89.10 | 70.50 |
-| IRCoT + HippoRAG | 57.60 | 93.90 | 75.75 |
-| HippoRAG 2 | 74.70 | 90.40 | 82.55 |
-| Vector Graph RAG + GPT-4o-mini | 64.41 | 91.35 | 77.88 |
-| Vector Graph RAG + GPT-5-mini | 73.32 | 93.80 | 83.56 |
-| Vector Graph RAG + Jev · relations only | 69.30 | 90.78 | 80.04 |
-| **Vector Graph RAG + Jev · two-stage** | **76.78** | **95.35** | **86.07** |
+| Method | MuSiQue R@5 | 2Wiki R@5 | Average R@5 | Mean model-call time |
+|---|---:|---:|---:|---:|
+| Naive RAG · BGE-large-en-v1.5 | 58.03% | 72.73% | 65.38% | 0 s |
+| Naive RAG · ColBERTv2 | 49.20% | 68.20% | 58.70% | 0 s |
+| Naive RAG · NV-Embed-v2 | 69.70% | 76.50% | 73.10% | 0 s |
+| HippoRAG 2 | 74.70% | 90.40% | 82.55% | ≈8.25 s (reference) |
+| Vector Graph RAG + GPT-6 Luna | 72.18% | 93.23% | 82.70% | 5.35 s |
+| Vector Graph RAG + DeepSeek V4.1 Flash | 73.20% | 93.48% | 83.34% | 10.97 s |
+| Vector Graph RAG + Jev · relations only | 69.30% | 90.78% | 80.04% | 2.28 s |
+| **Vector Graph RAG + Jev · two-stage** | **76.78%** | **95.35%** | **86.07%** | **3.13 s** |
 
 ![Quality and additional model latency](assets/evaluation/quality-latency.png)
 
-Compared with relation-only Jev, the second stage adds **6.03 percentage points of average Recall@5** for about **0.85 seconds** more model-call time. It also improves average recall by **2.51 points over Vector Graph RAG + GPT-5-mini** and **3.52 points over HippoRAG 2**.
+Compared with relation-only Jev, the second stage adds **6.03 percentage points of average Recall@5** for about **0.85 seconds** more model-call time. It also improves average recall by **2.73 points over Vector Graph RAG + DeepSeek V4.1 Flash** and **3.52 points over HippoRAG 2**.
 
 On the plotted Pareto frontier, no alternative offers both at least the same recall and no more additional model-call time, with a strict improvement in either. Two-stage Jev is the frontier's highest-quality option; direct retrieval and relation-only Jev offer lower-latency choices at lower recall.
 
-The horizontal axis excludes embedding, retrieval and answer generation. Jev uses recorded mean request durations; generative-model points use estimated range midpoints. The dotted Pareto frontier is conditional on those estimates. Naive RAG adds no judgment call, hence zero additional time.
+The horizontal axis excludes embedding, retrieval and answer generation. Jev, Luna and Flash use measured API means; HippoRAG 2 retains a reference estimate. Test dates, concurrency and provider conditions differ, so the frontier is descriptive rather than a controlled end-to-end speed claim. Naive RAG adds no judgment call, hence zero additional time.
 
-See the [complete evaluation and reproduction instructions](https://github.com/zilliztech/vector-graph-rag/blob/main/evaluation/jev/two-stage/README.md) for the dataset checks, cached GPT replay, one historical 2Wiki fallback row, score normalization and timing sample sizes. Enable the implementation through the [reranking guide](guides/reranking.md).
+See the [full evaluation report](../evaluation/jev/two-stage/README.md) for the Flash audit and chart reproduction, and [Jev score reproduction](../evaluation/jev/two-stage/README.md#recompute-without-api-calls). Enable the implementation through the [reranking guide](guides/reranking.md).
 
 [^hotpot-sampling]: The HippoRAG authors resampled HotpotQA between HippoRAG and HippoRAG 2, so the historical HotpotQA results use different question samples. The original three-dataset results are retained for reference. This does not affect the new Jev comparison, which uses MuSiQue and 2Wiki only.

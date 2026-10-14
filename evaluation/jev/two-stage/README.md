@@ -1,33 +1,55 @@
-# Two-stage Jev: full MuSiQue and 2Wiki evaluation
+# Two-stage Jev reaches the quality–latency Pareto frontier
 
-October 2026 — expanding on the initial Jev evaluation from September 2026.
+Jev evaluation began in September 2026; the full two-stage results below were added in October 2026. The Luna/Flash comparison was updated on October 14, 2026. MuSiQue and 2Wiki each contain 1,000 questions; averages weight the two datasets equally. The generative rerankers are GPT-6 Luna and official DeepSeek V4.1 Flash.
 
-Jev first ranks candidate relations, then ranks the passages reached through those relations together with direct vector-search candidates. This evaluation covers all 1,000 questions in each dataset. Recall@5 is reported in percent; the average weights each dataset equally.
+![Quality and additional model-call latency](../../../docs/assets/evaluation/quality-latency.png)
 
-| Method | MuSiQue | 2Wiki | Average |
-|---|---:|---:|---:|
-| Naive RAG · BGE-large-en-v1.5 | 58.03 | 72.73 | 65.38 |
-| Naive RAG · ColBERTv2 | 49.20 | 68.20 | 58.70 |
-| Naive RAG · NV-Embed-v2 | 69.70 | 76.50 | 73.10 |
-| HippoRAG · ColBERTv2 | 51.90 | 89.10 | 70.50 |
-| IRCoT + HippoRAG | 57.60 | 93.90 | 75.75 |
-| HippoRAG 2 | 74.70 | 90.40 | 82.55 |
-| Vector Graph RAG + GPT-4o-mini | 64.41 | 91.35 | 77.88 |
-| Vector Graph RAG + GPT-5-mini | 73.32 | 93.80 | 83.56 |
-| Vector Graph RAG + Jev · relations only | 69.30 | 90.78 | 80.04 |
-| **Vector Graph RAG + Jev · two-stage** | **76.78** | **95.35** | **86.07** |
+| Method | MuSiQue R@5 | 2Wiki R@5 | Average R@5 | Mean model-call time |
+|---|---:|---:|---:|---:|
+| Naive RAG · BGE-large-en-v1.5 | 58.03% | 72.73% | 65.38% | 0 s |
+| Naive RAG · ColBERTv2 | 49.20% | 68.20% | 58.70% | 0 s |
+| Naive RAG · NV-Embed-v2 | 69.70% | 76.50% | 73.10% | 0 s |
+| HippoRAG 2 | 74.70% | 90.40% | 82.55% | ≈8.25 s (reference) |
+| Vector Graph RAG + GPT-6 Luna | 72.18% | 93.23% | 82.70% | 5.35 s |
+| Vector Graph RAG + DeepSeek V4.1 Flash | 73.20% | 93.48% | 83.34% | 10.97 s |
+| Vector Graph RAG + Jev · relations only | 69.30% | 90.78% | 80.04% | 2.28 s |
+| **Vector Graph RAG + Jev · two-stage** | **76.78%** | **95.35%** | **86.07%** | **3.13 s** |
 
-![Retrieval quality and additional model latency](../../../docs/assets/evaluation/quality-latency.png)
+Luna uses **medium** reasoning: xhigh had similar recall (82.53% versus 82.70%) but higher mean latency (8.86 s versus 5.35 s); Flash uses **low** because high produced very long reasoning and exhausted the output limit on some questions.
 
-## Reaching the quality–latency Pareto frontier
+Two-stage Jev has the highest recall among these methods: 6.03 percentage points above relation-only Jev, 3.36 above Luna, and 2.73 above Flash. It is the highest-quality non-dominated point using the displayed timings. The chart computes that frontier from the data; this is not a controlled end-to-end speed comparison.
 
-**Two-stage Jev delivers the highest Recall@5 in this comparison on both datasets.** Its 86.07% average improves on relation-only Jev by **6.03 percentage points**, Vector Graph RAG + GPT-5-mini by **2.51 points**, and HippoRAG 2 by **3.52 points**.
+## Measurement scope
 
-The extra passage-scoring stage raises recorded mean model-call time from **2.28 to 3.13 seconds**—about **0.85 seconds** for the recall gain. Relation selection finds candidate evidence through the graph; passage reranking then evaluates that evidence in its full source context, together with direct-search candidates. This separates finding relevant relations from deciding which passages belong in the final result.
+The horizontal axis excludes embedding, retrieval and answer generation. Zero means no extra model call. Jev timings use the recorded timing subsets: equal-weight means of per-query request-duration sums from 500 MuSiQue and 900 2Wiki queries, with three concurrent queries. Luna and Flash use measured full-evaluation API means, not the older generative-model timing estimates. Network, provider queueing, concurrency and measurement dates differ between runs. HippoRAG 2 retains an approximate reference time; its scores and the ColBERTv2/NV-Embed-v2 points are published aggregates rather than new runs. See the [comparison provenance](#comparison-basis).
 
-Under the figure's reference latency estimates, two-stage Jev is the **highest-quality point on the Pareto frontier**. No plotted alternative matches or exceeds its recall while taking no more additional model-call time, with a strict improvement in one dimension. This does not mean every application should choose it: direct retrieval adds no judgment calls, and relation-only Jev spends less time at lower recall.
+The frozen candidates, input prompts, relation order and historical scoring are retained for the new generative runs. Their selected relations expand to source passages in order, followed by naive retrieval to fill ten passages. Only message output text and the `useful_relations` JSON field are scored; reasoning text and field aliases are not used. MuSiQue matches distinct full passages and 2Wiki distinct titles. Jev's two-stage recipe is described in the [frozen recipe](#frozen-recipe).
 
-The frontier compares additional model-call latency, not end-to-end search time. Jev values are recorded means and generative-model values are estimates; the [latency section](#latency-and-cost) specifies their scope and assumptions.
+## Flash audit
+
+All 2,000 requests completed with validated payload hashes and unique indices 0–999 per dataset: no retries, truncation or refusals. Seven responses lacked `useful_relations` and used the historical empty-selection/naive fallback without being resent. Forty-one exact-payload successful sample responses were reused; the remaining 1,959 were newly requested. High results are excluded.
+
+Requests used the official Responses API, `model=deepseek-flash`, `reasoning.effort=low`, `max_output_tokens=393216`, and four concurrent requests. This output ceiling includes reasoning and differs from the older proxy experiment's 4,096-token cap. Actual output usage, not the ceiling, determines estimated charges.
+
+| Dataset | R@10 | Mean | P50 | P90 | Maximum |
+|---|---:|---:|---:|---:|---:|
+| MuSiQue | 79.41% | 14.57 s | 9.24 s | 29.15 s | 648.71 s |
+| 2Wiki | 94.73% | 7.37 s | 5.59 s | 12.08 s | 407.18 s |
+| Average / pooled timing | 87.07% | 10.97 s | 7.05 s | 20.69 s | 648.71 s |
+
+Low still has long-tail requests. The runner waits for each batch of four, so a slow request can delay the next batch; individual API durations retain that delay rather than treating cache reads as calls. The 41-question sample took 301.42 seconds; the remaining run took 10,647.41 seconds. Including the 567.86-second gap between stages, first request to completion was 11,516.69 seconds.
+
+Reported usage was 8,092,904 input tokens (769,664 cached) and 4,181,868 output tokens, including 3,774,026 reasoning tokens. The fixed off-peak assumptions of CNY 1/M uncached input, 0.02/M cached input and 4/M output give an estimated CNY 24.07, not an account invoice. Reasoning is not charged twice.
+
+## Saved data and chart reproduction
+
+`comparison.csv` contains per-dataset Recall@5/10 aggregates; `flash-summary.json` contains the Flash audit, usage and timing statistics; `chart-data.json` freezes the plotted coordinates. These aggregates reproduce the figure, not the underlying model calls or independent per-query scoring. Raw responses and credentials are not included in the repository. `results.json.gz` and `summarize.py` provide frozen evidence fingerprints and score replay for the naive and both Jev methods; `summary.json` contains their recomputed scores.
+
+```bash
+uv run --offline --no-project --python 3.12 --with matplotlib evaluation/jev/two-stage/plot.py
+```
+
+The offline command requires matplotlib to be cached locally. The figure omits reasoning-strength labels for readability; the configuration note above identifies the measurements.
 
 ## Frozen recipe
 
@@ -41,32 +63,17 @@ The frozen graph relation candidates use historical Contriever retrieval; the di
 
 ## Comparison basis
 
-MuSiQue and 2Wiki question IDs, question order and corpus contents were checked against the corresponding HippoRAG 2 reproduction data. HotpotQA is excluded here because its published comparison uses a resampled question set. The original three-dataset results remain [historical results](../../../docs/evaluation.md#historical-results).
+MuSiQue and 2Wiki question IDs, question order and corpus contents were checked against the corresponding HippoRAG 2 reproduction data. Recall counts distinct recovered evidence: full passages for MuSiQue and titles for 2Wiki. Earlier exploration used some of these queries; this is an expanded public-benchmark evaluation rather than an untouched holdout.
 
-GPT results replay saved selections with corrected relation-to-passage ordering. MuSiQue matches all 1,000 original prompts; 2Wiki matches 999. For index 685, both GPT baselines retain the historical saved result (Recall@5 = 1), rather than claiming a corrected replay for that row. The difference cannot reverse the reported ranking. No new GPT calls were made.
-
-External aggregates come from [HippoRAG Tables 2–3](https://arxiv.org/abs/2405.14831) and [HippoRAG 2 Table 3](https://arxiv.org/abs/2502.14802); these systems were not rerun. The BGE baseline and both Jev methods have full per-query outputs. Earlier exploration used some of these queries, so this is an expanded public-benchmark evaluation, not a previously untouched holdout.
-
-Recall counts distinct recovered supporting evidence: full passages for MuSiQue, titles for 2Wiki. Duplicate titles do not receive repeated credit. The regular evaluator now uses this same distinct-evidence definition; historical tables are not retroactively rewritten.
-
-## Latency and cost
-
-The figure shows **additional model-call latency**, excluding embeddings, retrieval and final answer generation. Naive RAG makes no additional decision call and is at zero on this axis, not zero end-to-end time. HippoRAG and IRCoT lack comparable latency estimates and remain in the quality table only.
-
-Jev's 3.13 seconds is the equal-weight mean of recorded per-query request-duration sums from 500 MuSiQue and 900 2Wiki queries. Relation batches in this run were sequential within each query; three queries ran concurrently. Cached reads are never timed as requests. The library retains configurable request concurrency, so production wall time may differ. The old relation-stage mean is 2.28 seconds on that same timing basis.
-
-Generative model points are illustrative range midpoints, not measured averages: GPT-4o-mini 7 s (4–10), GPT-5-mini 20 s (10–30), HippoRAG 2 with Llama-3.3-70B 8.25 s (1.5–15). The plotted frontier is conditional on these reference times. See the [historical assumptions and sources](../api-cost-latency.md); no controlled end-to-end speed claim is made.
-
-At the recorded $0.042/M input-token assumption, two-stage Jev averages approximately $2.43 per 1,000 queries across the two timing subsets, equally weighted. This is not the incremental bill for completing the experiment. Revised GPT input counts average 3,871.631 tokens: using the historical price assumptions and 500 output tokens gives about $0.88/1,000 for GPT-4o-mini; 500–2,000 output tokens gives $1.97–4.97 for GPT-5-mini. These estimates do not establish that Jev is always cheaper. The old 20,000-input-token scenario is superseded for this comparison.
+External aggregates in the evaluation report come from [HippoRAG Tables 2–3](https://arxiv.org/abs/2405.14831) and [HippoRAG 2 Table 3](https://arxiv.org/abs/2502.14802); those systems were not rerun. HotpotQA is excluded from this comparison because its published comparison uses a resampled question set.
 
 ## Recompute without API calls
 
 ```bash
-uv run python evaluation/jev/two-stage/summarize.py
-uv run --extra evaluation python evaluation/jev/two-stage/plot.py
+uv run --no-project python evaluation/jev/two-stage/summarize.py
 ```
 
-`results.json.gz` holds 10,000 method/query records with ordered SHA-256 evidence fingerprints and metrics. `manifest.json` identifies all queries and dataset file hashes. Scoring can be independently recomputed; fingerprints do not reconstruct candidate generation or model calls. Raw model caches, local databases and exploratory variants are not included.
+`results.json.gz` holds 6,000 method/query records for naive retrieval, relation-only Jev and two-stage Jev, including ordered SHA-256 evidence fingerprints and metrics. `manifest.json` identifies the 2,000 queries and dataset file hashes. The script independently checks saved Recall@5/10 against evidence fingerprints and verifies the expected query set for each method. Fingerprints do not reconstruct candidate generation or model calls; raw model caches and local databases are not included.
 
 ## Run against your index
 
@@ -80,3 +87,5 @@ uv run python evaluation/evaluate.py --dataset musique --data-dir evaluation/dat
 ```
 
 Repeat with `--dataset 2wikimultihopqa`. Remove `--max-samples` for all 1,000 questions. This exercises the shipped two-stage implementation on the configured index; it does not reconstruct the frozen hybrid candidate pools. Indexing, embeddings and model calls can incur charges. Errors must be inspected in evaluation logs.
+
+Earlier model comparisons and their source artifacts are preserved in the [evaluation snapshot](https://github.com/zilliztech/vector-graph-rag/tree/e32c077ccde8c577f9335b7966ebf22d46e18334/evaluation/jev).

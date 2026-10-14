@@ -47,7 +47,8 @@ settings = Settings(
 |---|---|---|---|
 | `openai_api_key` | `Optional[str]` | `None` | OpenAI API key. Also read from `OPENAI_API_KEY` env var. |
 | `openai_base_url` | `Optional[str]` | `None` | Custom OpenAI-compatible API base URL (e.g. for Azure or local proxies). |
-| `llm_model` | `str` | `"gpt-4o-mini"` | Model name used for LLM calls (extraction, answering, reranking). |
+| `llm_model` | `str` | `"gpt-6-luna"` | Default for extraction, answering and reranking; set explicitly for your provider. |
+| `llm_reasoning_effort` | `str` | `"medium"` | GPT-6 Responses effort; ignored by the non-GPT-6 Chat Completions route. |
 | `embedding_provider` | `Optional[str]` | `None` | Embedding provider name. Use `openai`, `huggingface`, `google`/`gemini`, `voyage`, `jina`, `mistral`, `ollama`, `local`, or `onnx`. |
 | `embedding_model` | `str` | `"text-embedding-3-large"` | Model name used for embedding generation. |
 | `embedding_api_key` | `Optional[str]` | `None` | Optional API key override for embedding providers. Provider-specific environment variables are used when omitted. |
@@ -928,7 +929,7 @@ rag = create_rag(
     milvus_db=None,                         # Optional[str]
     collection_prefix=None,                 # Optional[str]
     openai_api_key=None,                    # Optional[str]
-    llm_model="gpt-4o-mini",               # str
+    llm_model="gpt-6-luna",  # str
     embedding_provider=None,                # Optional[str]
     embedding_model=None,                   # Optional[str]
     embedding_api_key=None,                 # Optional[str]
@@ -942,7 +943,7 @@ rag = create_rag(
 | `milvus_db` | `Optional[str]` | `None` | Milvus database name. |
 | `collection_prefix` | `Optional[str]` | `None` | Prefix for collection names (multi-dataset isolation). |
 | `openai_api_key` | `Optional[str]` | `None` | OpenAI API key. Falls back to environment variable. |
-| `llm_model` | `str` | `"gpt-4o-mini"` | LLM model to use. |
+| `llm_model` | `str` | `"gpt-6-luna"` | Default; set explicitly for your provider. |
 | `embedding_provider` | `Optional[str]` | `None` | Embedding provider name. |
 | `embedding_model` | `Optional[str]` | `None` | Embedding model to use. If omitted with no provider, `create_rag()` uses `text-embedding-3-small`. If omitted with a provider, the provider default is used. |
 | `embedding_api_key` | `Optional[str]` | `None` | Optional API key override for embedding providers. |

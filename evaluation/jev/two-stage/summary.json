@@ -1,15 +1,5 @@
 {
   "2wikimultihopqa": {
-    "gpt-4o-mini": {
-      "n": 1000,
-      "recall_at_5": 91.35,
-      "recall_at_10": 93.27499999999999
-    },
-    "gpt-5-mini": {
-      "n": 1000,
-      "recall_at_5": 93.8,
-      "recall_at_10": 95.025
-    },
     "jev_single": {
       "n": 1000,
       "recall_at_5": 90.77499999999999,
@@ -27,16 +17,6 @@
     }
   },
   "musique": {
-    "gpt-4o-mini": {
-      "n": 1000,
-      "recall_at_5": 64.40833333333333,
-      "recall_at_10": 73.9
-    },
-    "gpt-5-mini": {
-      "n": 1000,
-      "recall_at_5": 73.31666666666666,
-      "recall_at_10": 79.26666666666667
-    },
     "jev_single": {
       "n": 1000,
       "recall_at_5": 69.3,

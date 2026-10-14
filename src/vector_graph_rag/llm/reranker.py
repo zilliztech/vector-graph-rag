@@ -10,6 +10,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 
 from vector_graph_rag.config import Settings, get_settings
 from vector_graph_rag.llm.cache import LLMCache, get_llm_cache
+from vector_graph_rag.llm.generation import generate_text
 from vector_graph_rag.observability import start_span
 
 RERANK_EXAMPLE_1_INPUT = """I will provide you with a set of relationship descriptions from a knowledge graph. Select exactly 5 relationships most useful for answering this multi-hop question.
@@ -70,7 +71,12 @@ Relationship descriptions:
 
 RERANK_EXAMPLE_3_OUTPUT = """{"thought_process": "3-hop question: (1) Find award won by The Hurt Locker ([5]: Academy Award Best Picture), (2) Find another film with same award ([12]: Moonlight), (3) Find director ([15]: Barry Jenkins).", "useful_relations": ["[5] the hurt locker won academy award best picture", "[12] moonlight won academy award best picture", "[15] moonlight directed by barry jenkins", "[8] the hurt locker directed by kathryn bigelow", "[25] barry jenkins born in miami"]}"""
 
-RERANK_PROMPT_TEMPLATE = """Question:
+RERANK_PROMPT_TEMPLATE = """Select up to 5 of the supplied relationships, most useful first.
+Return a JSON object with "thought_process" and "useful_relations".
+"useful_relations" must be an array of the original relation lines including their [ID].
+Use only supplied relationships; if fewer than 5 are available, return fewer.
+
+Question:
 {question}
 
 Relationship descriptions:
@@ -191,20 +197,15 @@ class LLMReranker:
             {"role": "user", "content": prompt},
         ]
 
-        # Build API call kwargs
-        api_kwargs = {
-            "model": self.model,
-            "messages": messages,
-            "response_format": {"type": "json_object"},
-        }
-
-        # gpt-5 series doesn't support 'temperature' and 'stop' parameters
-        if not self.model.startswith("gpt-5"):
-            api_kwargs["temperature"] = 0
-            api_kwargs["stop"] = ["\n\n"]
-
-        response = self.client.chat.completions.create(**api_kwargs)
-        result = response.choices[0].message.content or "{}"
+        result = generate_text(
+            self.client,
+            settings=self.settings,
+            model=self.model,
+            messages=messages,
+            json_mode=True,
+            temperature=0,
+            stop=["\n\n"],
+        )
 
         # Store in cache
         if self.cache:
@@ -378,17 +379,13 @@ Answer:"""
 
             messages = [{"role": "user", "content": prompt}]
 
-            # Build API call kwargs - gpt-5 series doesn't support temperature parameter
-            api_kwargs = {
-                "model": self.model,
-                "messages": messages,
-            }
-            if not self.model.startswith("gpt-5"):
-                api_kwargs["temperature"] = 0
-
-            response = self.client.chat.completions.create(**api_kwargs)
-
-            result = response.choices[0].message.content or "I don't know."
+            result = generate_text(
+                self.client,
+                settings=self.settings,
+                model=self.model,
+                messages=messages,
+                temperature=0,
+            )
 
             # Store in cache
             if self.cache:
