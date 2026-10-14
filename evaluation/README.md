@@ -1,4 +1,4 @@
-> For the current two-stage Jev results and frozen-score reproduction, see [Jev evaluation](jev/README.md). The earlier three-dataset tables below remain historical; HippoRAG 2 uses a resampled HotpotQA set.
+> For the current Jev, GPT-6 Luna and DeepSeek V4.1 Flash comparison, see [current evaluation](jev/current/README.md). The earlier three-dataset tables below remain historical; HippoRAG 2 uses a resampled HotpotQA set.
 
 # Evaluation
 

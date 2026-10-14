@@ -1,3 +1,5 @@
+> Historical October 8, 2026 snapshot. For the current Luna/Flash comparison and figure, see [current results](../current/README.md). The older model scores and timing estimates below are retained for traceability.
+
 # Two-stage Jev: full MuSiQue and 2Wiki evaluation
 
 October 2026 — expanding on the initial Jev evaluation from September 2026.
@@ -17,7 +19,7 @@ Jev first ranks candidate relations, then ranks the passages reached through tho
 | Vector Graph RAG + Jev · relations only | 69.30 | 90.78 | 80.04 |
 | **Vector Graph RAG + Jev · two-stage** | **76.78** | **95.35** | **86.07** |
 
-![Retrieval quality and additional model latency](../../../docs/assets/evaluation/quality-latency.png)
+The original figure is available in [Git history](https://github.com/zilliztech/vector-graph-rag/blob/e32c077/docs/assets/evaluation/quality-latency.png).
 
 ## Reaching the quality–latency Pareto frontier
 

@@ -1,0 +1,218 @@
+{
+  "model": "deepseek-flash",
+  "reasoning_effort": "low",
+  "max_output_tokens": 393216,
+  "audit": {
+    "unique_questions": 2000,
+    "payload_and_sha256_verified": 2000,
+    "completed": 2000,
+    "missing_field": 7,
+    "invalid_field_type": 0,
+    "nonstring_entries": 0,
+    "refusals": 0,
+    "attempt_count": 2000,
+    "retries": 0,
+    "uncertain_charge_attempts": 0,
+    "truncated": 0,
+    "format_issue_counts": {
+      "invalid_json": 5,
+      "missing_useful_relations": 2
+    }
+  },
+  "performance": [
+    {
+      "dataset": "musique",
+      "n": 1000,
+      "r5": 0.732,
+      "r10": 0.7940833333333334,
+      "mean_seconds": 14.570022694559768,
+      "p50_seconds": 9.240943636745214,
+      "p90_seconds": 29.146152329072365,
+      "max_seconds": 648.712685411796,
+      "sum_api_seconds": 14570.022694559768,
+      "input_tokens": 5785783,
+      "cached_tokens": 386048,
+      "output_tokens": 2774247,
+      "reasoning_tokens": 2572151,
+      "estimated_cost_cny": 16.50444396,
+      "request_span_seconds": 8114.400951862335
+    },
+    {
+      "dataset": "2wikimultihopqa",
+      "n": 1000,
+      "r5": 0.93475,
+      "r10": 0.94725,
+      "mean_seconds": 7.370046182136982,
+      "p50_seconds": 5.590516213327646,
+      "p90_seconds": 12.079873851686717,
+      "max_seconds": 407.1848223246634,
+      "sum_api_seconds": 7370.046182136983,
+      "input_tokens": 2307121,
+      "cached_tokens": 383616,
+      "output_tokens": 1407621,
+      "reasoning_tokens": 1201875,
+      "estimated_cost_cny": 7.561661320000001,
+      "request_span_seconds": 11516.3412733078
+    },
+    {
+      "dataset": "average",
+      "n": 2000,
+      "r5": 0.833375,
+      "r10": 0.8706666666666667,
+      "mean_seconds": 10.970034438348375,
+      "p50_seconds": 7.047142514958978,
+      "p90_seconds": 20.694431407563396,
+      "max_seconds": 648.712685411796,
+      "sum_api_seconds": 21940.06887669675,
+      "input_tokens": 8092904,
+      "cached_tokens": 769664,
+      "output_tokens": 4181868,
+      "reasoning_tokens": 3774026,
+      "estimated_cost_cny": 24.066105280000002,
+      "request_span_seconds": 11516.34209561348
+    }
+  ],
+  "wall_clock": {
+    "sample_41_seconds": 301.4175601005554,
+    "full_remaining_1959_seconds": 10647.40696310997,
+    "first_sample_to_finished_seconds": 11516.685079097748,
+    "gap_between_stages_seconds": 567.8605561256409
+  },
+  "comparison": [
+    {
+      "model": "DeepSeek V4.1 Flash low",
+      "dataset": "musique",
+      "n": 1000,
+      "r5": 0.732,
+      "r10": 0.7940833333333334
+    },
+    {
+      "model": "DeepSeek V4.1 Flash low",
+      "dataset": "2wikimultihopqa",
+      "n": 1000,
+      "r5": 0.93475,
+      "r10": 0.94725
+    },
+    {
+      "model": "DeepSeek V4.1 Flash low",
+      "dataset": "average",
+      "n": 2000,
+      "r5": 0.833375,
+      "r10": 0.8706666666666667
+    },
+    {
+      "model": "naive",
+      "dataset": "musique",
+      "n": 1000,
+      "r5": 0.5803333333333334,
+      "r10": 0.6715
+    },
+    {
+      "model": "naive",
+      "dataset": "2wikimultihopqa",
+      "n": 1000,
+      "r5": 0.72725,
+      "r10": 0.76775
+    },
+    {
+      "model": "naive",
+      "dataset": "average",
+      "n": 2000,
+      "r5": 0.6537916666666667,
+      "r10": 0.719625
+    },
+    {
+      "model": "jev_single",
+      "dataset": "musique",
+      "n": 1000,
+      "r5": 0.693,
+      "r10": 0.7658333333333334
+    },
+    {
+      "model": "jev_single",
+      "dataset": "2wikimultihopqa",
+      "n": 1000,
+      "r5": 0.90775,
+      "r10": 0.92275
+    },
+    {
+      "model": "jev_single",
+      "dataset": "average",
+      "n": 2000,
+      "r5": 0.800375,
+      "r10": 0.8442916666666667
+    },
+    {
+      "model": "jev_two",
+      "dataset": "musique",
+      "n": 1000,
+      "r5": 0.7678333333333334,
+      "r10": 0.8206666666666667
+    },
+    {
+      "model": "jev_two",
+      "dataset": "2wikimultihopqa",
+      "n": 1000,
+      "r5": 0.9535,
+      "r10": 0.95525
+    },
+    {
+      "model": "jev_two",
+      "dataset": "average",
+      "n": 2000,
+      "r5": 0.8606666666666667,
+      "r10": 0.8879583333333333
+    },
+    {
+      "model": "Luna medium",
+      "dataset": "musique",
+      "n": 1000,
+      "r5": 0.7218333333333333,
+      "r10": 0.78675
+    },
+    {
+      "model": "Luna medium",
+      "dataset": "2wikimultihopqa",
+      "n": 1000,
+      "r5": 0.93225,
+      "r10": 0.94525
+    },
+    {
+      "model": "Luna medium",
+      "dataset": "average",
+      "n": 2000,
+      "r5": 0.8270416666666667,
+      "r10": 0.866
+    }
+  ],
+  "format_issues": [
+    {
+      "question": "musique-647",
+      "reason": "invalid_json"
+    },
+    {
+      "question": "2wikimultihopqa-996",
+      "reason": "invalid_json"
+    },
+    {
+      "question": "musique-913",
+      "reason": "missing_useful_relations"
+    },
+    {
+      "question": "musique-860",
+      "reason": "invalid_json"
+    },
+    {
+      "question": "musique-765",
+      "reason": "invalid_json"
+    },
+    {
+      "question": "musique-930",
+      "reason": "invalid_json"
+    },
+    {
+      "question": "musique-218",
+      "reason": "missing_useful_relations"
+    }
+  ]
+}

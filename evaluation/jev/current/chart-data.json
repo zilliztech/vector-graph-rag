@@ -1,0 +1,70 @@
+{
+  "points": {
+    "hippo2": {
+      "quality": 82.55000000000001,
+      "latency": 8.25,
+      "range": [
+        1.5,
+        15
+      ]
+    },
+    "jev_single": {
+      "quality": 80.0375,
+      "latency": 2.2843104925691664,
+      "range": [
+        2.2843104925691664,
+        2.2843104925691664
+      ]
+    },
+    "jev_two": {
+      "quality": 86.06666666666666,
+      "latency": 3.1327848465049435,
+      "range": [
+        3.1327848465049435,
+        3.1327848465049435
+      ]
+    },
+    "gpt-6-luna": {
+      "quality": 82.70416666666667,
+      "latency": 5.351172424641438
+    },
+    "flash": {
+      "quality": 83.33749999999999,
+      "latency": 10.970034438348375
+    }
+  },
+  "naive_points": [
+    {
+      "model": "NV-Embed-v2",
+      "mean_recall5": 73.1,
+      "extra_decision_latency": 0
+    },
+    {
+      "model": "BGE-large-en-v1.5",
+      "mean_recall5": 65.37916666666666,
+      "extra_decision_latency": 0
+    },
+    {
+      "model": "ColBERTv2",
+      "mean_recall5": 58.7,
+      "extra_decision_latency": 0
+    }
+  ],
+  "pareto_frontier": [
+    [
+      "NV-Embed-v2",
+      0,
+      73.1
+    ],
+    [
+      "jev_single",
+      2.2843104925691664,
+      80.0375
+    ],
+    [
+      "jev_two",
+      3.1327848465049435,
+      86.06666666666666
+    ]
+  ]
+}

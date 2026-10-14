@@ -290,9 +290,13 @@ Before introducing Jev, we evaluated Vector Graph RAG on three multi-hop QA benc
 
 **Two-stage Jev reaches the quality–latency Pareto frontier.**
 
-**86.07% average Recall@5**, the highest among the compared methods, with **3.13 seconds of additional model-call latency**. On MuSiQue and 2Wiki (1,000 questions each), two-stage Jev reaches the Pareto frontier under the reference latency estimates. This two-dataset result is separate from the historical three-dataset average above.
+**86.07% average Recall@5**, the highest among the compared methods, with **3.13 seconds of additional model-call latency**. On MuSiQue and 2Wiki (1,000 questions each), two-stage Jev reaches the Pareto frontier using the displayed timings. This two-dataset result is separate from the historical three-dataset average above.
 
 ![Quality and additional model latency](docs/assets/evaluation/quality-latency.png)
+
+Luna uses **medium** reasoning: xhigh had similar recall (82.53% versus 82.70%) but higher mean latency (8.86 s versus 5.35 s); Flash uses **low** because high produced very long reasoning and exhausted the output limit on some questions.
+
+Current generative baselines are GPT-6 Luna (82.70% Recall@5, 5.35 s) and DeepSeek V4.1 Flash (83.34%, 10.97 s). API means include network and provider queueing; run conditions differ.
 
 See [Evaluation Results](evaluation/jev/README.md) for the gains over relation-only Jev and other baselines, timing details and reproduction instructions.
 
