@@ -1,12 +1,14 @@
 # Models and reranking
 
-Choose models by task. Existing `llm_model` configurations continue to work: it supplies the default for extraction, reranking and answer generation. A task-specific value overrides only that task.
+Choose models by task. In the examples, set `VGRAG_LLM_MODEL` and any task-specific variables to model IDs supported by your configured Chat Completions provider; `your-...-model` values are placeholders. Existing `llm_model` configurations continue to work: it supplies the default for extraction, reranking and answer generation. A task-specific value overrides only that task.
 
 ```python
+import os
+
 from vector_graph_rag import VectorGraphRAG
 
 rag = VectorGraphRAG(
-    llm_model="gpt-4o-mini",
+    llm_model=os.environ["VGRAG_LLM_MODEL"],
     reranker_model="jev",
 )
 ```
@@ -23,20 +25,20 @@ export OPENAI_API_KEY=your-generation-key
 
 ```python
 rag = VectorGraphRAG(
-    extractor_model="gpt-5-mini",
+    extractor_model=os.environ["VGRAG_EXTRACTOR_MODEL"],
     reranker_model="jev-1.13.0",
-    answer_model="gpt-4o-mini",
+    answer_model=os.environ["VGRAG_ANSWER_MODEL"],
 )
 ```
 
 | Parameter | Role | When omitted |
 |---|---|---|
-| `llm_model` | Shared default generative model | `gpt-4o-mini` |
+| `llm_model` | Shared default generative model | Compatibility default; see [API reference](../reference/python-api.md) |
 | `extractor_model` | Document triplets and query entities | Inherits `llm_model` |
 | `reranker_model` | Relation reranking, plus passage reranking for Jev | Inherits `llm_model` |
 | `answer_model` | Final answer generation | Inherits `llm_model` |
 
-`reranker_model="gpt-5-mini"` selects generative relation reranking. `jev` and `jev-*` names select the Jev two-stage pipeline; there is no strategy switch. The `jev` alias currently resolves to `jev-1.13.0` (a project recommendation, not an official latest-model alias). Pin the full name for reproducible runs. To follow the official stable release, use `reranker_model="jev-latest"`; `jev-preview` is also accepted. These are the [official aliases](https://docs.typesafe.ai/models), not the bare string `latest`. Moving aliases bypass the local response cache so a previous release cannot silently supply the result. Jev extraction and answer generation are not supported and are rejected during configuration.
+A non-Jev `reranker_model` selects generative relation reranking. `jev` and `jev-*` names select the Jev two-stage pipeline; there is no strategy switch. The `jev` alias currently resolves to `jev-1.13.0` (a project recommendation, not an official latest-model alias). Pin the full name for reproducible runs. To follow the official stable release, use `reranker_model="jev-latest"`; `jev-preview` is also accepted. These are the [official aliases](https://docs.typesafe.ai/models), not the bare string `latest`. Moving aliases bypass the local response cache so a previous release cannot silently supply the result. Jev extraction and answer generation are not supported and are rejected during configuration.
 
 `retrieve()` skips answer generation; `query()` generates an answer from the same selected passages. Both still perform query entity extraction. The facade constructs all task clients, so their credentials must be configured even when only retrieval is requested.
 
@@ -72,10 +74,10 @@ Embedding configuration remains independent (`embedding_provider`, `embedding_mo
 The same fields work through `Settings` and `VGRAG_` environment variables:
 
 ```bash
-export VGRAG_LLM_MODEL=gpt-4o-mini
+export VGRAG_LLM_MODEL=your-chat-completions-model
 export VGRAG_RERANKER_MODEL=jev
-export VGRAG_EXTRACTOR_MODEL=gpt-5-mini
-export VGRAG_ANSWER_MODEL=gpt-4o-mini
+export VGRAG_EXTRACTOR_MODEL=your-extraction-model
+export VGRAG_ANSWER_MODEL=your-answer-model
 ```
 
 Task environment values can also be JSON objects with `model`, `base_url` and `api_key`. Avoid putting real credentials in shell history. `ModelConfig.api_key` is redacted in representations and serialization. The legacy OpenAI key field retains its existing behavior.
