@@ -43,9 +43,10 @@ class Settings(BaseSettings):
 
     # Model Settings
     llm_model: ModelSpec = Field(
-        default="gpt-4o-mini",
+        default="gpt-6-luna",
         description="LLM model for triplet extraction and reranking",
     )
+    llm_reasoning_effort: Literal["none", "low", "medium", "high", "xhigh", "max"] = "medium"
     extractor_model: Optional[ModelSpec] = None
     reranker_model: Optional[ModelSpec] = None
     answer_model: Optional[ModelSpec] = None
@@ -110,6 +111,8 @@ class Settings(BaseSettings):
         )
 
     def cache_model_name(self, model: str) -> str:
+        if model.startswith("gpt-6"):
+            model = f"{model}-responses-{self.llm_reasoning_effort}"
         if (
             not self.openai_base_url
             or self.openai_base_url.rstrip("/") == "https://api.openai.com/v1"

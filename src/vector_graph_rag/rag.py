@@ -1736,7 +1736,7 @@ def create_rag(
     milvus_db: Optional[str] = None,
     collection_prefix: Optional[str] = None,
     openai_api_key: Optional[str] = None,
-    llm_model: ModelSpec = "gpt-4o-mini",
+    llm_model: ModelSpec = "gpt-6-luna",
     embedding_provider: Optional[str] = None,
     embedding_model: Optional[str] = None,
     embedding_api_key: Optional[str] = None,

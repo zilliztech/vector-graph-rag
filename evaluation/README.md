@@ -102,7 +102,7 @@ evaluation/data/
 
 #### Graph RAG Evaluation
 
-Set `VGRAG_LLM_MODEL` to a model ID supported by your configured Chat Completions provider before running these commands. The published Luna/Flash retrieval results used separate frozen-request evaluation runners; these commands do not reproduce their interface or reasoning settings.
+Set `VGRAG_LLM_MODEL` to a model ID supported by your configured provider (Responses for GPT-6, Chat Completions for other models) before running these commands. The published Luna/Flash retrieval results used separate frozen-request evaluation runners; these commands do not reproduce their interface or reasoning settings.
 
 ```bash
 # MuSiQue
@@ -198,7 +198,7 @@ uv run python evaluation/evaluate.py \
 | `--entity-top-k` | Top-K entities to retrieve | 20 |
 | `--relation-top-k` | Top-K relations to retrieve | 20 |
 | `--embedding-model` | Embedding model for vector search | BAAI/bge-large-en-v1.5 |
-| `--llm-model` | Generative model (set explicitly for your provider) | CLI compatibility default; see `evaluate.py --help` |
+| `--llm-model` | Generative model (set explicitly for your provider) | `gpt-6-luna` |
 | `--force-reindex` | Rebuild index from scratch | False |
 | `--milvus-uri` | Milvus database URI (use .db for local) | Required |
 

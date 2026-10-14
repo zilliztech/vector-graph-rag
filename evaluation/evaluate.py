@@ -276,7 +276,7 @@ class VectorGraphRAGEvaluator:
             entity_similarity_threshold: Similarity threshold for entity retrieval (default: 0.9)
             relation_similarity_threshold: Similarity threshold for relation retrieval (default: -1)
             relation_number_threshold: Max expanded relations, eviction if exceeded (default: 1000)
-            llm_model: LLM model for reranking (default: gpt-4o-mini)
+            llm_model: LLM model for reranking (default: gpt-6-luna)
             use_llm_cache: Whether to use LLM response caching (default: True)
             embedding_model: Embedding model to use (e.g., facebook/contriever, text-embedding-3-large)
             embedding_instruction: Instruction for embedding model (for BGE/Qwen3 style models)
@@ -698,8 +698,8 @@ def main():
     parser.add_argument(
         "--llm-model",
         type=str,
-        default="gpt-4o-mini",
-        help="LLM model for reranking (default: gpt-4o-mini)",
+        default="gpt-6-luna",
+        help="LLM model for reranking (default: gpt-6-luna)",
     )
     parser.add_argument(
         "--no-llm-cache",

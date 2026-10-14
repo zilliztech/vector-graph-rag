@@ -13,6 +13,7 @@ from tqdm import tqdm
 
 from vector_graph_rag.config import Settings, get_settings
 from vector_graph_rag.llm.cache import LLMCache, get_llm_cache
+from vector_graph_rag.llm.generation import generate_text
 from vector_graph_rag.models import Document, Triplet
 from vector_graph_rag.observability import start_span
 
@@ -151,10 +152,12 @@ class TripletExtractor:
             if cached is not None:
                 return cached
 
-        response = self.client.chat.completions.create(
+        result = generate_text(
+            self.client,
+            settings=self.settings,
             model=self.model,
             temperature=self.temperature,
-            response_format={"type": "json_object"},
+            json_mode=True,
             messages=[
                 {"role": "system", "content": EXTRACTION_SYSTEM_PROMPT},
                 {"role": "user", "content": EXTRACTION_EXAMPLE_INPUT},
@@ -162,7 +165,6 @@ class TripletExtractor:
                 {"role": "user", "content": f"Text: {text}"},
             ],
         )
-        result = response.choices[0].message.content or "{}"
 
         # Store in cache
         if self.cache:
@@ -382,10 +384,12 @@ class EntityExtractor:
                     except (json.JSONDecodeError, KeyError):
                         pass
 
-            response = self.client.chat.completions.create(
+            content = generate_text(
+                self.client,
+                settings=self.settings,
                 model=self.model,
                 temperature=0,
-                response_format={"type": "json_object"},
+                json_mode=True,
                 messages=[
                     {"role": "system", "content": NER_SYSTEM_PROMPT},
                     {"role": "user", "content": NER_ONE_SHOT_INPUT},
@@ -393,8 +397,6 @@ class EntityExtractor:
                     {"role": "user", "content": NER_TEMPLATE.format(question)},
                 ],
             )
-
-            content = response.choices[0].message.content or "{}"
 
             # Store in cache
             if self.cache:
