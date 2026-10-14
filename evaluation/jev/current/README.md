@@ -1,6 +1,6 @@
 # Current retrieval comparison
 
-Updated October 14, 2026. MuSiQue and 2Wiki each contain 1,000 questions; averages weight the two datasets equally. The current generative rerankers are GPT-6 Luna and official DeepSeek V4.1 Flash. Older GPT-4o-mini/GPT-5-mini comparisons remain in the [historical report](../two-stage/README.md) and Git history.
+Updated October 14, 2026. MuSiQue and 2Wiki each contain 1,000 questions; averages weight the two datasets equally. The current generative rerankers are GPT-6 Luna and official DeepSeek V4.1 Flash.
 
 ![Quality and additional model-call latency](../../../docs/assets/evaluation/quality-latency.png)
 
@@ -21,7 +21,7 @@ Two-stage Jev has the highest recall among these methods: 6.03 percentage points
 
 ## Measurement scope
 
-The horizontal axis excludes embedding, retrieval and answer generation. Zero means no extra model call. Jev timings retain the historical measured basis: equal-weight means of per-query request-duration sums from 500 MuSiQue and 900 2Wiki queries, with three concurrent queries. Luna and Flash use measured full-evaluation API means, not the older generative-model timing estimates. Network, provider queueing, concurrency and measurement dates differ between runs. HippoRAG 2 retains an approximate reference time; its scores and the ColBERTv2/NV-Embed-v2 points are published aggregates rather than new runs. See the [original comparison provenance](../two-stage/README.md#comparison-basis).
+The horizontal axis excludes embedding, retrieval and answer generation. Zero means no extra model call. Jev timings use the recorded timing subsets: equal-weight means of per-query request-duration sums from 500 MuSiQue and 900 2Wiki queries, with three concurrent queries. Luna and Flash use measured full-evaluation API means, not the older generative-model timing estimates. Network, provider queueing, concurrency and measurement dates differ between runs. HippoRAG 2 retains an approximate reference time; its scores and the ColBERTv2/NV-Embed-v2 points are published aggregates rather than new runs. See the [comparison provenance](../two-stage/README.md#comparison-basis).
 
 The frozen candidates, input prompts, relation order and historical scoring are retained for the new generative runs. Their selected relations expand to source passages in order, followed by naive retrieval to fill ten passages. Only message output text and the `useful_relations` JSON field are scored; reasoning text and field aliases are not used. MuSiQue matches distinct full passages and 2Wiki distinct titles. Jev's two-stage recipe is described in the [frozen recipe](../two-stage/README.md#frozen-recipe).
 
@@ -43,10 +43,12 @@ Reported usage was 8,092,904 input tokens (769,664 cached) and 4,181,868 output 
 
 ## Saved data and chart reproduction
 
-`comparison.csv` contains current per-dataset Recall@5/10 aggregates; `summary.json` contains the Flash audit, usage and timing statistics; `chart-data.json` freezes the plotted coordinates. These aggregates reproduce the figure, not the underlying model calls or independent per-query scoring. Raw responses and credentials are not included in the repository. The historical Jev report separately provides its frozen evidence fingerprints and score replay.
+`comparison.csv` contains current per-dataset Recall@5/10 aggregates; `summary.json` contains the Flash audit, usage and timing statistics; `chart-data.json` freezes the plotted coordinates. These aggregates reproduce the figure, not the underlying model calls or independent per-query scoring. Raw responses and credentials are not included in the repository. The Jev recipe directory provides frozen evidence fingerprints and score replay for the naive and both Jev methods.
 
 ```bash
 uv run --offline --no-project --python 3.12 --with matplotlib evaluation/jev/current/plot.py
 ```
 
 The offline command requires matplotlib to be cached locally. The figure omits reasoning-strength labels for readability; the configuration note above identifies the measurements.
+
+Earlier model comparisons and their source artifacts are preserved in the [evaluation snapshot](https://github.com/zilliztech/vector-graph-rag/tree/e32c077ccde8c577f9335b7966ebf22d46e18334/evaluation/jev).
