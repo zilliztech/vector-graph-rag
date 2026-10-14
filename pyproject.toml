@@ -1,6 +1,6 @@
 [project]
 name = "vector-graph-rag"
-version = "0.3.1"
+version = "0.4.0"
 description = "A Graph RAG implementation using pure vector search with Milvus"
 readme = "README.md"
 license = { text = "MIT" }

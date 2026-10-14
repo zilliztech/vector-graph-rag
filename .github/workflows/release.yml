@@ -1,38 +1,69 @@
-# Usage:
-# git tag v0.x.x  # Must match version in pyproject.toml
-# git push --tags
-
-name: Publish Python Package to PyPI
+# Push a v-prefixed tag only after the release pull request passes validation.
+name: Validate and Publish Python Package
 
 on:
+  pull_request:
+    branches: [main]
   push:
-    tags:
-      - "v*"
+    tags: ["v*"]
+
+permissions:
+  contents: read
 
 jobs:
+  validate:
+    name: Validate Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Install test dependencies
+        run: uv sync --locked --python '${{ matrix.python-version }}' --extra dev --extra api
+      - name: Check package and tag versions
+        run: |
+          uv run --no-sync python - <<'PY'
+          import os
+          from importlib.metadata import version
+          from vector_graph_rag import __version__
+
+          package_version = version("vector-graph-rag")
+          assert package_version == __version__, (package_version, __version__)
+          if os.environ["GITHUB_REF_TYPE"] == "tag":
+              assert os.environ["GITHUB_REF_NAME"] == f"v{package_version}"
+          print(f"Validated version {package_version}")
+          PY
+      - name: Run tests
+        run: uv run --no-sync pytest tests -q
+      - name: Build distributions
+        run: uv build
+      - name: Verify wheel installation in isolation
+        run: |
+          uv run --isolated --no-project --python '${{ matrix.python-version }}' \
+            --with ./dist/vector_graph_rag-*.whl python -c \
+            'from importlib.metadata import version; from vector_graph_rag import Settings, VectorGraphRAG, __version__; assert version("vector-graph-rag") == __version__; print(__version__)'
+      - name: Save validated distributions
+        if: matrix.python-version == '3.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: distributions
+          path: dist/
+
   publish:
     name: Publish to PyPI
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: validate
     runs-on: ubuntu-latest
     environment: pypi
-
     permissions:
       id-token: write
-      contents: read
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/download-artifact@v4
         with:
-          python-version: "3.10"
-
-      - name: Install build tools
-        run: python -m pip install build
-
-      - name: Build package
-        run: python -m build
-
-      - name: Publish to PyPI
+          name: distributions
+          path: dist/
+      - name: Publish validated distributions
         uses: pypa/gh-action-pypi-publish@release/v1
