@@ -6,7 +6,7 @@
 
 **Graph RAG with pure vector search** — no graph database needed, configurable model reranking, optimized for knowledge-intensive domains.
 
-Use the default model or enable the [two-stage Jev reranker](guides/reranking.md). The [evaluation](evaluation.md#jev-reranker-evaluation) includes the latest Luna/Flash comparison and measured model-call timings.
+Use the default model or enable the [two-stage Jev reranker](guides/reranking.md). The [evaluation](evaluation.md#jev-reranker-evaluation) includes the Luna/Flash comparison and measured model-call timings.
 
 ## Why Vector Graph RAG?
 

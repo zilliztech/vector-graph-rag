@@ -1,6 +1,6 @@
-# Current retrieval comparison
+# Two-stage Jev reaches the quality–latency Pareto frontier
 
-Updated October 14, 2026. MuSiQue and 2Wiki each contain 1,000 questions; averages weight the two datasets equally. The current generative rerankers are GPT-6 Luna and official DeepSeek V4.1 Flash.
+Updated October 14, 2026. MuSiQue and 2Wiki each contain 1,000 questions; averages weight the two datasets equally. The generative rerankers are GPT-6 Luna and official DeepSeek V4.1 Flash.
 
 ![Quality and additional model-call latency](../../../docs/assets/evaluation/quality-latency.png)
 
@@ -43,7 +43,7 @@ Reported usage was 8,092,904 input tokens (769,664 cached) and 4,181,868 output 
 
 ## Saved data and chart reproduction
 
-`comparison.csv` contains current per-dataset Recall@5/10 aggregates; `summary.json` contains the Flash audit, usage and timing statistics; `chart-data.json` freezes the plotted coordinates. These aggregates reproduce the figure, not the underlying model calls or independent per-query scoring. Raw responses and credentials are not included in the repository. The Jev recipe directory provides frozen evidence fingerprints and score replay for the naive and both Jev methods.
+`comparison.csv` contains per-dataset Recall@5/10 aggregates; `summary.json` contains the Flash audit, usage and timing statistics; `chart-data.json` freezes the plotted coordinates. These aggregates reproduce the figure, not the underlying model calls or independent per-query scoring. Raw responses and credentials are not included in the repository. The Jev recipe directory provides frozen evidence fingerprints and score replay for the naive and both Jev methods.
 
 ```bash
 uv run --offline --no-project --python 3.12 --with matplotlib evaluation/jev/current/plot.py

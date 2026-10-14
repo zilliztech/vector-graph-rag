@@ -1,8 +1,8 @@
-> For the current Jev, GPT-6 Luna and DeepSeek V4.1 Flash comparison, see [current evaluation](jev/current/README.md). The earlier three-dataset tables below remain historical; HippoRAG 2 uses a resampled HotpotQA set.
+> For the Jev, GPT-6 Luna and DeepSeek V4.1 Flash comparison, see [evaluation results](jev/current/README.md). The earlier three-dataset tables below remain historical; HippoRAG 2 uses a resampled HotpotQA set.
 
 # Evaluation
 
-For Jev and the current Luna/Flash comparison, see [Jev evaluation](jev/README.md). Its 1,000-question-per-dataset results and reproduction instructions are separate from the historical tables below.
+For Jev and the Luna/Flash comparison, see [Jev evaluation](jev/README.md). Its 1,000-question-per-dataset results and reproduction instructions are separate from the historical tables below.
 
 This directory contains the evaluation framework for Vector Graph RAG, comparing it against Naive RAG baseline on multi-hop question answering datasets.
 

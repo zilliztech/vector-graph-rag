@@ -1,6 +1,6 @@
 # Jev: frozen recipe and score reproduction
 
-Jev evaluation began in September 2026; the full two-stage results were added in October 2026. This directory contains the Jev and direct-retrieval evidence used in the [latest comparison](../current/README.md), not a separate historical comparison.
+Jev evaluation began in September 2026; the full two-stage results were added in October 2026. This directory contains the Jev and direct-retrieval evidence used in the [evaluation](../current/README.md).
 
 ## Frozen recipe
 
@@ -16,7 +16,7 @@ The frozen graph relation candidates use historical Contriever retrieval; the di
 
 MuSiQue and 2Wiki question IDs, question order and corpus contents were checked against the corresponding HippoRAG 2 reproduction data. Recall counts distinct recovered evidence: full passages for MuSiQue and titles for 2Wiki. Earlier exploration used some of these queries; this is an expanded public-benchmark evaluation rather than an untouched holdout.
 
-External aggregates in the current report come from [HippoRAG Tables 2–3](https://arxiv.org/abs/2405.14831) and [HippoRAG 2 Table 3](https://arxiv.org/abs/2502.14802); those systems were not rerun. HotpotQA is excluded from the current comparison because its published comparison uses a resampled question set.
+External aggregates in the evaluation report come from [HippoRAG Tables 2–3](https://arxiv.org/abs/2405.14831) and [HippoRAG 2 Table 3](https://arxiv.org/abs/2502.14802); those systems were not rerun. HotpotQA is excluded from this comparison because its published comparison uses a resampled question set.
 
 ## Recompute without API calls
 
@@ -26,7 +26,7 @@ uv run --no-project python evaluation/jev/two-stage/summarize.py
 
 `results.json.gz` holds 6,000 method/query records for naive retrieval, relation-only Jev and two-stage Jev, including ordered SHA-256 evidence fingerprints and metrics. `manifest.json` identifies the 2,000 queries and dataset file hashes. The script independently checks saved Recall@5/10 against evidence fingerprints and verifies the expected query set for each method. Fingerprints do not reconstruct candidate generation or model calls; raw model caches and local databases are not included.
 
-The [current report](../current/README.md#saved-data-and-chart-reproduction) documents chart reproduction and the saved aggregates for Luna and Flash.
+The [evaluation report](../current/README.md#saved-data-and-chart-reproduction) documents chart reproduction and the saved aggregates for Luna and Flash.
 
 ## Run against your index
 

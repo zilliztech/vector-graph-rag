@@ -116,6 +116,6 @@ The horizontal axis excludes embedding, retrieval and answer generation. Jev, Lu
 
 Luna uses **medium** reasoning: xhigh had similar recall (82.53% versus 82.70%) but higher mean latency (8.86 s versus 5.35 s); Flash uses **low** because high produced very long reasoning and exhausted the output limit on some questions.
 
-See the [current evaluation report](../evaluation/jev/current/README.md) for the Flash audit and chart reproduction, and the [Jev recipe and score reproduction](../evaluation/jev/two-stage/README.md). Enable the implementation through the [reranking guide](guides/reranking.md).
+See the [full evaluation report](../evaluation/jev/current/README.md) for the Flash audit and chart reproduction, and the [Jev recipe and score reproduction](../evaluation/jev/two-stage/README.md). Enable the implementation through the [reranking guide](guides/reranking.md).
 
 [^hotpot-sampling]: The HippoRAG authors resampled HotpotQA between HippoRAG and HippoRAG 2, so the historical HotpotQA results use different question samples. The original three-dataset results are retained for reference. This does not affect the new Jev comparison, which uses MuSiQue and 2Wiki only.

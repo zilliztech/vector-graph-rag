@@ -121,7 +121,7 @@ With these three mechanisms working together, the candidate set is already rich 
 
 ### The Cost Advantage
 
-The following call-count scenario is illustrative, not a measurement of the current rerankers. See the [latest evaluation](../evaluation.md#jev-reranker-evaluation) for measured quality and model-call latency.
+The following call-count scenario is illustrative, not a measurement of the evaluated rerankers. See the [latest evaluation](../evaluation.md#jev-reranker-evaluation) for measured quality and model-call latency.
 
 Each LLM call adds latency (typically 1–3 seconds) and cost. For a system processing thousands of queries per day, the difference between 2 and 5 LLM calls per query is substantial:
 

@@ -104,4 +104,4 @@ Relation questions use the existing token-budgeted batching; each batch repeats 
 
 ## Evaluation
 
-The [full evaluation](https://github.com/zilliztech/vector-graph-rag/blob/main/evaluation/jev/current/README.md) covers MuSiQue and 2Wiki, 1,000 questions each. It includes current model comparisons, method details and the timing scope. Frozen evaluation candidates use historical Contriever graph retrieval plus BGE dense retrieval; a fresh index with a different configuration need not reproduce the exact scores.
+The [full evaluation](https://github.com/zilliztech/vector-graph-rag/blob/main/evaluation/jev/current/README.md) covers MuSiQue and 2Wiki, 1,000 questions each. It includes model comparisons, method details and the timing scope. Frozen evaluation candidates use historical Contriever graph retrieval plus BGE dense retrieval; a fresh index with a different configuration need not reproduce the exact scores.

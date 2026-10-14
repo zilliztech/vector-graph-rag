@@ -296,7 +296,7 @@ Before introducing Jev, we evaluated Vector Graph RAG on three multi-hop QA benc
 
 Luna uses **medium** reasoning: xhigh had similar recall (82.53% versus 82.70%) but higher mean latency (8.86 s versus 5.35 s); Flash uses **low** because high produced very long reasoning and exhausted the output limit on some questions.
 
-Current generative baselines are GPT-6 Luna (82.70% Recall@5, 5.35 s) and DeepSeek V4.1 Flash (83.34%, 10.97 s). API means include network and provider queueing; run conditions differ.
+The generative baselines are GPT-6 Luna (82.70% Recall@5, 5.35 s) and DeepSeek V4.1 Flash (83.34%, 10.97 s). API means include network and provider queueing; run conditions differ.
 
 See [Evaluation Results](evaluation/jev/README.md) for the gains over relation-only Jev and other baselines, timing details and reproduction instructions.
 
