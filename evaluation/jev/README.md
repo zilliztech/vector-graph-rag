@@ -8,10 +8,8 @@ Across **MuSiQue and 2Wiki, 1,000 questions each**, two-stage Jev achieves **86.
 
 ![Quality and latency](../../docs/assets/evaluation/quality-latency.png)
 
-Luna uses **medium** reasoning: xhigh had similar recall (82.53% versus 82.70%) but higher mean latency (8.86 s versus 5.35 s); Flash uses **low** because high produced very long reasoning and exhausted the output limit on some questions.
-
 The two-stage pipeline adds passage reranking after relation selection. Relative to relation-only Jev, average Recall@5 rises by **6.03 percentage points**, while recorded additional model-call time increases from **2.28 to 3.13 seconds** on the same timing basis. Jev is the highest-quality point on the observed frontier; this is additional model time, not end-to-end search latency.
 
-See the [full evaluation report](current/README.md) for dataset scores, measured timing scope, Flash audit and chart reproduction. Enable the pipeline with `reranker_model="jev"`; the [reranking guide](../../docs/guides/reranking.md) covers configuration.
+See the [full evaluation report](two-stage/README.md) for dataset scores, measured timing scope, Flash audit and chart reproduction. Enable the pipeline with `reranker_model="jev"`; the [reranking guide](../../docs/guides/reranking.md) covers configuration.
 
 The [frozen Jev recipe and score reproduction](two-stage/README.md) support these results. This two-dataset comparison is separate from the project's historical three-dataset average.
