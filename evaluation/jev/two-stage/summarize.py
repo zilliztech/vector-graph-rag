@@ -32,7 +32,7 @@ def summarize():
     assert set(groups) == {
         (dataset, method)
         for dataset in ("musique", "2wikimultihopqa")
-        for method in ("naive", "jev_single", "jev_two")
+        for method in ("naive", "jev_single", "jev_two", "jev_two_114")
     }
     (ROOT / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
     return summary

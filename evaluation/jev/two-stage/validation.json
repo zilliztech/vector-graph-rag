@@ -14,5 +14,6 @@
   "implementation_sha256": {
     "src/vector_graph_rag/llm/jev.py": "97f8be699bcefcfc7ee3f1a6579de55ca7251afe3f5d7027fc52f8684745d6f6",
     "src/vector_graph_rag/rag.py": "da637666334d5c184f3c7caaa20c8dda1b00e00c27b57332e8b95fc4f0435e9a"
-  }
+  },
+  "scope": "Historical Jev 1.13 implementation replay; Jev 1.14 checks and paired comparison are recorded in jev114-audit.json."
 }

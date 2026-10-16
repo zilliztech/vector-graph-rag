@@ -8,8 +8,8 @@ D=Path(__file__).parent
 data=json.loads((D/'chart-data.json').read_text())
 pts=data['points']
 old={'naive_points':data['naive_points']}
-colors={'jev_single':'#168568','jev_two':'#168568','gpt-6-luna':'#a16826','hippo2':'#777f8b','flash':'#2674bd'}
-labels={'jev_single':('Jev · relations only','o',(10,-12)),'jev_two':('Jev · two-stage','*',(10,10)),'gpt-6-luna':('GPT-6 Luna','o',(10,-12)),'hippo2':('HippoRAG 2','s',(10,-12)),'flash':('DeepSeek V4.1 Flash','o',(10,10))}
+colors={'jev_single':'#168568','jev_two':'#168568','jev_two_114':'#087049','gpt-6-luna':'#a16826','hippo2':'#777f8b','flash':'#2674bd'}
+labels={'jev_single':('Jev 1.13 · relations only','o',(10,-12)),'jev_two':('Jev 1.13 · two-stage','D',(-85,18)),'jev_two_114':('Jev 1.14 · two-stage','*',(10,10)),'gpt-6-luna':('GPT-6 Luna','o',(10,-12)),'hippo2':('HippoRAG 2','s',(10,-12)),'flash':('DeepSeek V4.1 Flash','o',(10,10))}
 plt.rcParams.update({'font.family':'DejaVu Sans','font.size':12,'svg.fonttype':'none','svg.hashsalt':'vgrag-current'})
 fig,ax=plt.subplots(figsize=(15,8.5));fig.subplots_adjust(left=.09,right=.97,top=.82,bottom=.19)
 ax.set(xlim=(-.45,16),ylim=(55.5,90),xticks=[0,2,4,6,8,10,12,14,16],yticks=[60,65,70,75,80,85,90],xlabel='Additional model-call latency (s)',ylabel='Average Recall@5 (%)')
