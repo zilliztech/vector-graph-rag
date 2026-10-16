@@ -14,7 +14,7 @@ Jev evaluation began in September 2026; the full two-stage results below were ad
 | Vector Graph RAG + DeepSeek V4.1 Flash | 73.20% | 93.48% | 83.34% | 10.97 s |
 | Vector Graph RAG + Jev 1.13 · relations only | 69.30% | 90.78% | 80.04% | 2.28 s |
 | Vector Graph RAG + Jev 1.13 · two-stage | 76.78% | 95.35% | 86.07% | 3.13 s |
-| **Vector Graph RAG + Jev 1.14 · two-stage** | **77.73%** | **95.50%** | **86.61%** | **5.77 s** |
+| **Vector Graph RAG + Jev 1.14 · two-stage** | **77.73%** | **95.50%** | **86.61%** | **≈4.9 s** |
 
 Luna uses **medium** reasoning: xhigh had similar recall (82.53% versus 82.70%) but higher mean latency (8.86 s versus 5.35 s); Flash uses **low** because high produced very long reasoning and exhausted the output limit on some questions.
 
@@ -39,9 +39,11 @@ The new phase took 54.46 minutes and 10,735 network attempts, including three re
 |---|---:|---:|---:|
 | Reused 200-query pilot | 5.81 s | 3.17 s | 20.71 s |
 | Additional 1,800 queries | 5.76 s | 3.22 s | 21.41 s |
-| Full 2,000 queries (chart) | 5.77 s | 3.21 s | 21.40 s |
+| Full 2,000 queries (OpenRouter) | 5.77 s | 3.21 s | 21.40 s |
 
 These are sums of successful HTTP durations per query, not cache-read timings; failed-attempt waits are excluded and retained separately in the experiment ledger. Jev 1.14 used four concurrent queries, serial batches within each query, and at most 64 judgments per request. Jev 1.13 used the earlier direct service and different batching. The paired results compare the fixed application recipe across version/service runs; they do not isolate model weights from all service effects.
+
+The chart estimates official-direct Jev 1.14 latency at **≈4.9 s**, scaling the recorded 5.77 s by paired direct/OpenRouter timings for 12 size-stratified queries (67 identical payload pairs); see the [calibration record](jev114-latency-calibration.json) and [offline calculation](calibrate_latency.py).
 
 ## Measurement scope
 

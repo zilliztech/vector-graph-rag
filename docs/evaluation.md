@@ -91,7 +91,7 @@ We began evaluating Jev in September 2026, following its availability, and expan
 
 ### Reaching the quality–latency Pareto frontier
 
-**Two-stage Jev 1.14 achieves the highest Recall@5 among the compared methods on both datasets**, averaging **86.61%** across **MuSiQue and 2Wiki, 1,000 questions each**. Using the displayed timings, it reaches the quality–latency Pareto frontier with **5.77 seconds of measured additional model-call time**.
+**Two-stage Jev 1.14 achieves the highest Recall@5 among the compared methods on both datasets**, averaging **86.61%** across **MuSiQue and 2Wiki, 1,000 questions each**. Using the displayed timings, it reaches the quality–latency Pareto frontier with **approximately 4.9 seconds of estimated direct API time**.
 
 The pipeline first selects relations, then reranks their source passages together with direct vector-search candidates. The second stage judges full passages, so the final ordering can use evidence beyond the relation text. It is a separate recipe and dataset scope from the historical three-dataset average above.
 
@@ -105,7 +105,7 @@ The pipeline first selects relations, then reranks their source passages togethe
 | Vector Graph RAG + DeepSeek V4.1 Flash | 73.20% | 93.48% | 83.34% | 10.97 s |
 | Vector Graph RAG + Jev 1.13 · relations only | 69.30% | 90.78% | 80.04% | 2.28 s |
 | Vector Graph RAG + Jev 1.13 · two-stage | 76.78% | 95.35% | 86.07% | 3.13 s |
-| **Vector Graph RAG + Jev 1.14 · two-stage** | **77.73%** | **95.50%** | **86.61%** | **5.77 s** |
+| **Vector Graph RAG + Jev 1.14 · two-stage** | **77.73%** | **95.50%** | **86.61%** | **≈4.9 s** |
 
 ![Quality and additional model latency](assets/evaluation/quality-latency.png)
 
@@ -113,7 +113,7 @@ Jev 1.14 improves average Recall@5 over 1.13 by **0.55 percentage points** (pair
 
 On the plotted Pareto frontier, no alternative offers both at least the same recall and no more additional model-call time, with a strict improvement in either. Jev 1.14 is the highest-quality option among the evaluated configurations; Jev 1.13 remains a lower-latency frontier point at 86.07% / 3.13 s. This is a scoped best result, not a claim against every published system.
 
-The horizontal axis excludes embedding, retrieval and answer generation. Jev, Luna and Flash use measured API means; HippoRAG 2 retains a reference estimate. Test dates, concurrency and provider conditions differ, so the frontier is descriptive rather than a controlled end-to-end speed claim. Naive RAG adds no judgment call, hence zero additional time.
+The horizontal axis excludes embedding, retrieval and answer generation. Jev 1.14 uses a calibrated direct API estimate; the other Jev, Luna and Flash points use measured API means, and HippoRAG 2 retains a reference estimate. Test dates, concurrency and provider conditions differ, so the frontier is descriptive rather than a controlled end-to-end speed claim. Naive RAG adds no judgment call, hence zero additional time.
 
 See the [full evaluation report](../evaluation/jev/two-stage/README.md) for the Flash audit and chart reproduction, and [Jev score reproduction](../evaluation/jev/two-stage/README.md#recompute-without-api-calls). Enable the implementation through the [reranking guide](guides/reranking.md).
 

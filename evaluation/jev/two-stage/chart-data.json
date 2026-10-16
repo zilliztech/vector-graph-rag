@@ -34,7 +34,10 @@
     },
     "jev_two_114": {
       "quality": 86.6125,
-      "latency": 5.769053221371956
+      "latency": 4.87210045028051,
+      "latency_kind": "estimated_official_direct",
+      "measured_openrouter_latency": 5.769053221371956,
+      "latency_source": "jev114-latency-calibration.json"
     }
   },
   "naive_points": [
@@ -72,7 +75,7 @@
     ],
     [
       "jev_two_114",
-      5.769053221371956,
+      4.87210045028051,
       86.6125
     ]
   ]

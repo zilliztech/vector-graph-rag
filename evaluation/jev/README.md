@@ -4,7 +4,7 @@ Jev evaluation began in September 2026; the full two-stage results below were ad
 
 ## Two-stage Jev reaches the quality–latency Pareto frontier
 
-Across **MuSiQue and 2Wiki, 1,000 questions each**, two-stage Jev 1.14 achieves **86.61% average Recall@5**, compared with **82.70% for GPT-6 Luna** and **83.34% for DeepSeek V4.1 Flash**. Their measured additional model-call means are **5.77 s**, **5.35 s** and **10.97 s**, respectively. Different test conditions and external reference points limit direct speed comparisons.
+Across **MuSiQue and 2Wiki, 1,000 questions each**, two-stage Jev 1.14 achieves **86.61% average Recall@5**, compared with **82.70% for GPT-6 Luna** and **83.34% for DeepSeek V4.1 Flash**. Their additional model-call means are **≈4.9 s** (estimated direct), **5.35 s** and **10.97 s**, respectively. Different test conditions and external reference points limit direct speed comparisons.
 
 ![Quality and latency](../../docs/assets/evaluation/quality-latency.png)
 

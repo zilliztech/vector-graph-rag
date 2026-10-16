@@ -136,9 +136,9 @@ These benchmarks use Recall@5 and HippoRAG’s pre-extracted triplets. See [Eval
 
 ## Two-stage Jev reaches the quality–latency Pareto frontier
 
-**Jev 1.14 achieves 86.61% average Recall@5** on MuSiQue and 2Wiki (1,000 questions each), the highest among the compared methods. Its measured additional model-call mean is **5.77 seconds**. The same-query improvement over Jev 1.13 is **0.55 percentage points**, reproduced on the additional 1,800 queries beyond the pilot.
+**Jev 1.14 achieves 86.61% average Recall@5** on MuSiQue and 2Wiki (1,000 questions each), the highest among the compared methods. Its estimated direct API mean is **approximately 4.9 seconds**. The same-query improvement over Jev 1.13 is **0.55 percentage points**, reproduced on the additional 1,800 queries beyond the pilot.
 
-With the displayed timings, this puts two-stage Jev on the **quality–latency Pareto frontier**. Jev, GPT-6 Luna and DeepSeek V4.1 Flash use measured API means; HippoRAG 2 retains a reference estimate. Measurements exclude the rest of the search pipeline and differ in test conditions. This two-dataset evaluation is separate from the historical three-dataset results.
+With the displayed timings, this puts two-stage Jev on the **quality–latency Pareto frontier**. Jev 1.14 uses a calibrated direct API estimate; the other Jev, Luna and Flash points use measured API means, and HippoRAG 2 retains a reference estimate. Measurements exclude the rest of the search pipeline and differ in test conditions. This two-dataset evaluation is separate from the historical three-dataset results.
 
 ![Quality and latency](assets/evaluation/quality-latency.png)
 
