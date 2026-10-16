@@ -1,0 +1,275 @@
+{
+  "complete": true,
+  "counts": {
+    "2wikimultihopqa": 1000,
+    "musique": 1000
+  },
+  "returned_models": [
+    "typesafe/jev-1.14-20261014"
+  ],
+  "raw_verified": 11883,
+  "duplicate_successful_payloads": 0,
+  "new_attempts": 10735,
+  "new_failures": 3,
+  "new_reported_cost_usd": 6.83821131,
+  "new_cost_with_unknown_reserves_usd": 7.02526987,
+  "seed_cost_usd": 0.726064584,
+  "new_input_tokens": 162814555,
+  "results": [
+    {
+      "cohort": "all2000",
+      "dataset": "musique",
+      "n": 1000,
+      "old_r5_pct": 76.78333333333333,
+      "new_r5_pct": 77.725,
+      "delta_r5_pp": 0.941666666666674,
+      "ci95_r5_pp": [
+        0.3166666666666667,
+        1.616666666666667
+      ],
+      "wins_r5": 60,
+      "ties_r5": 906,
+      "losses_r5": 34,
+      "old_r10_pct": 82.06666666666668,
+      "new_r10_pct": 81.96666666666667,
+      "delta_r10_pp": -0.10000000000001119,
+      "ci95_r10_pp": [
+        -0.5166666666666666,
+        0.33333333333333337
+      ],
+      "wins_r10": 20,
+      "ties_r10": 955,
+      "losses_r10": 25,
+      "api_seconds_mean": 8.563113339066506,
+      "api_seconds_p50": 4.943883922882378,
+      "api_seconds_p90": 22.705867564678194
+    },
+    {
+      "cohort": "all2000",
+      "dataset": "2wikimultihopqa",
+      "n": 1000,
+      "old_r5_pct": 95.35,
+      "new_r5_pct": 95.5,
+      "delta_r5_pp": 0.14999999999999458,
+      "ci95_r5_pp": [
+        -0.05,
+        0.4
+      ],
+      "wins_r5": 4,
+      "ties_r5": 995,
+      "losses_r5": 1,
+      "old_r10_pct": 95.525,
+      "new_r10_pct": 95.525,
+      "delta_r10_pp": 0.0,
+      "ci95_r10_pp": [
+        -0.15,
+        0.15
+      ],
+      "wins_r10": 1,
+      "ties_r10": 998,
+      "losses_r10": 1,
+      "api_seconds_mean": 2.974993103677407,
+      "api_seconds_p50": 2.440317046828568,
+      "api_seconds_p90": 5.093906792253256
+    },
+    {
+      "cohort": "all2000",
+      "dataset": "combined",
+      "n": 2000,
+      "old_r5_pct": 86.06666666666666,
+      "new_r5_pct": 86.6125,
+      "delta_r5_pp": 0.5458333333333343,
+      "ci95_r5_pp": [
+        0.20833333333333337,
+        0.8958333333333334
+      ],
+      "wins_r5": 64,
+      "ties_r5": 1901,
+      "losses_r5": 35,
+      "old_r10_pct": 88.79583333333333,
+      "new_r10_pct": 88.74583333333334,
+      "delta_r10_pp": -0.050000000000005596,
+      "ci95_r10_pp": [
+        -0.2666666666666667,
+        0.17916666666666664
+      ],
+      "wins_r10": 21,
+      "ties_r10": 1953,
+      "losses_r10": 26,
+      "api_seconds_mean": 5.769053221371956,
+      "api_seconds_p50": 3.2082588635385036,
+      "api_seconds_p90": 21.402270781435075
+    },
+    {
+      "cohort": "pilot200",
+      "dataset": "musique",
+      "n": 100,
+      "old_r5_pct": 82.41666666666667,
+      "new_r5_pct": 83.66666666666667,
+      "delta_r5_pp": 1.2499999999999956,
+      "ci95_r5_pp": [
+        -0.5854166666666663,
+        3.3333333333333335
+      ],
+      "wins_r5": 5,
+      "ties_r5": 93,
+      "losses_r5": 2,
+      "old_r10_pct": 86.5,
+      "new_r10_pct": 85.66666666666667,
+      "delta_r10_pp": -0.8333333333333304,
+      "ci95_r10_pp": [
+        -2.25,
+        0.41666666666666674
+      ],
+      "wins_r10": 1,
+      "ties_r10": 95,
+      "losses_r10": 4,
+      "api_seconds_mean": 8.333140513449907,
+      "api_seconds_p50": 4.078808578662574,
+      "api_seconds_p90": 23.6037679694593
+    },
+    {
+      "cohort": "pilot200",
+      "dataset": "2wikimultihopqa",
+      "n": 100,
+      "old_r5_pct": 95.0,
+      "new_r5_pct": 95.0,
+      "delta_r5_pp": 0.0,
+      "ci95_r5_pp": [
+        0.0,
+        0.0
+      ],
+      "wins_r5": 0,
+      "ties_r5": 100,
+      "losses_r5": 0,
+      "old_r10_pct": 95.25,
+      "new_r10_pct": 95.25,
+      "delta_r10_pp": 0.0,
+      "ci95_r10_pp": [
+        0.0,
+        0.0
+      ],
+      "wins_r10": 0,
+      "ties_r10": 100,
+      "losses_r10": 0,
+      "api_seconds_mean": 3.284691636711359,
+      "api_seconds_p50": 2.5084686866030097,
+      "api_seconds_p90": 5.785142944566906
+    },
+    {
+      "cohort": "pilot200",
+      "dataset": "combined",
+      "n": 200,
+      "old_r5_pct": 88.70833333333333,
+      "new_r5_pct": 89.33333333333333,
+      "delta_r5_pp": 0.6249999999999978,
+      "ci95_r5_pp": [
+        -0.2927083333333331,
+        1.6666666666666667
+      ],
+      "wins_r5": 5,
+      "ties_r5": 193,
+      "losses_r5": 2,
+      "old_r10_pct": 90.875,
+      "new_r10_pct": 90.45833333333333,
+      "delta_r10_pp": -0.4166666666666652,
+      "ci95_r10_pp": [
+        -1.125,
+        0.20833333333333337
+      ],
+      "wins_r10": 1,
+      "ties_r10": 195,
+      "losses_r10": 4,
+      "api_seconds_mean": 5.808916075080633,
+      "api_seconds_p50": 3.174646155908704,
+      "api_seconds_p90": 20.71453274041414
+    },
+    {
+      "cohort": "additional1800",
+      "dataset": "musique",
+      "n": 900,
+      "old_r5_pct": 76.15740740740739,
+      "new_r5_pct": 77.06481481481481,
+      "delta_r5_pp": 0.9074074074074123,
+      "ci95_r5_pp": [
+        0.26851851851851855,
+        1.5740740740740742
+      ],
+      "wins_r5": 55,
+      "ties_r5": 813,
+      "losses_r5": 32,
+      "old_r10_pct": 81.57407407407409,
+      "new_r10_pct": 81.55555555555556,
+      "delta_r10_pp": -0.018518518518528815,
+      "ci95_r10_pp": [
+        -0.4537037037037037,
+        0.42592592592592593
+      ],
+      "wins_r10": 19,
+      "ties_r10": 860,
+      "losses_r10": 21,
+      "api_seconds_mean": 8.588665875246127,
+      "api_seconds_p50": 4.989171349443495,
+      "api_seconds_p90": 22.673906320519745
+    },
+    {
+      "cohort": "additional1800",
+      "dataset": "2wikimultihopqa",
+      "n": 900,
+      "old_r5_pct": 95.38888888888889,
+      "new_r5_pct": 95.55555555555556,
+      "delta_r5_pp": 0.16666666666667052,
+      "ci95_r5_pp": [
+        -0.05555555555555555,
+        0.4444444444444444
+      ],
+      "wins_r5": 4,
+      "ties_r5": 895,
+      "losses_r5": 1,
+      "old_r10_pct": 95.55555555555556,
+      "new_r10_pct": 95.55555555555556,
+      "delta_r10_pp": 0.0,
+      "ci95_r10_pp": [
+        -0.16666666666666669,
+        0.16666666666666669
+      ],
+      "wins_r10": 1,
+      "ties_r10": 898,
+      "losses_r10": 1,
+      "api_seconds_mean": 2.9405821555625233,
+      "api_seconds_p50": 2.4354141177609563,
+      "api_seconds_p90": 4.964876044727862
+    },
+    {
+      "cohort": "additional1800",
+      "dataset": "combined",
+      "n": 1800,
+      "old_r5_pct": 85.77314814814814,
+      "new_r5_pct": 86.31018518518519,
+      "delta_r5_pp": 0.537037037037047,
+      "ci95_r5_pp": [
+        0.19907407407407404,
+        0.8843749999999984
+      ],
+      "wins_r5": 59,
+      "ties_r5": 1708,
+      "losses_r5": 33,
+      "old_r10_pct": 88.56481481481482,
+      "new_r10_pct": 88.55555555555557,
+      "delta_r10_pp": -0.009259259259253305,
+      "ci95_r10_pp": [
+        -0.24074074074074076,
+        0.23148148148148143
+      ],
+      "wins_r10": 20,
+      "ties_r10": 1758,
+      "losses_r10": 22,
+      "api_seconds_mean": 5.764624015404325,
+      "api_seconds_p50": 3.2206173380836844,
+      "api_seconds_p90": 21.410766001790762
+    }
+  ],
+  "limitations": "Historical 1.13 direct service versus 1.14 OpenRouter; common application recipe but transport batching differs. Additional1800 confirms the pilot trend on previously unused comparison queries, not an untouched historical dataset. CI is paired stratified bootstrap, not a guarantee of generalization.",
+  "new_phase_wall_seconds": 3267.542360305786,
+  "conclusion": "The small Recall@5 gain reproduces on the additional 1,800 queries, primarily on MuSiQue. No clear Recall@10 gain. Historical service and batching differences limit attribution to model weights."
+}

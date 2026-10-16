@@ -31,6 +31,13 @@
     "flash": {
       "quality": 83.33749999999999,
       "latency": 10.970034438348375
+    },
+    "jev_two_114": {
+      "quality": 86.6125,
+      "latency": 4.87210045028051,
+      "latency_kind": "estimated_official_direct",
+      "measured_openrouter_latency": 5.769053221371956,
+      "latency_source": "jev114-latency-calibration.json"
     }
   },
   "naive_points": [
@@ -65,6 +72,11 @@
       "jev_two",
       3.1327848465049435,
       86.06666666666666
+    ],
+    [
+      "jev_two_114",
+      4.87210045028051,
+      86.6125
     ]
   ]
 }

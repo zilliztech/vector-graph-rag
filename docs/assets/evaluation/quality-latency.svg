@@ -255,6 +255,7 @@ L 1047.6 110.16
     <path d="M 123.198784 299.028522
 L 255.174996 221.497435
 L 304.195667 154.117565
+L 404.684758 148.017522
 " clip-path="url(#pfb3f67a1a0)" style="fill: none; stroke-dasharray: 4.81,2.08; stroke-dashoffset: 0; stroke: #168568; stroke-opacity: 0.7; stroke-width: 1.3"/>
    </g>
    <g id="patch_3">
@@ -272,12 +273,12 @@ L 1047.6 495.72
     <text style="font-size: 11px; font-family: 'DejaVu Sans'; fill: #777f8b" transform="translate(609.843161 232.522437)">82.55% · ≈8.25 s</text>
    </g>
    <g id="text_20">
-    <text style="font-size: 11px; font-family: 'DejaVu Sans'; fill: #168568" transform="translate(265.174996 244.232747)">Jev · relations only</text>
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; fill: #168568" transform="translate(265.174996 244.232747)">Jev 1.13 · relations only</text>
     <text style="font-size: 11px; font-family: 'DejaVu Sans'; fill: #168568" transform="translate(265.174996 260.601263)">80.04% · 2.28 s</text>
    </g>
    <g id="text_21">
-    <text style="font-size: 11px; font-family: 'DejaVu Sans'; fill: #168568" transform="translate(314.195667 123.883581)">Jev · two-stage</text>
-    <text style="font-size: 11px; font-family: 'DejaVu Sans'; fill: #168568" transform="translate(314.195667 140.421393)">86.07% · 3.13 s</text>
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; fill: #168568" transform="translate(219.195667 115.955768)">Jev 1.13 · two-stage</text>
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; fill: #168568" transform="translate(219.195667 132.421393)">86.07% · 3.13 s</text>
    </g>
    <g id="text_22">
     <text style="font-size: 11px; font-family: 'DejaVu Sans'; fill: #a16826" transform="translate(442.363178 215.399524)">GPT-6 Luna</text>
@@ -288,12 +289,16 @@ L 1047.6 495.72
     <text style="font-size: 11px; font-family: 'DejaVu Sans'; fill: #2674bd" transform="translate(766.993357 170.921611)">83.34% · 10.97 s</text>
    </g>
    <g id="text_24">
-    <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #777f8b" x="135.198784" y="303.028522" transform="rotate(-0 135.198784 303.028522)">Naive RAG · NV-Embed-v2  (73.10%)</text>
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; fill: #087049" transform="translate(414.684758 117.783537)">Jev 1.14 · two-stage</text>
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; fill: #087049" transform="translate(414.684758 134.32135)">86.61% · ≈4.87 s</text>
    </g>
    <g id="text_25">
-    <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #777f8b" x="135.198784" y="389.31387" transform="rotate(-0 135.198784 389.31387)">Naive RAG · BGE-large-en-v1.5  (65.38%)</text>
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #777f8b" x="135.198784" y="303.028522" transform="rotate(-0 135.198784 303.028522)">Naive RAG · NV-Embed-v2  (73.10%)</text>
    </g>
    <g id="text_26">
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #777f8b" x="135.198784" y="389.31387" transform="rotate(-0 135.198784 389.31387)">Naive RAG · BGE-large-en-v1.5  (65.38%)</text>
+   </g>
+   <g id="text_27">
     <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #777f8b" x="135.198784" y="463.957913" transform="rotate(-0 135.198784 463.957913)">Naive RAG · ColBERTv2  (58.70%)</text>
    </g>
    <g id="PathCollection_1">
@@ -329,21 +334,15 @@ z
    </g>
    <g id="PathCollection_3">
     <defs>
-     <path id="mfa49a455e4" d="M 0 -6.892024
-L -1.547356 -2.129753
-L -6.554705 -2.129753
-L -2.503674 0.813493
-L -4.05103 5.575765
-L -0 2.632519
-L 4.05103 5.575765
-L 2.503674 0.813493
-L 6.554705 -2.129753
-L 1.547356 -2.129753
+     <path id="m36a28b9472" d="M -0 6.324555
+L 6.324555 0
+L 0 -6.324555
+L -6.324555 -0
 z
 " style="stroke: #ffffff; stroke-width: 0.9"/>
     </defs>
     <g clip-path="url(#pfb3f67a1a0)">
-     <use xlink:href="#mfa49a455e4" x="304.195667" y="154.117565" style="fill: #168568; stroke: #ffffff; stroke-width: 0.9"/>
+     <use xlink:href="#m36a28b9472" x="304.195667" y="154.117565" style="fill: #168568; stroke: #ffffff; stroke-width: 0.9"/>
     </g>
    </g>
    <g id="PathCollection_4">
@@ -384,6 +383,25 @@ z
    </g>
    <g id="PathCollection_6">
     <defs>
+     <path id="mb28cfb273e" d="M 0 -6.892024
+L -1.547356 -2.129753
+L -6.554705 -2.129753
+L -2.503674 0.813493
+L -4.05103 5.575765
+L -0 2.632519
+L 4.05103 5.575765
+L 2.503674 0.813493
+L 6.554705 -2.129753
+L 1.547356 -2.129753
+z
+" style="stroke: #ffffff; stroke-width: 0.9"/>
+    </defs>
+    <g clip-path="url(#pfb3f67a1a0)">
+     <use xlink:href="#mb28cfb273e" x="404.684758" y="148.017522" style="fill: #087049; stroke: #ffffff; stroke-width: 0.9"/>
+    </g>
+   </g>
+   <g id="PathCollection_7">
+    <defs>
      <path id="m077a5d3511" d="M -3.708099 3.708099
 L 3.708099 3.708099
 L 3.708099 -3.708099
@@ -395,38 +413,38 @@ z
      <use xlink:href="#m077a5d3511" x="123.198784" y="299.028522" style="fill: #ffffff; stroke: #777f8b"/>
     </g>
    </g>
-   <g id="PathCollection_7">
+   <g id="PathCollection_8">
     <g clip-path="url(#pfb3f67a1a0)">
      <use xlink:href="#m077a5d3511" x="123.198784" y="385.31387" style="fill: #ffffff; stroke: #777f8b"/>
     </g>
    </g>
-   <g id="PathCollection_8">
+   <g id="PathCollection_9">
     <g clip-path="url(#pfb3f67a1a0)">
      <use xlink:href="#m077a5d3511" x="123.198784" y="459.957913" style="fill: #ffffff; stroke: #777f8b"/>
     </g>
    </g>
    <g id="legend_1">
     <g id="line2d_25">
-     <path d="M 855.489375 477.837187
-L 867.489375 477.837187
-L 879.489375 477.837187
+     <path d="M 797.900625 477.837187
+L 809.900625 477.837187
+L 821.900625 477.837187
 " style="fill: none; stroke-dasharray: 4.81,2.08; stroke-dashoffset: 0; stroke: #168568; stroke-opacity: 0.7; stroke-width: 1.3"/>
     </g>
-    <g id="text_27">
-     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: start" x="889.089375" y="482.037187" transform="rotate(-0 889.089375 482.037187)">Observed Pareto frontier</text>
+    <g id="text_28">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: start" x="831.500625" y="482.037187" transform="rotate(-0 831.500625 482.037187)">Pareto frontier (displayed timings)</text>
     </g>
    </g>
   </g>
-  <g id="text_28">
+  <g id="text_29">
    <text style="font-weight: 700; font-size: 22px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #253143" x="97.2" y="36.72" transform="rotate(-0 97.2 36.72)">Retrieval quality–latency trade-off</text>
   </g>
-  <g id="text_29">
+  <g id="text_30">
    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #657181" x="97.2" y="70.38" transform="rotate(-0 97.2 70.38)">MuSiQue + 2Wiki · Equal-weight Recall@5 · 1,000 queries per dataset</text>
   </g>
-  <g id="text_30">
-   <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #657181" x="97.2" y="556.92" transform="rotate(-0 97.2 556.92)">Jev, Luna and Flash: measured API means. HippoRAG 2: reference estimate (≈); separate evaluation setup.</text>
-  </g>
   <g id="text_31">
+   <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #657181" x="97.2" y="556.92" transform="rotate(-0 97.2 556.92)">Jev 1.14: calibrated direct API estimate (≈). HippoRAG 2: reference estimate (≈). Other points: measured API means.</text>
+  </g>
+  <g id="text_32">
    <text style="font-size: 10px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #657181" x="97.2" y="578.34" transform="rotate(-0 97.2 578.34)">0 s excludes embedding, retrieval and answer generation. API means include network and provider queueing; runs differ in time/concurrency.</text>
   </g>
  </g>

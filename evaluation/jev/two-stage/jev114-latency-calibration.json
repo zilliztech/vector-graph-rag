@@ -1,0 +1,811 @@
+{
+  "method": "Stratified ratio estimate: full-run OpenRouter mean in each dataset/input-size tertile multiplied by fresh paired direct/proxy sum-duration ratio; strata weighted by their population size. Two selected queries per stratum; 10000 within-stratum paired bootstrap draws, seed 20261016. Fixed original payloads replayed, not a fresh adaptive reranking quality evaluation.",
+  "sample_queries": 12,
+  "paired_payloads": 67,
+  "successful_calls_including_preflight": 135,
+  "direct_model_ids": [
+    "jev-1.14.0"
+  ],
+  "proxy_model_ids": [
+    "typesafe/jev-1.14-20261014"
+  ],
+  "measured_full_proxy_seconds": 5.769053221371956,
+  "estimated_full_direct_seconds": 4.87210045028051,
+  "bootstrap_95_seconds": [
+    4.809900402174373,
+    4.9602925762654895
+  ],
+  "strata": [
+    {
+      "dataset": "2wikimultihopqa",
+      "input_size_tertile": 0,
+      "population_queries": 333,
+      "sample_indices": [
+        751,
+        635
+      ],
+      "direct_seconds": [
+        1.209848053753376,
+        1.2065433878451586
+      ],
+      "proxy_seconds": [
+        1.4271362517029047,
+        1.5050979983061552
+      ],
+      "ratio": 0.8240785815768534,
+      "population_proxy_mean": 1.678963577386003
+    },
+    {
+      "dataset": "2wikimultihopqa",
+      "input_size_tertile": 1,
+      "population_queries": 333,
+      "sample_indices": [
+        809,
+        202
+      ],
+      "direct_seconds": [
+        1.9380952958017588,
+        2.195953357964754
+      ],
+      "proxy_seconds": [
+        2.3223306592553854,
+        2.5290276668965816
+      ],
+      "ratio": 0.8521425085179362,
+      "population_proxy_mean": 2.544555445428233
+    },
+    {
+      "dataset": "2wikimultihopqa",
+      "input_size_tertile": 2,
+      "population_queries": 334,
+      "sample_indices": [
+        225,
+        753
+      ],
+      "direct_seconds": [
+        2.824526697397232,
+        4.255737511441112
+      ],
+      "proxy_seconds": [
+        3.5021222587674856,
+        5.287975212559104
+      ],
+      "ratio": 0.8054818768431472,
+      "population_proxy_mean": 4.696291224791216
+    },
+    {
+      "dataset": "musique",
+      "input_size_tertile": 0,
+      "population_queries": 333,
+      "sample_indices": [
+        671,
+        914
+      ],
+      "direct_seconds": [
+        2.117865364998579,
+        1.3807572070509195
+      ],
+      "proxy_seconds": [
+        2.7611062321811914,
+        2.0072109010070562
+      ],
+      "ratio": 0.7337227106180769,
+      "population_proxy_mean": 2.314814398769994
+    },
+    {
+      "dataset": "musique",
+      "input_size_tertile": 1,
+      "population_queries": 333,
+      "sample_indices": [
+        16,
+        753
+      ],
+      "direct_seconds": [
+        4.4052952360361814,
+        3.162586098536849
+      ],
+      "proxy_seconds": [
+        5.824677836149931,
+        3.5019379537552595
+      ],
+      "ratio": 0.8114284436123386,
+      "population_proxy_mean": 4.846341628150584
+    },
+    {
+      "dataset": "musique",
+      "input_size_tertile": 2,
+      "population_queries": 334,
+      "sample_indices": [
+        395,
+        257
+      ],
+      "direct_seconds": [
+        18.94511961005628,
+        8.809859830886126
+      ],
+      "proxy_seconds": [
+        21.589598016813397,
+        10.032495761290193
+      ],
+      "ratio": 0.8777084666089084,
+      "population_proxy_mean": 18.498348449407047
+    }
+  ],
+  "proxy_reported_cost_usd": 0.041282051999999986,
+  "direct_estimated_cost_usd": 0.041444760000000004,
+  "limitations": "Small deterministic size-stratified sample; bootstrap describes sample variation only, not provider/day drift. Transport calibration does not replace full-run quality or measured timing records.",
+  "paired_timings": [
+    {
+      "dataset": "2wikimultihopqa",
+      "index": 202,
+      "request_index": 0,
+      "source_payload_hash": "0122fbde5db41a67300488a85e261f085b1f4a39e94f1d724d9bc7fc815f9cc3",
+      "direct_seconds": 0.8039861228317022,
+      "proxy_seconds": 0.9672893472015858,
+      "direct_epoch": 1792144830.0033941,
+      "proxy_epoch": 1792144829.197535
+    },
+    {
+      "dataset": "2wikimultihopqa",
+      "index": 202,
+      "request_index": 1,
+      "source_payload_hash": "3e0b7b7bc7ddccc0f9ca9aacf69ac2f96973f4e49063871046cfae7b2e2fcec5",
+      "direct_seconds": 0.7734909504652023,
+      "proxy_seconds": 0.8402157463133335,
+      "direct_epoch": 1792144830.7802615,
+      "proxy_epoch": 1792144831.625896
+    },
+    {
+      "dataset": "2wikimultihopqa",
+      "index": 202,
+      "request_index": 2,
+      "source_payload_hash": "639a07ba51e399aa09e15e291fa7717c236369d7a0d8fcffcc7d37f10332230d",
+      "direct_seconds": 0.6184762846678495,
+      "proxy_seconds": 0.7215225733816624,
+      "direct_epoch": 1792144832.970367,
+      "proxy_epoch": 1792144832.3502483
+    },
+    {
+      "dataset": "2wikimultihopqa",
+      "index": 225,
+      "request_index": 0,
+      "source_payload_hash": "45cae4afe0df3b5c1eeee025fad87a18ad109e4cfe192e4407d2e9151ca78a0e",
+      "direct_seconds": 0.7745530195534229,
+      "proxy_seconds": 0.8913206942379475,
+      "direct_epoch": 1792144831.646409,
+      "proxy_epoch": 1792144832.5426762
+    },
+    {
+      "dataset": "2wikimultihopqa",
+      "index": 225,
+      "request_index": 1,
+      "source_payload_hash": "1c3e1c7daddd01cc9a35c344f10b9336a898cafb09f94ae8f5ef6d9e6295757d",
+      "direct_seconds": 0.7577998489141464,
+      "proxy_seconds": 0.8684250824153423,
+      "direct_epoch": 1792144834.175867,
+      "proxy_epoch": 1792144833.4149652
+    },
+    {
+      "dataset": "2wikimultihopqa",
+      "index": 225,
+      "request_index": 2,
+      "source_payload_hash": "b04f2f1a1f180fb9d7eaa83f47343f3ff0d3520e7381abf0db3ea77450756bbd",
+      "direct_seconds": 0.6929213367402554,
+      "proxy_seconds": 1.051333600655198,
+      "direct_epoch": 1792144834.8701286,
+      "proxy_epoch": 1792144835.9231362
+    },
+    {
+      "dataset": "2wikimultihopqa",
+      "index": 225,
+      "request_index": 3,
+      "source_payload_hash": "e7c567c8a80ad76ec211ecf26ece27bd09ad504dbaafd7f3893a2619da6d7cca",
+      "direct_seconds": 0.5992524921894073,
+      "proxy_seconds": 0.6910428814589977,
+      "direct_epoch": 1792144837.2178943,
+      "proxy_epoch": 1792144836.6164548
+    },
+    {
+      "dataset": "2wikimultihopqa",
+      "index": 635,
+      "request_index": 0,
+      "source_payload_hash": "1c9be4b32d11efa7e61a4330e4aeb98f0734b04771f48433d7b0a1abc3bd9235",
+      "direct_seconds": 0.5983939785510302,
+      "proxy_seconds": 0.7060031462460756,
+      "direct_epoch": 1792144828.824619,
+      "proxy_epoch": 1792144829.532097
+    },
+    {
+      "dataset": "2wikimultihopqa",
+      "index": 635,
+      "request_index": 1,
+      "source_payload_hash": "f43867fe6000520f7804eadf43346eee0a8c511531e8bb4ce0a47009018dc84d",
+      "direct_seconds": 0.6081494092941284,
+      "proxy_seconds": 0.7990948520600796,
+      "direct_epoch": 1792144830.9440553,
+      "proxy_epoch": 1792144830.3340235
+    },
+    {
+      "dataset": "2wikimultihopqa",
+      "index": 751,
+      "request_index": 0,
+      "source_payload_hash": "19ee79e21691ecf04aeb42bfba48e680e55d13fd12d8ad8d3c43df203798b3b0",
+      "direct_seconds": 0.5838879868388176,
+      "proxy_seconds": 0.7258664779365063,
+      "direct_epoch": 1792144828.8090134,
+      "proxy_epoch": 1792144829.5361037
+    },
+    {
+      "dataset": "2wikimultihopqa",
+      "index": 751,
+      "request_index": 1,
+      "source_payload_hash": "902354ef40ba97abf60819d17f20f1786279390d0919f89be0b420ee9de4e890",
+      "direct_seconds": 0.6259600669145584,
+      "proxy_seconds": 0.7012697737663984,
+      "direct_epoch": 1792144830.8679204,
+      "proxy_epoch": 1792144830.2400548
+    },
+    {
+      "dataset": "2wikimultihopqa",
+      "index": 753,
+      "request_index": 0,
+      "source_payload_hash": "c985524aa766a13c5ae60d565c7f466c9af247ddb99e2b89e45a070baae3c0ac",
+      "direct_seconds": 0.7698969598859549,
+      "proxy_seconds": 0.9259554948657751,
+      "direct_epoch": 1792144831.7179096,
+      "proxy_epoch": 1792144832.6471138
+    },
+    {
+      "dataset": "2wikimultihopqa",
+      "index": 753,
+      "request_index": 1,
+      "source_payload_hash": "54a2e3a530be747546c9fb827328ba1b902bc0b2872e8fc636263070890c8834",
+      "direct_seconds": 0.7699445802718401,
+      "proxy_seconds": 0.9713825546205044,
+      "direct_epoch": 1792144834.3954124,
+      "proxy_epoch": 1792144833.6224167
+    },
+    {
+      "dataset": "2wikimultihopqa",
+      "index": 753,
+      "request_index": 2,
+      "source_payload_hash": "c402d43a1e1deeffab95e21a0cf7a1b78c2780bebf615d1235c851e00a08706c",
+      "direct_seconds": 0.8495856486260891,
+      "proxy_seconds": 0.9035572092980146,
+      "direct_epoch": 1792144835.2489605,
+      "proxy_epoch": 1792144836.15558
+    },
+    {
+      "dataset": "2wikimultihopqa",
+      "index": 753,
+      "request_index": 3,
+      "source_payload_hash": "44e29eafad0c498ea1b675c04c45f10692fe547d08c6dcab149c9a1ba1186198",
+      "direct_seconds": 0.6165817528963089,
+      "proxy_seconds": 0.7033702209591866,
+      "direct_epoch": 1792144837.480782,
+      "proxy_epoch": 1792144836.8622224
+    },
+    {
+      "dataset": "2wikimultihopqa",
+      "index": 753,
+      "request_index": 4,
+      "source_payload_hash": "2156c104f9d0a78e5540473173a8bededb3136edcfa8282ac7b7101975b925f0",
+      "direct_seconds": 0.6236837394535542,
+      "proxy_seconds": 0.9959509130567312,
+      "direct_epoch": 1792144838.107133,
+      "proxy_epoch": 1792144839.1068685
+    },
+    {
+      "dataset": "2wikimultihopqa",
+      "index": 753,
+      "request_index": 5,
+      "source_payload_hash": "c0ff3ba3fdf07373f49e36200bc7966d44960d639dcf6e69a8925b899fb00305",
+      "direct_seconds": 0.6260448303073645,
+      "proxy_seconds": 0.7877588197588921,
+      "direct_epoch": 1792144840.5251286,
+      "proxy_epoch": 1792144839.8972862
+    },
+    {
+      "dataset": "2wikimultihopqa",
+      "index": 809,
+      "request_index": 0,
+      "source_payload_hash": "fda9885e7371a22193b15527db9f674ddce3e1a97e9087a7fc5dfba0c1576296",
+      "direct_seconds": 0.7420384883880615,
+      "proxy_seconds": 0.8507523275911808,
+      "direct_epoch": 1792144828.9702458,
+      "proxy_epoch": 1792144829.823141
+    },
+    {
+      "dataset": "2wikimultihopqa",
+      "index": 809,
+      "request_index": 1,
+      "source_payload_hash": "b8a3298e4543b95b707f389fea171b07b2e449be27f08b54f0b2a8c0d221eae1",
+      "direct_seconds": 0.587289659306407,
+      "proxy_seconds": 0.7340991795063019,
+      "direct_epoch": 1792144831.149569,
+      "proxy_epoch": 1792144830.5600233
+    },
+    {
+      "dataset": "2wikimultihopqa",
+      "index": 809,
+      "request_index": 2,
+      "source_payload_hash": "969e0e2f708e7c73ffa3100c43f6761f49bf8afaa4bee4aa624f100767916a78",
+      "direct_seconds": 0.6087671481072903,
+      "proxy_seconds": 0.7374791521579027,
+      "direct_epoch": 1792144831.7603192,
+      "proxy_epoch": 1792144832.4995737
+    },
+    {
+      "dataset": "musique",
+      "index": 16,
+      "request_index": 0,
+      "source_payload_hash": "a159c7cdda7c72c3a29578061e767b3002ce81c75594958cd834510e88ec9dd4",
+      "direct_seconds": 0.7621214389801025,
+      "proxy_seconds": 0.8822253104299307,
+      "direct_epoch": 1792144838.8703666,
+      "proxy_epoch": 1792144838.1043174
+    },
+    {
+      "dataset": "musique",
+      "index": 16,
+      "request_index": 1,
+      "source_payload_hash": "cb3ded6650f65cff18b98a03fbe24a9289819b1c1e791a59c445154b9970e275",
+      "direct_seconds": 0.8460997641086578,
+      "proxy_seconds": 0.8948755320161581,
+      "direct_epoch": 1792144839.7205918,
+      "proxy_epoch": 1792144840.618584
+    },
+    {
+      "dataset": "musique",
+      "index": 16,
+      "request_index": 2,
+      "source_payload_hash": "eeb36d0c2388aaa8ec3f5692375ae4e00caa9cad4ae0f00ea61c382325297c6c",
+      "direct_seconds": 0.7638876214623451,
+      "proxy_seconds": 1.1195879187434912,
+      "direct_epoch": 1792144842.5094295,
+      "proxy_epoch": 1792144841.7424192
+    },
+    {
+      "dataset": "musique",
+      "index": 16,
+      "request_index": 3,
+      "source_payload_hash": "7456c2933a7bc4a8ddc2a699f149680ee1f6cb2e05fd20d2eb18d325370e7e65",
+      "direct_seconds": 0.6106476169079542,
+      "proxy_seconds": 0.7464047130197287,
+      "direct_epoch": 1792144843.1232843,
+      "proxy_epoch": 1792144843.8715518
+    },
+    {
+      "dataset": "musique",
+      "index": 16,
+      "request_index": 4,
+      "source_payload_hash": "e37d8bdd8370329d8be0d3acd43fb6d3b0e152b651c1351f35aecc8d574c9097",
+      "direct_seconds": 0.8241809289902449,
+      "proxy_seconds": 1.463505232706666,
+      "direct_epoch": 1792144846.1650615,
+      "proxy_epoch": 1792144845.3379364
+    },
+    {
+      "dataset": "musique",
+      "index": 16,
+      "request_index": 5,
+      "source_payload_hash": "44a4d3444fc12f83d7a21fd858274c13bdea970a96feecb8649fb2ad2f5225bb",
+      "direct_seconds": 0.5983578655868769,
+      "proxy_seconds": 0.7180791292339563,
+      "direct_epoch": 1792144846.7665057,
+      "proxy_epoch": 1792144847.4863942
+    },
+    {
+      "dataset": "musique",
+      "index": 257,
+      "request_index": 0,
+      "source_payload_hash": "ebab42e3533d9a2f8a46f9756c415efe33ab4bbc83e384154fd890f9f204939d",
+      "direct_seconds": 0.7893729023635387,
+      "proxy_seconds": 1.0453351996839046,
+      "direct_epoch": 1792144838.660061,
+      "proxy_epoch": 1792144839.7090487
+    },
+    {
+      "dataset": "musique",
+      "index": 257,
+      "request_index": 1,
+      "source_payload_hash": "bf303aeb5b755b07eecc00eab6dea0e7313c28bc99eb2bb20e2a3d1813ae8428",
+      "direct_seconds": 0.8351442944258451,
+      "proxy_seconds": 0.9219785537570715,
+      "direct_epoch": 1792144841.4743936,
+      "proxy_epoch": 1792144840.6356456
+    },
+    {
+      "dataset": "musique",
+      "index": 257,
+      "request_index": 2,
+      "source_payload_hash": "646e36fdd186d59fff7a1799a5846d477ea8ff27bbfc600cbfb8f56d38ee54ca",
+      "direct_seconds": 0.7783150561153889,
+      "proxy_seconds": 0.930101165547967,
+      "direct_epoch": 1792144842.2573879,
+      "proxy_epoch": 1792144843.190957
+    },
+    {
+      "dataset": "musique",
+      "index": 257,
+      "request_index": 3,
+      "source_payload_hash": "2db7e37fce3c0e2f256e1235ffe509de04ba8b5b32c703f3df76cdd8be1c017d",
+      "direct_seconds": 0.8738553375005722,
+      "proxy_seconds": 0.9213462546467781,
+      "direct_epoch": 1792144844.9943926,
+      "proxy_epoch": 1792144844.1168294
+    },
+    {
+      "dataset": "musique",
+      "index": 257,
+      "request_index": 4,
+      "source_payload_hash": "264d3d78d112e471f99af450100f59c88abb5fdc5908265579a5242e35c31b05",
+      "direct_seconds": 0.9811957199126482,
+      "proxy_seconds": 0.8789860121905804,
+      "direct_epoch": 1792144845.9803097,
+      "proxy_epoch": 1792144846.8630035
+    },
+    {
+      "dataset": "musique",
+      "index": 257,
+      "request_index": 5,
+      "source_payload_hash": "3c2e594485b8ddb2c7bae834393cbbe8b5383527cf496d66483c85222c4df201",
+      "direct_seconds": 0.7864706851541996,
+      "proxy_seconds": 0.8882900010794401,
+      "direct_epoch": 1792144848.5456092,
+      "proxy_epoch": 1792144847.7557948
+    },
+    {
+      "dataset": "musique",
+      "index": 257,
+      "request_index": 6,
+      "source_payload_hash": "baeddf699880ba5c8c7c38355e0bb7d1bcdcfc780520d6d82cfdd5fd816bbcdf",
+      "direct_seconds": 0.7948276400566101,
+      "proxy_seconds": 0.9308845940977335,
+      "direct_epoch": 1792144849.345065,
+      "proxy_epoch": 1792144850.2789652
+    },
+    {
+      "dataset": "musique",
+      "index": 257,
+      "request_index": 7,
+      "source_payload_hash": "fe43df078a2ecbaa36e71444cb752498266b7aab910e74dc2e37392126e73d56",
+      "direct_seconds": 0.8170272428542376,
+      "proxy_seconds": 0.9361807275563478,
+      "direct_epoch": 1792144852.0411963,
+      "proxy_epoch": 1792144851.2201917
+    },
+    {
+      "dataset": "musique",
+      "index": 257,
+      "request_index": 8,
+      "source_payload_hash": "b2c77e9a249dd2c9c2f17f079fbcbaa4fe80cf04b278bb5798f2a2c8d6a50a4a",
+      "direct_seconds": 0.7889738269150257,
+      "proxy_seconds": 0.90776102617383,
+      "direct_epoch": 1792144852.8349426,
+      "proxy_epoch": 1792144853.7464132
+    },
+    {
+      "dataset": "musique",
+      "index": 257,
+      "request_index": 9,
+      "source_payload_hash": "4884215c6d1553bb181bdb932d93f22ea6ffed63ef70255e85b1661a1ae91ca4",
+      "direct_seconds": 0.7688791733235121,
+      "proxy_seconds": 0.8740134444087744,
+      "direct_epoch": 1792144855.3956635,
+      "proxy_epoch": 1792144854.6242938
+    },
+    {
+      "dataset": "musique",
+      "index": 257,
+      "request_index": 10,
+      "source_payload_hash": "2a19a166f34df71a8f7b17ce8a99f09b04617b56aafceefcfe554cc92f4b444c",
+      "direct_seconds": 0.5957979522645473,
+      "proxy_seconds": 0.7976187821477652,
+      "direct_epoch": 1792144855.9943788,
+      "proxy_epoch": 1792144856.7940037
+    },
+    {
+      "dataset": "musique",
+      "index": 395,
+      "request_index": 0,
+      "source_payload_hash": "86c4d2790e302b9f9ec9abcd44248cbbcb12152e816ab163d8078d7b0b779f9d",
+      "direct_seconds": 0.9961467422544956,
+      "proxy_seconds": 1.0471091512590647,
+      "direct_epoch": 1792144841.5261,
+      "proxy_epoch": 1792144842.5780249
+    },
+    {
+      "dataset": "musique",
+      "index": 395,
+      "request_index": 1,
+      "source_payload_hash": "c4788f432ad02fcb791862313957800450d7b05f0f428b16b1b5dbb48819f45d",
+      "direct_seconds": 0.9857145566493273,
+      "proxy_seconds": 1.0753219705075026,
+      "direct_epoch": 1792144844.649396,
+      "proxy_epoch": 1792144843.6590972
+    },
+    {
+      "dataset": "musique",
+      "index": 395,
+      "request_index": 2,
+      "source_payload_hash": "54eea8377ff14760ae03885817ced233ab7c0f26bcb9342ce977f128b9fca7fe",
+      "direct_seconds": 0.8464976847171783,
+      "proxy_seconds": 1.0536859780550003,
+      "direct_epoch": 1792144845.500792,
+      "proxy_epoch": 1792144846.5576663
+    },
+    {
+      "dataset": "musique",
+      "index": 395,
+      "request_index": 3,
+      "source_payload_hash": "ef6a12a6b0c48d7f8eb706c811f7a727791cdc04d3e1f93c2337690d1fe78811",
+      "direct_seconds": 0.9558276943862438,
+      "proxy_seconds": 1.084609903395176,
+      "direct_epoch": 1792144848.607624,
+      "proxy_epoch": 1792144847.647196
+    },
+    {
+      "dataset": "musique",
+      "index": 395,
+      "request_index": 4,
+      "source_payload_hash": "aa2b20d77ecd8f226c155eb03c2ef42239c98694a03c0b5064dbe62c821644ac",
+      "direct_seconds": 0.9670300278812647,
+      "proxy_seconds": 1.0778414867818356,
+      "direct_epoch": 1792144849.580434,
+      "proxy_epoch": 1792144850.6629336
+    },
+    {
+      "dataset": "musique",
+      "index": 395,
+      "request_index": 5,
+      "source_payload_hash": "6730e6268e38beeadf3d1395c5f7a755a8f012ec42707625c9b064105237ef2b",
+      "direct_seconds": 0.854083713144064,
+      "proxy_seconds": 1.023521265015006,
+      "direct_epoch": 1792144852.5488853,
+      "proxy_epoch": 1792144851.6914504
+    },
+    {
+      "dataset": "musique",
+      "index": 395,
+      "request_index": 6,
+      "source_payload_hash": "0e2b95dde0815122c443cc41d3129e2b3fffb33ce81895b2c198251c62f95423",
+      "direct_seconds": 0.9507954306900501,
+      "proxy_seconds": 1.0828811135143042,
+      "direct_epoch": 1792144853.5048382,
+      "proxy_epoch": 1792144854.5923715
+    },
+    {
+      "dataset": "musique",
+      "index": 395,
+      "request_index": 7,
+      "source_payload_hash": "5dd6f7619f810d9f9371f10fa017c339fec9e5648cfbca146043573f16103e98",
+      "direct_seconds": 0.982960756868124,
+      "proxy_seconds": 1.1502721682190895,
+      "direct_epoch": 1792144856.7362044,
+      "proxy_epoch": 1792144855.748584
+    },
+    {
+      "dataset": "musique",
+      "index": 395,
+      "request_index": 8,
+      "source_payload_hash": "7d678306790b8d750f954d82b9850778ee35caad6efe2562902c36d8bda2af15",
+      "direct_seconds": 0.7886025942862034,
+      "proxy_seconds": 0.8867002669721842,
+      "direct_epoch": 1792144857.5297992,
+      "proxy_epoch": 1792144858.4200134
+    },
+    {
+      "dataset": "musique",
+      "index": 395,
+      "request_index": 9,
+      "source_payload_hash": "04c22df06826c8918d9af3e946e916ad0620080d7f7c80bb005e65603dff1cc8",
+      "direct_seconds": 0.953749680891633,
+      "proxy_seconds": 1.0870717894285917,
+      "direct_epoch": 1792144860.470586,
+      "proxy_epoch": 1792144859.5121212
+    },
+    {
+      "dataset": "musique",
+      "index": 395,
+      "request_index": 10,
+      "source_payload_hash": "2e7e74f66e27460b37e9e16e1130ac94cc357b695b7cbf576cffa1e99d6cb2ba",
+      "direct_seconds": 0.958041612058878,
+      "proxy_seconds": 1.1005075294524431,
+      "direct_epoch": 1792144861.434502,
+      "proxy_epoch": 1792144862.5397117
+    },
+    {
+      "dataset": "musique",
+      "index": 395,
+      "request_index": 11,
+      "source_payload_hash": "0d734cd6ee504be9681b91616778ec545580ba152178281230f7b9b5fbca7049",
+      "direct_seconds": 0.8252267800271511,
+      "proxy_seconds": 0.9396641552448273,
+      "direct_epoch": 1792144864.312992,
+      "proxy_epoch": 1792144863.484487
+    },
+    {
+      "dataset": "musique",
+      "index": 395,
+      "request_index": 12,
+      "source_payload_hash": "74c6495b2acd45000c630483260a1dfc39c8d6a7dadda7b608b8e385964eaec5",
+      "direct_seconds": 0.9955972526222467,
+      "proxy_seconds": 1.068956820294261,
+      "direct_epoch": 1792144865.3134537,
+      "proxy_epoch": 1792144866.3869762
+    },
+    {
+      "dataset": "musique",
+      "index": 395,
+      "request_index": 13,
+      "source_payload_hash": "c9504ead316eb359053fe04d23278b21d286a47d525e9f48d48e86cd5fc75093",
+      "direct_seconds": 0.954769404605031,
+      "proxy_seconds": 1.0568570904433727,
+      "direct_epoch": 1792144868.4093812,
+      "proxy_epoch": 1792144867.4497144
+    },
+    {
+      "dataset": "musique",
+      "index": 395,
+      "request_index": 14,
+      "source_payload_hash": "4f0eef7f919446b77b34d591be2739cace4365a397db16bc234878f99eeee4ef",
+      "direct_seconds": 0.7984059490263462,
+      "proxy_seconds": 1.0734521057456732,
+      "direct_epoch": 1792144869.212701,
+      "proxy_epoch": 1792144870.289435
+    },
+    {
+      "dataset": "musique",
+      "index": 395,
+      "request_index": 15,
+      "source_payload_hash": "40e0494c0060f09bfa5ba4f120520cbac4909c2cf0a28e122ffd029c2b0d085b",
+      "direct_seconds": 0.9605456721037626,
+      "proxy_seconds": 1.083042312413454,
+      "direct_epoch": 1792144872.3427107,
+      "proxy_epoch": 1792144871.377582
+    },
+    {
+      "dataset": "musique",
+      "index": 395,
+      "request_index": 16,
+      "source_payload_hash": "03a7fcaf1116d1e4bcddd13b737812fefceb702e7556f50b9c003048f6c84e1f",
+      "direct_seconds": 0.9833166394382715,
+      "proxy_seconds": 1.0829947739839554,
+      "direct_epoch": 1792144873.331835,
+      "proxy_epoch": 1792144874.4195232
+    },
+    {
+      "dataset": "musique",
+      "index": 395,
+      "request_index": 17,
+      "source_payload_hash": "88e8becb4bb0e4cb840fde32caa5e6f3f84c0a1dde0ca4f9fe07a36d8e857e2f",
+      "direct_seconds": 0.7975561879575253,
+      "proxy_seconds": 0.9063366763293743,
+      "direct_epoch": 1792144876.1319025,
+      "proxy_epoch": 1792144875.3310285
+    },
+    {
+      "dataset": "musique",
+      "index": 395,
+      "request_index": 18,
+      "source_payload_hash": "40be6dcd2e053d99beda2e76ad2cbfad19251b4b44452972c5aa54a162e052b9",
+      "direct_seconds": 0.9604067094624043,
+      "proxy_seconds": 1.062388962134719,
+      "direct_epoch": 1792144877.0953054,
+      "proxy_epoch": 1792144878.1614408
+    },
+    {
+      "dataset": "musique",
+      "index": 395,
+      "request_index": 19,
+      "source_payload_hash": "63e9c894e89ed10e29f682e5a1fe6a12c98e149cf9d74f8eed704259be126b28",
+      "direct_seconds": 0.8224679101258516,
+      "proxy_seconds": 0.9584855884313583,
+      "direct_epoch": 1792144879.9525359,
+      "proxy_epoch": 1792144879.125746
+    },
+    {
+      "dataset": "musique",
+      "index": 395,
+      "request_index": 20,
+      "source_payload_hash": "b8fc35557b466ba21ada3eaaf524110bd00b2b2598a465a04d5027ee8454c12e",
+      "direct_seconds": 0.6073766108602285,
+      "proxy_seconds": 0.6878969091922045,
+      "direct_epoch": 1792144880.5640674,
+      "proxy_epoch": 1792144881.2539122
+    },
+    {
+      "dataset": "musique",
+      "index": 671,
+      "request_index": 0,
+      "source_payload_hash": "7639630c52ac9c4d3980c474d6108e6db5c533e30e48ac02c0554e3be55866f6",
+      "direct_seconds": 0.7774221245199442,
+      "proxy_seconds": 0.8467044457793236,
+      "direct_epoch": 1792144833.751186,
+      "proxy_epoch": 1792144834.6011753
+    },
+    {
+      "dataset": "musique",
+      "index": 671,
+      "request_index": 1,
+      "source_payload_hash": "5d0aa011c2ef9befadc557610c886209750cc0ac57353318ffc7bb41c10a565f",
+      "direct_seconds": 0.7439604178071022,
+      "proxy_seconds": 1.221975838765502,
+      "direct_epoch": 1792144836.5731509,
+      "proxy_epoch": 1792144835.8266299
+    },
+    {
+      "dataset": "musique",
+      "index": 671,
+      "request_index": 2,
+      "source_payload_hash": "6065d727f8eb6139bbc1638eb10d23e9224ddbd8e63d5fd3aab170dd580a627d",
+      "direct_seconds": 0.5964828226715326,
+      "proxy_seconds": 0.6924259476363659,
+      "direct_epoch": 1792144837.1725032,
+      "proxy_epoch": 1792144837.8666348
+    },
+    {
+      "dataset": "musique",
+      "index": 753,
+      "request_index": 0,
+      "source_payload_hash": "b178081784025cbf5876de8544912beab012c0b85336cd5c9d717483d8302529",
+      "direct_seconds": 0.761413399130106,
+      "proxy_seconds": 0.8637788891792297,
+      "direct_epoch": 1792144836.6634266,
+      "proxy_epoch": 1792144837.530228
+    },
+    {
+      "dataset": "musique",
+      "index": 753,
+      "request_index": 1,
+      "source_payload_hash": "4a7f2447b1c6a23377c877b7c24a6efe539a3ed04127c1345a1885ac27d067e4",
+      "direct_seconds": 0.8519893269985914,
+      "proxy_seconds": 0.9898653067648411,
+      "direct_epoch": 1792144839.379182,
+      "proxy_epoch": 1792144838.5240016
+    },
+    {
+      "dataset": "musique",
+      "index": 753,
+      "request_index": 2,
+      "source_payload_hash": "7018e74a909e43443cbc5ddd19dc38fa3982878f70fda075feed0f7a5f1d6289",
+      "direct_seconds": 0.7419057227671146,
+      "proxy_seconds": 0.9172262102365494,
+      "direct_epoch": 1792144840.1248147,
+      "proxy_epoch": 1792144841.0447288
+    },
+    {
+      "dataset": "musique",
+      "index": 753,
+      "request_index": 3,
+      "source_payload_hash": "26d215288a78d5dbffbe0d95a224782cc10e4382dddd22e581bc3e78c9461d74",
+      "direct_seconds": 0.807277649641037,
+      "proxy_seconds": 0.7310675475746393,
+      "direct_epoch": 1792144842.587571,
+      "proxy_epoch": 1792144841.7786667
+    },
+    {
+      "dataset": "musique",
+      "index": 914,
+      "request_index": 0,
+      "source_payload_hash": "49e0020e7560672f140f8e8d61b3770cfcb8e11400680b6a920a8b3434f8c447",
+      "direct_seconds": 0.7720276676118374,
+      "proxy_seconds": 0.8822829257696867,
+      "direct_epoch": 1792144834.1600313,
+      "proxy_epoch": 1792144833.38547
+    },
+    {
+      "dataset": "musique",
+      "index": 914,
+      "request_index": 1,
+      "source_payload_hash": "dcff2359fd915e2e89b4d1cd6edbe5e54855cdfcabe545f51cd1ef8ba0761016",
+      "direct_seconds": 0.6087295394390821,
+      "proxy_seconds": 1.1249279752373695,
+      "direct_epoch": 1792144834.7717278,
+      "proxy_epoch": 1792144835.8984327
+    }
+  ],
+  "payload_and_answer_key_checks_passed": 67,
+  "official_model_reference": "https://docs.typesafe.ai/models"
+}

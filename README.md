@@ -290,7 +290,7 @@ Before introducing Jev, we evaluated Vector Graph RAG on three multi-hop QA benc
 
 **Two-stage Jev reaches the quality–latency Pareto frontier.**
 
-**86.07% average Recall@5**, the highest among the compared methods, with **3.13 seconds of additional model-call latency**. On MuSiQue and 2Wiki (1,000 questions each), two-stage Jev reaches the Pareto frontier using the displayed timings. This two-dataset result is separate from the historical three-dataset average above.
+**Jev 1.14 achieves 86.61% average Recall@5**, the highest among the compared methods, with **approximately 4.9 seconds of estimated direct API latency**. On MuSiQue and 2Wiki (1,000 questions each), two-stage Jev reaches the Pareto frontier using the displayed timings. This two-dataset result is separate from the historical three-dataset average above.
 
 ![Quality and additional model latency](docs/assets/evaluation/quality-latency.png)
 

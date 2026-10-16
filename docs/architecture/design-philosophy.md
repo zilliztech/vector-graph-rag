@@ -238,7 +238,7 @@ flowchart TB
 | **Local-first** | Yes | Yes | Partial | No | No | **Yes (Milvus Lite)** |
 | **Setup complexity** | Minimal | Moderate | Moderate | High | High | **Minimal** |
 
-### Performance on Multi-Hop QA Benchmarks
+### Historical Performance on Multi-Hop QA Benchmarks
 
 | Method | MuSiQue | HotpotQA | 2WikiMultiHopQA | Average |
 |--------|---------|----------|-----------------|---------|
@@ -248,7 +248,7 @@ flowchart TB
 | **Vector Graph RAG** | 73.0% | **96.3%** | **94.1%** | **87.8%** |
 
 > [!INFO]
-> Recall@5 on standard multi-hop QA benchmarks. Vector Graph RAG achieves the highest average score while using fewer LLM calls and no graph database. See [Evaluation](../evaluation.md) for methodology details.
+> Historical three-dataset Recall@5 comparison. The October 16, 2026 two-stage Jev 1.14 evaluation reaches 77.73% on MuSiQue and 95.50% on 2Wiki (86.61% average), the highest-quality point on the observed quality–latency Pareto frontier. Its two-dataset scope is separate from this table. See [Evaluation](../evaluation.md#jev-reranker-evaluation) for methodology and paired comparison with Jev 1.13.
 
 ### Key Differentiators
 
