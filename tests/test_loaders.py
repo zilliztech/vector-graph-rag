@@ -428,3 +428,35 @@ def test_mineru_converter_returns_error_when_cli_times_out(
 
     assert result.documents == []
     assert result.errors == [f"MinerU timed out converting {source}"]
+
+
+def test_text_chunker_rejects_overlap_not_smaller_than_chunk_size():
+    """Overlap >= chunk_size used to raise inside range() or silently drop text."""
+    from vector_graph_rag.loaders.chunker import TextChunker
+
+    for overlap in (100, 200):
+        with pytest.raises(ValueError, match="chunk_overlap must be smaller than chunk_size"):
+            TextChunker(chunk_size=100, chunk_overlap=overlap)
+
+
+def test_text_chunker_rejects_non_positive_chunk_size():
+    """chunk_size=0 produced a zero step and raised ValueError from range()."""
+    from vector_graph_rag.loaders.chunker import TextChunker
+
+    with pytest.raises(ValueError, match="chunk_size must be greater than 0"):
+        TextChunker(chunk_size=0, chunk_overlap=0)
+
+    with pytest.raises(ValueError, match="chunk_overlap must be greater than or equal to 0"):
+        TextChunker(chunk_size=100, chunk_overlap=-1)
+
+
+def test_text_chunker_character_fallback_keeps_long_unseparated_text():
+    """A document without separators must still be chunked, not dropped."""
+    from vector_graph_rag.loaders.chunker import TextChunker
+
+    text = "x" * 300
+    chunks = TextChunker(chunk_size=100, chunk_overlap=20)._split_text(text)
+
+    assert len(chunks) == 4
+    assert chunks[0] == text[:100]
+    assert chunks[-1].endswith(text[-20:])

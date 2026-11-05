@@ -18,7 +18,7 @@ from fastapi import FastAPI, File, Form, HTTPException, Query, Request, UploadFi
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from vector_graph_rag import VectorGraphRAG, __version__
 from vector_graph_rag.config import ModelConfig, Settings, get_settings
@@ -95,10 +95,16 @@ class ImportRequest(BaseModel):
         examples=["/path/to/doc.pdf", "https://example.com/article"],
     )
     chunk_documents: bool = Field(True, description="Whether to chunk large documents")
-    chunk_size: int = Field(1000, description="Max characters per chunk")
-    chunk_overlap: int = Field(200, description="Overlap between chunks")
+    chunk_size: int = Field(1000, gt=0, description="Max characters per chunk")
+    chunk_overlap: int = Field(200, ge=0, description="Overlap between chunks")
     extract_triplets: bool = Field(True, description="Extract triplets using LLM")
     graph_name: Optional[str] = Field(None, description="Target graph name")
+
+    @model_validator(mode="after")
+    def validate_chunking(self):
+        if self.chunk_documents and self.chunk_overlap >= self.chunk_size:
+            raise ValueError("chunk_overlap must be smaller than chunk_size.")
+        return self
 
 
 class ImportResponse(BaseModel):
@@ -603,6 +609,12 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
         Accepts multipart form upload of files.
         Supported formats: PDF, DOCX, TXT, MD, HTML
         """
+        if chunk_documents and (chunk_size <= 0 or chunk_overlap < 0 or chunk_overlap >= chunk_size):
+            raise HTTPException(
+                status_code=400,
+                detail="chunk_size must be greater than 0 and chunk_overlap must satisfy 0 <= chunk_overlap < chunk_size.",
+            )
+
         from vector_graph_rag.loaders import DocumentImporter
 
         temp_paths = []

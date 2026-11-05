@@ -245,3 +245,30 @@ class TestQueryEndpoint:
         assert "answer" in data
         _, kwargs = mock_query.call_args
         assert kwargs["filter"] == 'source == "test"'
+
+
+class TestChunkingValidation:
+    """Invalid chunking parameters are rejected instead of failing mid-import."""
+
+    def test_import_rejects_overlap_not_smaller_than_chunk_size(self, client):
+        response = client.post(
+            "/import",
+            json={
+                "sources": ["/tmp/does-not-matter.txt"],
+                "chunk_size": 100,
+                "chunk_overlap": 100,
+            },
+        )
+
+        assert response.status_code == 422
+        assert "chunk_overlap" in response.text
+
+    def test_upload_rejects_overlap_not_smaller_than_chunk_size(self, client):
+        response = client.post(
+            "/upload",
+            files={"files": ("note.txt", b"hello world", "text/plain")},
+            data={"chunk_documents": "true", "chunk_size": "100", "chunk_overlap": "150"},
+        )
+
+        assert response.status_code == 400
+        assert "chunk_overlap" in response.text
