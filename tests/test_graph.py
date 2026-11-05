@@ -382,3 +382,25 @@ class TestGraphEdgeCases:
         # Verify cleared
         assert len(graph._entity_name_to_id) == 0
         assert len(graph._relation_text_to_id) == 0
+
+
+class TestGraphSharedRelations:
+    """Reusing a relation must still link both entities to the new passage."""
+
+    def test_create_passage_links_entities_for_reused_relation(self, graph):
+        """A second passage with the same triplet keeps entity links."""
+        triplets = [Triplet(subject="Alice", predicate="knows", object="Bob")]
+        first_passage_id = graph.create_passage("Alice knows Bob (one).", id="p1", triplets=triplets)
+        second_passage_id = graph.create_passage("Alice knows Bob (two).", id="p2", triplets=triplets)
+
+        alice_id = graph._entity_name_to_id["alice"]
+        bob_id = graph._entity_name_to_id["bob"]
+        alice = graph._store._get_entities_by_ids([alice_id])[0]
+        bob = graph._store._get_entities_by_ids([bob_id])[0]
+
+        assert set(alice["passage_ids"]) == {first_passage_id, second_passage_id}
+        assert set(bob["passage_ids"]) == {first_passage_id, second_passage_id}
+
+        passage = graph.get_passage(second_passage_id)
+        assert alice_id in passage.entity_ids
+        assert bob_id in passage.entity_ids
