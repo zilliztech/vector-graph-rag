@@ -782,3 +782,83 @@ def test_legacy_incremental_document_apis_raise_migration_errors():
             rag.delete_documents("file_alpha")
     finally:
         remove_temp_milvus_file(milvus_uri)
+
+
+def test_upsert_documents_by_source_links_entities_to_every_chunk_sharing_a_relation():
+    """Every chunk sharing a triplet keeps its own entity links."""
+    rag, milvus_uri = with_temp_rag("incremental_shared_relation_chunks")
+
+    try:
+        triplet = [["Alpha", "founded", "Acme"]]
+        rag.upsert_documents_by_source(
+            [
+                doc("Alpha founded Acme (chunk 1).", triplet, id="chunk_1"),
+                doc("Alpha founded Acme (chunk 2).", triplet, id="chunk_2"),
+            ],
+            source="file_alpha",
+            extract_triplets=False,
+            show_progress=False,
+        )
+
+        alpha = rag._store._get_entities_by_texts(["alpha"])["alpha"]
+        acme = rag._store._get_entities_by_texts(["acme"])["acme"]
+        assert set(alpha["passage_ids"]) == {"chunk_1", "chunk_2"}
+        assert set(acme["passage_ids"]) == {"chunk_1", "chunk_2"}
+
+        passages = {p["id"]: p for p in rag._store.get_passages_by_source("file_alpha")}
+        for passage in passages.values():
+            assert alpha["id"] in passage["entity_ids"]
+            assert acme["id"] in passage["entity_ids"]
+            assert len(passage["relation_ids"]) == 1
+    finally:
+        rag._store.client.close()
+        remove_temp_milvus_file(milvus_uri)
+
+
+@pytest.mark.parametrize("first_source", ["file_alpha", "file_beta"])
+def test_delete_sources_after_rebuild_removes_shared_relation_entities(first_source):
+    """Deleting all sources leaves no entities pointing to a deleted shared relation."""
+    rag, milvus_uri = with_temp_rag("rebuild_shared_relation_cleanup")
+
+    try:
+        triplet = [["Alpha", "founded", "Acme"]]
+        result = rag.rebuild_documents(
+            [
+                doc(
+                    "Alpha founded Acme (one).", triplet, id="a1", metadata={"source": "file_alpha"}
+                ),
+                doc(
+                    "Alpha founded Acme (two).", triplet, id="a2", metadata={"source": "file_alpha"}
+                ),
+                doc(
+                    "Alpha founded Acme (three).",
+                    triplet,
+                    id="b1",
+                    metadata={"source": "file_beta"},
+                ),
+            ],
+            extract_triplets=False,
+            show_progress=False,
+        )
+        entity_ids = [entity.id for entity in result.entities]
+        relation_ids = [relation.id for relation in result.relations]
+        assert len(entity_ids) == 2
+        assert len(relation_ids) == 1
+
+        assert rag.delete_documents_by_source(first_source)
+        remaining_source = "file_beta" if first_source == "file_alpha" else "file_alpha"
+        remaining_ids = {"b1"} if remaining_source == "file_beta" else {"a1", "a2"}
+        assert rag._store.get_passages_by_source(first_source) == []
+        assert {
+            passage["id"] for passage in rag._store.get_passages_by_source(remaining_source)
+        } == remaining_ids
+        relation = rag._store._get_relations_by_ids(relation_ids)[0]
+        assert set(relation["passage_ids"]) == remaining_ids
+
+        assert rag.delete_documents_by_source(remaining_source)
+        assert rag._store.get_passages_by_ids(["a1", "a2", "b1"]) == []
+        assert rag._store._get_relations_by_ids(relation_ids) == []
+        assert rag._store._get_entities_by_ids(entity_ids) == []
+    finally:
+        rag._store.client.close()
+        remove_temp_milvus_file(milvus_uri)
