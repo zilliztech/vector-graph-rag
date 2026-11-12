@@ -16,6 +16,7 @@ from tests.conftest import close_milvus_store
 from vector_graph_rag.api.app import create_app
 from vector_graph_rag.config import Settings
 from vector_graph_rag.graph.graph import Graph
+from vector_graph_rag.models import ExtractionResult
 
 
 def _attach_span_exporter(exporter: InMemorySpanExporter) -> None:
@@ -250,7 +251,22 @@ class TestQueryEndpoint:
 class TestChunkingValidation:
     """Invalid chunking parameters are rejected instead of failing mid-import."""
 
-    def test_import_rejects_overlap_not_smaller_than_chunk_size(self, client):
+    @pytest.fixture
+    def import_client(self, test_settings):
+        application = create_app(test_settings)
+        rag = MagicMock()
+        rag.rebuild_documents.side_effect = lambda documents, **kwargs: ExtractionResult(
+            documents=documents
+        )
+        application.state.rag_instances["default"] = rag
+        converter = MagicMock()
+        converter.supported_extensions = set()
+        with patch("vector_graph_rag.loaders.DocumentConverter", return_value=converter):
+            with TestClient(application) as client:
+                yield client, rag
+
+    def test_import_rejects_overlap_not_smaller_than_chunk_size(self, import_client):
+        client, rag = import_client
         response = client.post(
             "/import",
             json={
@@ -262,8 +278,10 @@ class TestChunkingValidation:
 
         assert response.status_code == 422
         assert "chunk_overlap" in response.text
+        rag.rebuild_documents.assert_not_called()
 
-    def test_upload_rejects_overlap_not_smaller_than_chunk_size(self, client):
+    def test_upload_rejects_overlap_not_smaller_than_chunk_size(self, import_client):
+        client, rag = import_client
         response = client.post(
             "/upload",
             files={"files": ("note.txt", b"hello world", "text/plain")},
@@ -272,3 +290,64 @@ class TestChunkingValidation:
 
         assert response.status_code == 400
         assert "chunk_overlap" in response.text
+        rag.rebuild_documents.assert_not_called()
+
+    @staticmethod
+    def import_mixed_files(client, endpoint, tmp_path, chunk_overlap):
+        short_text = "short file"
+        long_text = "0123456789" * 30
+        if endpoint == "/import":
+            short_path = tmp_path / "short.txt"
+            long_path = tmp_path / "long.txt"
+            short_path.write_text(short_text)
+            long_path.write_text(long_text)
+            return client.post(
+                endpoint,
+                json={
+                    "sources": [str(short_path), str(long_path)],
+                    "chunk_size": 100,
+                    "chunk_overlap": chunk_overlap,
+                    "extract_triplets": False,
+                },
+            )
+        return client.post(
+            endpoint,
+            files=[
+                ("files", ("short.txt", short_text.encode(), "text/plain")),
+                ("files", ("long.txt", long_text.encode(), "text/plain")),
+            ],
+            data={"chunk_size": 100, "chunk_overlap": chunk_overlap, "extract_triplets": "false"},
+        )
+
+    @pytest.mark.parametrize("endpoint, expected_status", [("/import", 422), ("/upload", 400)])
+    @pytest.mark.parametrize("chunk_overlap", [100, 200])
+    def test_mixed_file_import_rejects_invalid_chunking_before_writing(
+        self, import_client, tmp_path, endpoint, expected_status, chunk_overlap
+    ):
+        """A long file cannot disappear from an otherwise successful short-file import."""
+        client, rag = import_client
+        response = self.import_mixed_files(client, endpoint, tmp_path, chunk_overlap)
+
+        assert response.status_code == expected_status
+        assert "chunk_overlap" in response.text
+        rag.rebuild_documents.assert_not_called()
+
+    @pytest.mark.parametrize("endpoint", ["/import", "/upload"])
+    def test_mixed_file_import_preserves_all_chunks_with_valid_parameters(
+        self, import_client, tmp_path, endpoint
+    ):
+        """Valid chunking imports the short file and every chunk of the long file."""
+        client, rag = import_client
+        response = self.import_mixed_files(client, endpoint, tmp_path, chunk_overlap=20)
+
+        assert response.status_code == 200
+        assert response.json()["success"] is True
+        assert response.json()["num_sources"] == 2
+        assert response.json()["num_chunks"] == 5
+        assert response.json()["errors"] == []
+        rag.rebuild_documents.assert_called_once()
+        documents = rag.rebuild_documents.call_args.kwargs["documents"]
+        long_text = "0123456789" * 30
+        assert [document.page_content for document in documents] == ["short file"] + [
+            long_text[index : index + 100] for index in range(0, len(long_text), 80)
+        ]

@@ -609,7 +609,9 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
         Accepts multipart form upload of files.
         Supported formats: PDF, DOCX, TXT, MD, HTML
         """
-        if chunk_documents and (chunk_size <= 0 or chunk_overlap < 0 or chunk_overlap >= chunk_size):
+        if chunk_documents and (
+            chunk_size <= 0 or chunk_overlap < 0 or chunk_overlap >= chunk_size
+        ):
             raise HTTPException(
                 status_code=400,
                 detail="chunk_size must be greater than 0 and chunk_overlap must satisfy 0 <= chunk_overlap < chunk_size.",
