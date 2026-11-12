@@ -324,9 +324,8 @@ class Graph:
                     current = existing[0]
                     new_passage_ids = list(set(current.get("passage_ids", []) + passage_ids))
                     self._store._update_relation(existing_id, passage_ids=new_passage_ids)
-                # Reusing a relation must still link both entities to the new
-                # passage, otherwise passage.entity_ids and entity.passage_ids
-                # silently lose this passage.
+                # Record the new passage in both entities' reverse links.
+                # create_passage() obtains the forward entity IDs from the cache.
                 self._create_entity(subject, relation_ids=[existing_id], passage_ids=passage_ids)
                 self._create_entity(object_, relation_ids=[existing_id], passage_ids=passage_ids)
             return existing_id

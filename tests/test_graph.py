@@ -390,8 +390,12 @@ class TestGraphSharedRelations:
     def test_create_passage_links_entities_for_reused_relation(self, graph):
         """A second passage with the same triplet keeps entity links."""
         triplets = [Triplet(subject="Alice", predicate="knows", object="Bob")]
-        first_passage_id = graph.create_passage("Alice knows Bob (one).", id="p1", triplets=triplets)
-        second_passage_id = graph.create_passage("Alice knows Bob (two).", id="p2", triplets=triplets)
+        first_passage_id = graph.create_passage(
+            "Alice knows Bob (one).", id="p1", triplets=triplets
+        )
+        second_passage_id = graph.create_passage(
+            "Alice knows Bob (two).", id="p2", triplets=triplets
+        )
 
         alice_id = graph._entity_name_to_id["alice"]
         bob_id = graph._entity_name_to_id["bob"]

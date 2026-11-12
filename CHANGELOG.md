@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Preserve entity/passage links for every chunk that shares a relation, including full rebuilds, incremental source updates and passage creation. Source deletion can now clean up shared entities after every source has been removed.
+
+### Upgrading
+
+The shared-relation fix applies to new writes. Existing missing adjacency links are not repaired automatically. Rebuild affected knowledge bases with `rebuild_documents()` using the complete corpus and its source metadata. A rebuild replaces all data under the selected collection prefix, so include every source that should remain available.
+
 ## 0.4.0
 
 ### What's changed
