@@ -113,6 +113,34 @@ class TestHealthEndpoint:
         assert "version" in data
 
 
+class TestGraphStatsEndpoint:
+    """Statistics distinguish an empty graph from a storage failure."""
+
+    def test_stats_counts_existing_passages_after_deletion(self, client, app):
+        graph = app.state.graph_instances["default"]
+        graph.create_passage("First passage.", id="stats_1")
+        graph.create_passage("Second passage.", id="stats_2")
+        graph.delete_passage("stats_1")
+
+        response = client.get("/graph/default/stats")
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "graph_name": "default",
+            "entity_count": 0,
+            "relation_count": 0,
+            "passage_count": 1,
+        }
+
+    def test_stats_reports_storage_failure(self, client, app):
+        graph = app.state.graph_instances["default"]
+        with patch.object(graph._store.client, "query", side_effect=RuntimeError("Unavailable")):
+            response = client.get("/graph/default/stats")
+
+        assert response.status_code == 500
+        assert response.json() == {"detail": "Failed to retrieve graph statistics."}
+
+
 class TestObservabilityMiddleware:
     """Tests for API request tracing."""
 

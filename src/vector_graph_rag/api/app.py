@@ -819,14 +819,10 @@ def create_app(settings: Optional[Settings] = None) -> FastAPI:
                 relation_count=stats.get("relation_count", 0),
                 passage_count=stats.get("passage_count", 0),
             )
-        except Exception:
-            # If stats not available, return zeros
-            return GraphStatsResponse(
-                graph_name=graph_name,
-                entity_count=0,
-                relation_count=0,
-                passage_count=0,
-            )
+        except Exception as exc:
+            raise HTTPException(
+                status_code=500, detail="Failed to retrieve graph statistics."
+            ) from exc
 
     @app.get(
         "/graph/{graph_name}/neighbors/{entity_id}", response_model=NeighborResponse, tags=["Graph"]

@@ -1436,7 +1436,11 @@ class MilvusStore:
 
     def get_collection_stats(self) -> Dict[str, int]:
         """
-        Get statistics for all collections.
+        Count current records in each collection using strong consistency.
+
+        Missing collections contribute zero. Errors querying existing collections
+        propagate to the caller. Counts are read separately, so concurrent writes
+        can be observed at different stages across the three collections.
 
         Returns:
             Dict with entity_count, relation_count, passage_count.
@@ -1454,25 +1458,19 @@ class MilvusStore:
                 "vgrag.collection_count": 3,
             },
         ):
-            try:
-                if self.client.has_collection(self.entity_collection):
-                    entity_stats = self.client.get_collection_stats(self.entity_collection)
-                    stats["entity_count"] = entity_stats.get("row_count", 0)
-            except Exception:
-                pass
-
-            try:
-                if self.client.has_collection(self.relation_collection):
-                    relation_stats = self.client.get_collection_stats(self.relation_collection)
-                    stats["relation_count"] = relation_stats.get("row_count", 0)
-            except Exception:
-                pass
-
-            try:
-                if self.client.has_collection(self.passage_collection):
-                    passage_stats = self.client.get_collection_stats(self.passage_collection)
-                    stats["passage_count"] = passage_stats.get("row_count", 0)
-            except Exception:
-                pass
+            for key, collection_name in (
+                ("entity_count", self.entity_collection),
+                ("relation_count", self.relation_collection),
+                ("passage_count", self.passage_collection),
+            ):
+                if not self.client.has_collection(collection_name):
+                    continue
+                result = self.client.query(
+                    collection_name=collection_name,
+                    filter="",
+                    output_fields=["count(*)"],
+                    consistency_level="Strong",
+                )
+                stats[key] = int(result[0]["count(*)"])
 
         return stats

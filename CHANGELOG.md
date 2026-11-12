@@ -6,6 +6,7 @@
 
 - Preserve entity/passage links for every chunk that shares a relation, including full rebuilds, incremental source updates and passage creation. Source deletion can now clean up shared entities after every source has been removed.
 - Reject invalid chunk sizes and overlap values before importing documents. Mixed short/long file imports can no longer report success while silently omitting text because of an invalid character-splitting step.
+- Read knowledge-base statistics from strongly consistent Milvus counts across all sources. Counts reflect incremental updates, deletions and reconnects; storage failures raise an error and return HTTP 500 through the REST statistics endpoint.
 
 ### Upgrading
 
