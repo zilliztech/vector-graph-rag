@@ -176,6 +176,19 @@ A production ingestion job should track which source keys succeeded or failed.
 If a retry sees no matching passages during delete, the source may already have
 been removed by the previous attempt.
 
+## Repairing Existing Entity/Passage Links
+
+Every passage sharing a relation must appear in the relation's entities'
+`passage_ids`, and each passage must contain those entities in `entity_ids`.
+Missing links can leave orphan entities when sources are deleted.
+
+Upgrading to the shared-relation fix preserves these links for new writes.
+To repair a knowledge base indexed with missing links, call
+`rebuild_documents()` with the complete corpus and retain its source metadata.
+The rebuild replaces all data under the selected collection prefix, so include
+every source that should remain available. Upgrading the package alone does
+not repair stored adjacency metadata.
+
 ## ID Guidance
 
 Use `source` for the external object identity. Use `Document.id` only when you
