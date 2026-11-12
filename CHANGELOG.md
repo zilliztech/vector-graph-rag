@@ -5,6 +5,7 @@
 ### Fixes
 
 - Preserve entity/passage links for every chunk that shares a relation, including full rebuilds, incremental source updates and passage creation. Source deletion can now clean up shared entities after every source has been removed.
+- Reject invalid chunk sizes and overlap values before importing documents. Mixed short/long file imports can no longer report success while silently omitting text because of an invalid character-splitting step.
 
 ### Upgrading
 

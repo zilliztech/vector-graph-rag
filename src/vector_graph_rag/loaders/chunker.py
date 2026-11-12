@@ -22,6 +22,16 @@ class TextChunker:
         chunk_overlap: int = 200,  # Overlap between chunks
         separators: Optional[List[str]] = None,  # Split on these (priority order)
     ):
+        if chunk_size <= 0:
+            raise ValueError("chunk_size must be greater than 0.")
+        if chunk_overlap < 0:
+            raise ValueError("chunk_overlap must be greater than or equal to 0.")
+        if chunk_overlap >= chunk_size:
+            # A step of chunk_size - chunk_overlap would otherwise be <= 0:
+            # range() raises ValueError at 0 and silently yields nothing below 0,
+            # dropping the whole document.
+            raise ValueError("chunk_overlap must be smaller than chunk_size.")
+
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         self.separators = separators or ["\n\n", "\n", ". ", " "]
