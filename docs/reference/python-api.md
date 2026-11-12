@@ -662,13 +662,24 @@ for passage in result.passages:
 
 #### `get_stats`
 
-Return collection statistics.
+Return the current entity, relation, and passage counts stored in Milvus for
+this instance's collection prefix. Counts include all sources and reflect
+completed imports, replacements and deletions, including writes from another
+instance connected to the same knowledge base.
 
 ```python
 def get_stats() -> dict
 ```
 
 **Returns:** A dictionary with entity, relation, and passage counts.
+
+Each call performs a strongly consistent `count(*)` query on each existing
+collection. Only counts are returned; documents and vectors are not fetched.
+Existing collections must be loaded. Missing collections contribute zero;
+connection, permission and query failures raise an exception.
+
+The three counts are read separately. If another process is updating the graph
+at the same time, the counts can reflect different stages of that update.
 
 ```python
 stats = rag.get_stats()

@@ -587,6 +587,11 @@ curl -X POST "http://localhost:8000/query?graph_name=my_graph" \
 
 Returns aggregate statistics for a graph.
 
+Counts come from strongly consistent `count(*)` queries against the graph's
+three collections, which must be loaded. Missing collections contribute zero.
+Database query failures return HTTP 500. The collections are counted separately,
+so concurrent updates can be observed at different stages.
+
 **Path Parameters**
 
 | Parameter | Type | Description |

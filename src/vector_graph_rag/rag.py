@@ -1699,22 +1699,20 @@ class VectorGraphRAG:
 
     def get_stats(self) -> dict:
         """
-        Get statistics about the knowledge base.
+        Count the current knowledge-base records stored in Milvus.
+
+        Uses strongly consistent count queries scoped to this collection prefix.
+        Missing collections contribute zero; storage errors propagate. Counts are
+        read separately and do not form a transaction across collections.
 
         Returns:
             Dictionary with counts of entities, relations, passages.
         """
-        if self._extraction_result is None:
-            return {
-                "entities": 0,
-                "relations": 0,
-                "passages": 0,
-            }
-
+        stats = self._store.get_collection_stats()
         return {
-            "entities": len(self._extraction_result.entities),
-            "relations": len(self._extraction_result.relations),
-            "passages": len(self._extraction_result.documents),
+            "entities": stats["entity_count"],
+            "relations": stats["relation_count"],
+            "passages": stats["passage_count"],
         }
 
     def reset(self) -> None:
