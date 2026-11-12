@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Logo 7: Symmetric molecule structure, center hub with 6 satellite nodes -->
+  <defs>
+    <linearGradient id="g7_blue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#42a5f5"/>
+      <stop offset="100%" style="stop-color:#1e88e5"/>
+    </linearGradient>
+    <linearGradient id="g7_light" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#90caf9"/>
+      <stop offset="100%" style="stop-color:#64b5f6"/>
+    </linearGradient>
+    <linearGradient id="g7_center" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#29b6f6"/>
+      <stop offset="100%" style="stop-color:#0288d1"/>
+    </linearGradient>
+    <linearGradient id="g7_accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4dd0e1"/>
+      <stop offset="100%" style="stop-color:#00acc1"/>
+    </linearGradient>
+    <radialGradient id="g7_glow" cx="50%" cy="50%">
+      <stop offset="0%" style="stop-color:#e3f2fd;stop-opacity:0.6"/>
+      <stop offset="70%" style="stop-color:#e3f2fd;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background glow -->
+  <circle cx="256" cy="256" r="230" fill="url(#g7_glow)"/>
+
+  <!-- 6 spokes from center (60° apart) -->
+  <line x1="256" y1="256" x2="256" y2="72" stroke="url(#g7_light)" stroke-width="8" stroke-linecap="round"/>
+  <line x1="256" y1="256" x2="415" y2="164" stroke="url(#g7_light)" stroke-width="8" stroke-linecap="round"/>
+  <line x1="256" y1="256" x2="415" y2="348" stroke="url(#g7_light)" stroke-width="8" stroke-linecap="round"/>
+  <line x1="256" y1="256" x2="256" y2="440" stroke="url(#g7_light)" stroke-width="8" stroke-linecap="round"/>
+  <line x1="256" y1="256" x2="97" y2="348" stroke="url(#g7_light)" stroke-width="8" stroke-linecap="round"/>
+  <line x1="256" y1="256" x2="97" y2="164" stroke="url(#g7_light)" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Outer hexagon ring connecting satellites -->
+  <polygon points="256,72 415,164 415,348 256,440 97,348 97,164"
+           fill="none" stroke="#bbdefb" stroke-width="5" stroke-linejoin="round"/>
+
+  <!-- Highlight two paths (retrieval hops) -->
+  <line x1="256" y1="72" x2="256" y2="256" stroke="#26c6da" stroke-width="10" stroke-linecap="round" opacity="0.4"/>
+  <line x1="256" y1="256" x2="415" y2="348" stroke="#26c6da" stroke-width="10" stroke-linecap="round" opacity="0.4"/>
+
+  <!-- Satellite nodes (6, symmetric) -->
+  <circle cx="256" cy="72" r="32" fill="url(#g7_accent)" stroke="white" stroke-width="5"/>
+  <circle cx="415" cy="164" r="28" fill="url(#g7_blue)" stroke="white" stroke-width="4"/>
+  <circle cx="415" cy="348" r="32" fill="url(#g7_accent)" stroke="white" stroke-width="5"/>
+  <circle cx="256" cy="440" r="28" fill="url(#g7_blue)" stroke="white" stroke-width="4"/>
+  <circle cx="97" cy="348" r="28" fill="url(#g7_blue)" stroke="white" stroke-width="4"/>
+  <circle cx="97" cy="164" r="28" fill="url(#g7_blue)" stroke="white" stroke-width="4"/>
+
+  <!-- Center hub -->
+  <circle cx="256" cy="256" r="52" fill="url(#g7_center)" stroke="white" stroke-width="6"/>
+  <!-- Vector arrow icon -->
+  <path d="M 236 252 L 272 252" stroke="white" stroke-width="5" stroke-linecap="round"/>
+  <polygon points="278,252 266,244 266,260" fill="white"/>
+</svg>
