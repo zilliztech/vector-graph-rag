@@ -1,5 +1,6 @@
 """End-to-end tests for incremental source updates in VectorGraphRAG."""
 
+import json
 import os
 import tempfile
 from unittest.mock import MagicMock, patch
@@ -7,6 +8,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from vector_graph_rag.config import Settings
+from vector_graph_rag.graph.builder import GraphBuilder
 from vector_graph_rag.graph.retriever import GraphRetriever
 from vector_graph_rag.models import Document
 from vector_graph_rag.rag import VectorGraphRAG
@@ -172,6 +174,142 @@ def test_upsert_documents_by_source_infers_source_and_sets_chunk_metadata():
                 "chunk_index": 0,
             }
         ]
+    finally:
+        remove_temp_milvus_file(milvus_uri)
+
+
+def test_limit_dynamic_field_metadata_keeps_the_newest_adjacency_ids(caplog):
+    """Trim oldest links while preserving user metadata and logging the change."""
+    rag = object.__new__(VectorGraphRAG)
+    rag.settings = Settings(max_dynamic_field_bytes=500)
+    metadata = {
+        "source": "file_alpha",
+        "relation_ids": [f"relation_{index:03d}" for index in range(100)],
+        "passage_ids": [f"passage_{index:03d}" for index in range(100)],
+    }
+
+    with caplog.at_level("WARNING", logger="vector_graph_rag.rag"):
+        bounded = rag._limit_dynamic_field_metadata(
+            metadata,
+            ["relation_ids", "passage_ids"],
+            "entity",
+        )
+
+    assert bounded["source"] == "file_alpha"
+    assert bounded["relation_ids"][-1] == metadata["relation_ids"][-1]
+    assert bounded["passage_ids"][-1] == metadata["passage_ids"][-1]
+    assert len(json.dumps(bounded, ensure_ascii=True).encode("utf-8")) <= 500
+    assert len(bounded["relation_ids"]) < len(metadata["relation_ids"])
+    assert len(bounded["passage_ids"]) < len(metadata["passage_ids"])
+    assert "Trimmed" in caplog.text
+    assert len(metadata["relation_ids"]) == 100
+
+
+def test_incremental_insert_caps_merged_hub_metadata_without_milvus():
+    """Exercise the existing-record update path with a mocked store."""
+    rag = object.__new__(VectorGraphRAG)
+    rag.settings = Settings(max_dynamic_field_bytes=60_000)
+    rag._store = MagicMock()
+    existing_relation_ids = [f"old_relation_{index:04d}" for index in range(1000)]
+    existing_passage_ids = [f"old_passage_{index:04d}" for index in range(1000)]
+    rag._store._get_entities_by_texts.return_value = {
+        "speaker": {
+            "id": "speaker-existing",
+            "relation_ids": existing_relation_ids,
+            "passage_ids": existing_passage_ids,
+        }
+    }
+    rag._store._get_relations_by_texts.return_value = {}
+    rag._store._get_relations_by_ids.return_value = []
+    rag._store.get_passages_by_ids.return_value = []
+
+    documents = [
+        doc(
+            "Second batch of speaker notes.",
+            [["Speaker", "mentioned", f"topic_{index:04d}"] for index in range(1000)],
+            id="speaker_second",
+            metadata={"source": "file_second"},
+        )
+    ]
+    builder = GraphBuilder(settings=rag.settings)
+    builder.build_from_documents(documents)
+    passage_user_metadatas = {
+        item.id: rag._get_user_passage_metadata(item) for item in documents if item.id is not None
+    }
+    rag._insert_incremental_graph(
+        builder,
+        passage_user_metadatas,
+        [[0.0] * 4 for _ in builder.entity_ids],
+        [[0.0] * 4 for _ in builder.relation_ids],
+        [[0.0] * 4 for _ in builder.passage_ids],
+        source="file_second",
+        source_field="source",
+        show_progress=False,
+    )
+
+    updated_entity = rag._store._upsert_entity_records.call_args.args[0][0]
+    speaker_id = next(eid for eid, name in builder.entities.items() if name == "speaker")
+    expected_relation_ids = [
+        *existing_relation_ids,
+        *builder.entity_to_relation_ids[speaker_id],
+    ]
+    assert (
+        updated_entity["relation_ids"]
+        == expected_relation_ids[-len(updated_entity["relation_ids"]) :]
+    )
+    assert updated_entity["passage_ids"][-1] == "speaker_second"
+    assert (
+        len(
+            json.dumps(
+                {
+                    "relation_ids": updated_entity["relation_ids"],
+                    "passage_ids": updated_entity["passage_ids"],
+                },
+                ensure_ascii=True,
+            ).encode("utf-8")
+        )
+        <= rag.settings.max_dynamic_field_bytes
+    )
+
+
+def test_incremental_upsert_caps_merged_hub_metadata():
+    """Keep a high-degree entity below Milvus's dynamic-field byte limit."""
+    rag, milvus_uri = with_temp_rag("incremental_metadata_limit")
+
+    try:
+        first_triplets = [["Speaker", "mentioned", f"topic_{index:04d}"] for index in range(1000)]
+        second_triplets = [
+            ["Speaker", "mentioned", f"topic_{index:04d}"] for index in range(1000, 2000)
+        ]
+        first_result = rag.upsert_documents_by_source(
+            [doc("First batch of speaker notes.", first_triplets, id="speaker_first")],
+            source="file_first",
+            extract_triplets=False,
+            show_progress=False,
+        )
+        second_result = rag.upsert_documents_by_source(
+            [doc("Second batch of speaker notes.", second_triplets, id="speaker_second")],
+            source="file_second",
+            extract_triplets=False,
+            show_progress=False,
+        )
+
+        entity = rag._store._get_entities_by_texts(["speaker"])["speaker"]
+        expected_relation_ids = [
+            *first_result.entity_to_relation_ids[entity["id"]],
+            *second_result.entity_to_relation_ids[entity["id"]],
+        ]
+        assert len(expected_relation_ids) == 2000
+        assert entity["relation_ids"] == expected_relation_ids[-len(entity["relation_ids"]) :]
+        assert len(entity["relation_ids"]) < len(expected_relation_ids)
+        entity_metadata = {
+            "relation_ids": entity["relation_ids"],
+            "passage_ids": entity["passage_ids"],
+        }
+        assert (
+            len(json.dumps(entity_metadata, ensure_ascii=True).encode("utf-8"))
+            <= rag.settings.max_dynamic_field_bytes
+        )
     finally:
         remove_temp_milvus_file(milvus_uri)
 
